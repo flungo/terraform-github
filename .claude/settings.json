@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\": \"📋 Doc maintenance checklist — review before ending session:\\n  1. docs/decisions/ — did a structural decision get made? Write/update an ADR and its README row\\n  2. docs/plans/*.md — mark completed steps as done (- [x]); update the plans README status\\n  3. README.md \\\"What this manages\\\" — reflect any new resource type or module\\n  4. CLAUDE.md — update \\\"Active work\\\" if status changed\"}'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
