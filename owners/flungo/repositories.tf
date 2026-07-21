@@ -42,3 +42,25 @@ resource "github_repository" "github_workflows" {
   allow_rebase_merge     = true
   delete_branch_on_merge = true
 }
+
+# claude-plugins does not exist yet, so it is CREATED by this config rather than
+# adopted — hence no import block. Left empty (no auto_init) because its content
+# is delivered by an initial bulk push that establishes main, rather than the
+# branch + PR flow off a seeded placeholder README. Public so the marketplace can
+# be installed from Claude Code / claude.ai without extra access configuration.
+resource "github_repository" "claude_plugins" {
+  name        = "claude-plugins"
+  description = "Personal Claude Code / Claude.ai plugin marketplace"
+  topics      = ["claude", "claude-code", "plugins", "marketplace"]
+
+  visibility = "public"
+
+  has_issues             = true
+  has_wiki               = false
+  has_projects           = false
+  has_downloads          = true
+  allow_merge_commit     = false
+  allow_squash_merge     = true
+  allow_rebase_merge     = true
+  delete_branch_on_merge = true
+}
