@@ -151,4 +151,4 @@ Search for anything that may have changed (owner names, workspace names, provide
 See [`docs/decisions/README.md`](docs/decisions/README.md) for the full index. Short version:
 
 - Dedicated, provider-scoped `terraform-github` repo; Terraform over UI/scripts; multi-owner (personal + orgs); directory-per-owner consuming shared modules (ADR-001)
-- HCP backend, Local execution mode, and GitHub Actions plan/apply CI inherited from `terraform-grafana-cloud` (ADR-002 there); **workspace-per-owner topology confirmed** (build-out plan reviewed 2026-07-20) — to be written up as **ADR-002** here when the first owner skeleton lands
+- HCP backend, Local execution mode, and GitHub Actions plan/apply CI inherited from `terraform-grafana-cloud` (ADR-002 there); **workspace-per-owner topology** — one HCP workspace per owner directory (`github-<login>`) in a dedicated `terraform-github` project (ADR-002)
