@@ -340,9 +340,8 @@ owner matrix automatically.
 Option C is noted and rejected: it keeps per-owner state (so it doesn't simplify
 the backend) but gives up the per-owner directory the user wants.
 
-> **Confirmed in review (2026-07-20).** Option A is accepted; it graduates to
-> **ADR-002: workspace-per-owner backend topology** when the first owner skeleton
-> lands (§7 step 1).
+> **Confirmed in review (2026-07-20); ratified as [ADR-002](../decisions/002-workspace-per-owner-topology.md)
+> (2026-07-21).** Option A is accepted.
 
 ---
 
@@ -560,8 +559,8 @@ Resolved in review (2026-07-20) — carried into the sections above:
   `strict` bypass toggle; the protected branch is the `pattern` input (composite
   defaults it to the repo's default branch). `terraform-github` is protected when it
   is onboarded (§7 step 8), and is **not** among the first repos onboarded.
-- ✅ **Workspace topology** — **Option A (workspace per owner) confirmed**; graduates
-  to **ADR-002** when the first owner skeleton lands (§7 step 1). The per-owner
+- ✅ **Workspace topology** — **Option A (workspace per owner)**, ratified as
+  [ADR-002](../decisions/002-workspace-per-owner-topology.md). The per-owner
   overhead concern is addressed (one org-wide HCP token + auto-created workspaces +
   a single GitHub App key).
 - ✅ **Initial managed set** — onboarding order fixed (§7): `flungo` starts with
