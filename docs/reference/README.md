@@ -4,8 +4,6 @@
 
 Examples this repo expects to grow: a catalogue of the **standard repository settings** the template applies (and why), the **common shared-secret set** (names and purpose — never values), and the **GitHub provider resource coverage** map (what is managed as code vs still manual).
 
-_No reference docs yet — these accrue as the shared modules (see [`../plans/initial-buildout.md`](../plans/initial-buildout.md)) codify the standard baseline._
-
 | Document | Purpose |
 |---|---|
-| _(none yet)_ | |
+| [`secrets.md`](secrets.md) | The GitHub Actions secrets CI uses (state backend token, per-owner provider token) and where each is rotated |
