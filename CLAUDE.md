@@ -108,6 +108,14 @@ Claude sessions must **never commit directly to `main`**. All work happens on a 
 
 Documentation is a first-class deliverable. Stale docs are actively harmful — they mislead future sessions into re-deriving settled decisions or acting on wrong assumptions. These rules apply after every change.
 
+### Agent-directed callouts
+
+Docs here are read by both humans and AI agents. When a passage is an instruction to an **agent** following the doc — what to *do*, not a fact everyone needs — mark it with an agent callout so it is unmistakable, and so a human can see what the agent was told:
+
+> **🤖 Agent** — \<what the agent should do\>
+
+Reserve it for agent behaviour (e.g. "propose a value from context and ask the human to confirm, rather than asking cold"); shared facts and steps stay as normal prose. Keep each callout to the action — one instruction per callout.
+
 ### Plans vs runbooks vs reference vs ADRs
 
 Following the [Divio/Diátaxis](https://diataxis.fr/) split — docs are task-oriented (how-to) or information-oriented (reference); ADRs add a decision-oriented kind.
