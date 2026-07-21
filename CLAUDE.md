@@ -4,7 +4,7 @@ This repository manages GitHub resources as code with Terraform, across the user
 
 Its scope is **the GitHub provider's surface**, not a fixed feature list. It starts with a standard repository template and shared/common secrets, and grows to branch protection, webhooks, teams, and other resources exposed by [`integrations/github`](https://registry.terraform.io/providers/integrations/github/latest). It is named for the provider, not the initial use case, so that growth needs no rename. See [ADR-001](docs/decisions/001-dedicated-terraform-github-repo.md).
 
-> **Status: bootstrap / planning.** No Terraform is written yet. The build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md). When you add the first resources, update this file, the README, and the ADR index in the same PR.
+> **Status: build-out under way.** The `owners/flungo/` skeleton and the plan/apply CI have landed; repositories are managed directly in the owner directory (shared `modules/` are not extracted yet). The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md). Keep this file, the README, and the ADR index current as resources land.
 
 ## Architecture
 
@@ -59,7 +59,7 @@ docs/
                     secret names, provider coverage map). README.md is the index.
 ```
 
-`modules/` and `owners/` do not exist yet — they are created during the build-out. Until then the repo is docs only.
+`modules/` does not exist yet — modules are extracted later in the build-out; until then resources live directly in each owner directory. `owners/flungo/` is the first owner directory.
 
 ## Terraform conventions
 

@@ -4,15 +4,16 @@ Terraform configuration for managing GitHub resources across the personal accoun
 
 The repository is named for the **provider**, not its initial use case: scope is expected to grow to the full GitHub-manageable surface without a rename. See [ADR-001](docs/decisions/001-dedicated-terraform-github-repo.md) for the founding rationale.
 
-> **Status: bootstrap / planning.** No Terraform is written yet. This repository currently holds its documentation, standards, and the build-out plan. The concrete modules and owner directories are being scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md); nothing is applied against GitHub until that plan is ratified.
+> **Status: build-out under way.** The first owner directory (`owners/flungo/`) and the plan-on-PR / apply-on-merge CI workflow have landed; the `flungo` account's repositories are being brought under management. Shared `modules/` are not extracted yet — resources currently live directly in the owner directory. The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md).
 
 ## What this manages
 
-_Planned — nothing applied yet. Updated as resources land (see the build-out plan)._
+Terraform manages these GitHub resources for the `flungo` account (in `owners/flungo/`); apply runs on merge to `main` via CI.
 
-- **Repositories** — a standard project template (settings, merge strategy, feature toggles, topics) applied uniformly
-- **Shared secrets** — common Actions secrets/variables across repositories (org-level where the owner is an organisation, per-repo for the personal account)
-- **Growth** — branch protection / rulesets, webhooks, teams and membership, and other `integrations/github` resources
+- **Repositories** — a standard set of settings, merge strategy, and feature toggles applied per repo. Under management:
+  - `authentik.flungo.net` — adopted (imported) from the pre-existing repo
+  - `github-workflows` — created by this config to host the fleet's shared reusable workflows and CI standards
+- **Growth** — a shared repository module, common Actions secrets/variables, branch protection / rulesets, webhooks, teams and membership, and other `integrations/github` resources
 
 ## Structure
 
