@@ -1,66 +1,51 @@
-# authentik already matches our merge/feature standard; Projects is left enabled as
-# it is on the live repo — standardise deliberately later if desired.
-resource "github_repository" "authentik_flungo_net" {
-  name        = "authentik.flungo.net"
-  description = "Terraform configuration, architecture documentation, and operational records for Fabrizio's Authentik server."
+# The flungo account's repositories. Each is a call to the shared standard
+# repository module (../../modules/repository); the module encodes the baseline
+# (feature toggles, merge strategy) and each call passes only the per-repo inputs.
+# The moved blocks relocate the resources from their previous top-level addresses
+# into the module without destroy/recreate — they can be dropped in a follow-up
+# once the migrating apply has run.
 
-  visibility             = "private"
-  has_issues             = true
-  has_wiki               = false
-  has_projects           = true
-  has_downloads          = true
-  allow_merge_commit     = false
-  allow_squash_merge     = true
-  allow_rebase_merge     = true
-  delete_branch_on_merge = true
+moved {
+  from = github_repository.authentik_flungo_net
+  to   = module.authentik_flungo_net.github_repository.this
 }
 
-# github-workflows does not exist yet, so it is CREATED by this config rather than
-# adopted — hence no import block (contrast the authentik resource above). Applying
-# this config brings the repo into existence; it is then populated with the shared
-# reusable workflows (Terraform plan/apply, drift remediation, Markdown validation)
-# and CI standards separately. Public so the private consumer repos can call its
-# reusable workflows without extra Actions-sharing configuration.
-resource "github_repository" "github_workflows" {
+module "authentik_flungo_net" {
+  source = "../../modules/repository"
+
+  name        = "authentik.flungo.net"
+  description = "Terraform configuration, architecture documentation, and operational records for Fabrizio's Authentik server."
+}
+
+moved {
+  from = github_repository.github_workflows
+  to   = module.github_workflows.github_repository.this
+}
+
+module "github_workflows" {
+  source = "../../modules/repository"
+
   name        = "github-workflows"
   description = "Reusable GitHub Actions workflows and shared CI standards for the flungo Terraform repositories (Terraform plan/apply, drift remediation, Markdown validation)."
   topics      = ["terraform", "github-actions", "reusable-workflows", "ci"]
 
+  # Public so the private consumer repos can call its reusable workflows without
+  # extra Actions-sharing config.
   visibility = "public"
-
-  # auto_init creates an initial commit on main so the default branch exists up
-  # front — the repo can then be populated via the usual branch + PR flow rather
-  # than a first push straight to a non-existent main.
-  auto_init = true
-
-  has_issues             = true # the repo's own Markdown-link sweep opens issues here
-  has_wiki               = false
-  has_projects           = false
-  has_downloads          = true
-  allow_merge_commit     = false
-  allow_squash_merge     = true
-  allow_rebase_merge     = true
-  delete_branch_on_merge = true
 }
 
-# claude-plugins does not exist yet, so it is CREATED by this config rather than
-# adopted — hence no import block. Left empty (no auto_init) because its content
-# is delivered by an initial bulk push that establishes main, rather than the
-# branch + PR flow off a seeded placeholder README. Public so the marketplace can
-# be installed from Claude Code / claude.ai without extra access configuration.
-resource "github_repository" "claude_plugins" {
+moved {
+  from = github_repository.claude_plugins
+  to   = module.claude_plugins.github_repository.this
+}
+
+module "claude_plugins" {
+  source = "../../modules/repository"
+
   name        = "claude-plugins"
   description = "Personal Claude Code / Claude.ai plugin marketplace"
   topics      = ["claude", "claude-code", "plugins", "marketplace"]
 
+  # Public so the marketplace can be installed from Claude Code / claude.ai.
   visibility = "public"
-
-  has_issues             = true
-  has_wiki               = false
-  has_projects           = false
-  has_downloads          = true
-  allow_merge_commit     = false
-  allow_squash_merge     = true
-  allow_rebase_merge     = true
-  delete_branch_on_merge = true
 }
