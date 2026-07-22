@@ -1,6 +1,6 @@
 # Plan: Initial build-out of `terraform-github`
 
-Status: Planning — awaiting review before any Terraform is written
+Status: In progress — structure ratified (ADR-001/002/003); the `owners/flungo/` skeleton, plan/apply CI, and `modules/repository` have landed. §7 steps 1–3 done; step 4 (branch protection) next.
 Related: [ADR-001](../decisions/001-dedicated-terraform-github-repo.md) (founding decisions)
 
 ## Goal
@@ -485,6 +485,14 @@ code.
 ## 7. Build sequence
 
 Each step is its own PR (own plan, own review gate), in order:
+
+> **Progress.** Steps 1–3 are done: structure ratified (ADR-001/002/003); the
+> `owners/flungo/` skeleton and plan/apply CI landed; and `modules/repository` is
+> extracted with the flungo repositories migrated onto it. Two deviations from the
+> original sequence: **CI (step 7) landed early**, with the skeleton at step 2; and
+> `github-workflows` and `claude-plugins` were added ahead of step 8, so step 3
+> migrated **all three** existing repositories, not `authentik.flungo.net` alone.
+> Step 4 (branch protection) is next.
 
 1. **Ratify structure** — merge this repo's docs (this PR). Confirm the workspace
    recommendation (§3) and credential model (§5); write **ADR-002** (workspace

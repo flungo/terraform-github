@@ -4,7 +4,7 @@ This repository manages GitHub resources as code with Terraform, across the user
 
 Its scope is **the GitHub provider's surface**, not a fixed feature list. It starts with a standard repository template and shared/common secrets, and grows to branch protection, webhooks, teams, and other resources exposed by [`integrations/github`](https://registry.terraform.io/providers/integrations/github/latest). It is named for the provider, not the initial use case, so that growth needs no rename. See [ADR-001](docs/decisions/001-dedicated-terraform-github-repo.md).
 
-> **Status: build-out under way.** The `owners/flungo/` skeleton and the plan/apply CI have landed; repositories are managed directly in the owner directory (shared `modules/` are not extracted yet). The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md). Keep this file, the README, and the ADR index current as resources land.
+> **Status: build-out under way.** The `owners/flungo/` skeleton, the plan/apply CI, and the standard repository module (`modules/repository`) have landed; the flungo repositories are managed through the module. The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md). Keep this file, the README, and the ADR index current as resources land.
 
 ## Architecture
 
@@ -13,7 +13,7 @@ Its scope is **the GitHub provider's surface**, not a fixed feature list. It sta
 | Terraform provider | `integrations/github ~> 6.0` (one provider configuration per owner) |
 | State backend | HCP Terraform — org `flungo`, **one workspace per owner directory**, **Local execution mode** (inherited from `terraform-grafana-cloud`) |
 | Structure | Directory per owner (`owners/<owner>/`) consuming shared modules (`modules/`) — **not** a single flat root module (see § Terraform conventions) |
-| CI/CD | GitHub Actions — plan on PR, apply on merge (to be added with the first module code) |
+| CI/CD | GitHub Actions — plan on PR, apply on merge |
 | Secrets | GitHub Actions secrets — not HCP workspace variables |
 
 ## Sensitive information — never commit or expose
@@ -38,9 +38,10 @@ When a sensitive value is needed in docs or config, use a placeholder (e.g. `<gi
 ## Repo layout
 
 ```
-modules/            Shared, opinionated modules — the standard template and preferences
-                    (e.g. repository, repository-secrets, standard-repository). Consumed
-                    by every owner directory via a relative source path.
+modules/            Shared, opinionated modules, consumed by owner directories via a
+  repository/       relative source path. `repository` is the standard repository
+                    module — the baseline repo settings; more (repository-secrets,
+                    branch protection) are added as the build-out proceeds.
 owners/
   flungo/           The personal (user) account, by login — its own HCP workspace,
                     provider, and state. The only user account; named by login.
@@ -59,7 +60,7 @@ docs/
                     secret names, provider coverage map). README.md is the index.
 ```
 
-`modules/` does not exist yet — modules are extracted later in the build-out; until then resources live directly in each owner directory. `owners/flungo/` is the first owner directory.
+`modules/repository/` is the first shared module — the standard repository, consumed by every owner directory. `owners/flungo/` is the first owner directory.
 
 ## Terraform conventions
 
@@ -152,7 +153,7 @@ Search for anything that may have changed (owner names, workspace names, provide
 
 | Plan | Status |
 |---|---|
-| [Initial build-out](docs/plans/initial-buildout.md) | Planning — module structure, directory-per-owner layout, HCP workspace topology, and build sequence proposed; awaiting review before any Terraform is written |
+| [Initial build-out](docs/plans/initial-buildout.md) | In progress — owner skeleton, plan/apply CI, and the standard repository module have landed; the flungo repositories consume the module. Next: branch protection, shared secrets, and further repos/owners |
 
 ## Key decisions
 
@@ -160,3 +161,4 @@ See [`docs/decisions/README.md`](docs/decisions/README.md) for the full index. S
 
 - Dedicated, provider-scoped `terraform-github` repo; Terraform over UI/scripts; multi-owner (personal + orgs); directory-per-owner consuming shared modules (ADR-001)
 - HCP backend, Local execution mode, and GitHub Actions plan/apply CI inherited from `terraform-grafana-cloud` (ADR-002 there); **workspace-per-owner topology** — one HCP workspace per owner directory (`github-<login>`) in a dedicated `terraform-github` project (ADR-002)
+- **Standard repository module** (`modules/repository`) encodes the opinionated baseline; owner directories route each repo through it, migrated via `moved {}` blocks; standard first, deviation inputs added only on explicit confirmation (ADR-003)
