@@ -14,7 +14,7 @@ Settle these before writing the module call — most map straight onto a module 
 2. **Name** — the exact repository name. It becomes the `name` input, and the module call's local name with any character invalid in a Terraform identifier replaced by `_` (e.g. `my.repo` → `module "my_repo"`; see `CLAUDE.md` § Terraform conventions).
 3. **Visibility** — `public` or `private`? Standard is private; go public only when it must be readable/callable by others (e.g. hosting reusable workflows that private repos call).
 4. **Description** — the one-line repository description.
-5. **Topics** — any topics to set (optional; safe to include).
+5. **Topics** — any topics to set (optional; safe to include). Prefer topics from the [topics glossary](../reference/topics.md) so they stay consistent across the fleet.
 6. **Initialise now?** — `auto_init` (default `true`) seeds an initial commit with a placeholder `README.md` (the repo name and description) so a default branch (`main`) exists up front — suits populating via the usual branch + PR flow. Set it `false` for an empty repo whose first bulk push establishes `main`.
 7. **Standard deviations** — the module encodes the baseline (issues on; wiki/projects/downloads off; merge commits off, squash + rebase on, delete-branch-on-merge on). You do **not** set these per repo. If the repo genuinely needs to deviate, that requires adding a module input and the human's explicit confirmation that the deviation must be supported (see [`../reference/standard-repository.md`](../reference/standard-repository.md)).
 
