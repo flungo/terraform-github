@@ -27,7 +27,7 @@ module "github_workflows" {
 
   name        = "github-workflows"
   description = "Reusable GitHub Actions workflows and shared CI standards for the flungo Terraform repositories (Terraform plan/apply, drift remediation, Markdown validation)."
-  topics      = ["terraform", "github-actions", "reusable-workflows", "ci"]
+  topics      = ["terraform", "github-actions", "actions", "reusable-workflows", "ci", "cicd", "code-quality"]
 
   # Public so the private consumer repos can call its reusable workflows without
   # extra Actions-sharing config.
@@ -44,7 +44,7 @@ module "claude_plugins" {
 
   name        = "claude-plugins"
   description = "Personal Claude Code / Claude.ai plugin marketplace"
-  topics      = ["claude", "claude-code", "plugins", "marketplace"]
+  topics      = ["claude", "claude-code", "anthropic", "plugin", "marketplace"]
 
   # Public so the marketplace can be installed from Claude Code / claude.ai.
   visibility = "public"
