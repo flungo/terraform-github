@@ -33,7 +33,7 @@ Repositories are managed through the shared standard repository module ([`module
 
 3. **Iterate to a clean import.** Adjust the inputs from the posted plan until the only remaining changes are *intended* ones. Match identity attributes (`visibility`, `description`, `topics`) to the **live** values. Where the live repo deviates from the module's encoded baseline (e.g. Projects enabled), decide per repo: **standardise** it (accept the module baseline — the plan will show that change) or **preserve** the deviation (which requires adding a module input, on the user's explicit confirmation; see [`../reference/standard-repository.md`](../reference/standard-repository.md)). The target is **no unexpected difference** — the adoption itself plus only the changes you meant to make.
 
-   > **🤖 Agent** — Keep the repository's existing topics by default. If it has none, or they are sparse, propose a few well-chosen topics for the user to confirm — adoption is a good moment to improve topic consistency across the fleet.
+   > **🤖 Agent** — Keep the repository's existing topics by default. If it has none, or they are sparse, propose a few well-chosen topics from the [topics glossary](../reference/topics.md) for the user to confirm — adoption is a good moment to improve topic consistency across the fleet.
 
 4. **Merge → apply.** Merging runs `terraform apply`: the resource is imported into state under the module address and any intended changes are made.
 
