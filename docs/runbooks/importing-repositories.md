@@ -37,7 +37,7 @@ Repositories are managed through the shared standard repository module ([`module
 
 4. **Merge → apply.** Merging runs `terraform apply`: the resource is imported into state under the module address and any intended changes are made.
 
-5. **Remove the import block.** In a follow-up PR, delete the `import {}` block once the adopting apply has run — the module call stays managing the repository. (The import-block convention; see `CLAUDE.md` § Terraform conventions.)
+5. **Remove the import block.** In a follow-up PR, delete the `import {}` block once the adopting apply has run — the module call stays managing the repository. (The import-block convention; see [Terraform conventions](../reference/terraform-conventions.md).)
 
 ## Why not generate the config blind
 

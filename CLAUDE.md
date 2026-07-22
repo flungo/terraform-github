@@ -12,7 +12,7 @@ Its scope is **the GitHub provider's surface**, not a fixed feature list. It sta
 |---|---|
 | Terraform provider | `integrations/github ~> 6.0` (one provider configuration per owner) |
 | State backend | HCP Terraform — org `flungo`, **one workspace per owner directory**, **Local execution mode** (inherited from `terraform-grafana-cloud`) |
-| Structure | Directory per owner (`owners/<owner>/`) consuming shared modules (`modules/`) — **not** a single flat root module (see § Terraform conventions) |
+| Structure | Directory per owner (`owners/<owner>/`) consuming shared modules (`modules/`) — **not** a single flat root module (see [Terraform conventions](docs/reference/terraform-conventions.md)) |
 | CI/CD | GitHub Actions — plan on PR, apply on merge |
 | Secrets | GitHub Actions secrets — not HCP workspace variables |
 
@@ -64,20 +64,7 @@ docs/
 
 ## Terraform conventions
 
-> **Key divergence from the sibling repos.** `terraform-grafana-cloud` and `stalwart.flungo.net` use a **single flat root module** ("root module only — no child modules unless complexity clearly warrants it"). This repo deliberately does **not**: the multi-owner requirement makes shared modules + a directory (and HCP workspace) per owner the right structure from the start. The "one flat root" rule does not apply here. What *is* carried over: one `.tf` file per logical concern *within* each directory or module, sensitive values as variables, and durations as arithmetic.
-
-- **Directory per owner is a root module per owner.** Terraform root modules are flat — they load every `*.tf` in a directory and do not recurse. So each `owners/<owner>/` is its own root module, `init`/`plan`/`apply`'d independently against its own HCP workspace. Owner directories are thin: provider config, backend, variables, and module calls — the opinionated detail lives in `modules/`.
-- **Shared modules encode the preferences.** Change the standard once in `modules/` and re-apply each owner to roll it out. Owner directories should not re-express settings the module already owns.
-- **Customise modules through simple inputs, named for intent.** Express per-repo variation with a small, deliberately grown set of module inputs — not by forking a module. Where an input maps to a GitHub provider argument, **match the provider's variable name** (e.g. `visibility`, `default_branch`); where it does not, name it for the *intent* so one flag can drive several decisions (e.g. `terraform = true` marks a repo as holding Terraform config and can gate both required status checks and whether the HCP token secret is attached).
-- **Standard first; add inputs for deviations only on explicit confirmation.** When adopting a repo into the standard module, bringing it to the standard (disabling a feature, changing a setting) is confirmed by the user *per repo*. Add a module input to support a deviation **only when the user explicitly confirms** the deviation must be supported in the workflow — never speculatively — and name it per the convention above.
-- **Resource names mirror the real object name.** A resource's local name matches the repository (or team, secret, …) name, with any character not valid in a Terraform identifier replaced by `_` — e.g. repository `authentik.flungo.net` → `github_repository.authentik_flungo_net`. (Terraform identifiers allow letters, digits, `_`, and `-` and must start with a letter or `_`; `.` is the usual offender.)
-- **One `.tf` file per logical group** within a directory/module (`repositories.tf`, `secrets.tf`, `providers.tf`, `terraform.tf`).
-- **One provider configuration per owner** — `provider "github" { owner = "<owner>" token = var.github_token }`. Provider configurations are static; you cannot `for_each` a module across a dynamic set of provider aliases, so each owner is wired explicitly.
-- **All sensitive values are variables**, declared `sensitive = true`; never hard-code tokens or secret values.
-- **Express durations as arithmetic** for readability: `30 * 86400 # 30 days`, not `2592000`.
-- **Adopt existing resources via `import {}` blocks** (Terraform ≥ 1.5) in the `.tf` file, atomic with the config that manages them and reviewed in the same PR — every repo, secret, or team that already exists on GitHub must be imported before it can be managed. (Same convention as `terraform-grafana-cloud` ADR-012.)
-- **Pin the provider** in each directory's `terraform` block and commit `.terraform.lock.hcl`.
-- **Bootstrapping / circularity:** this repo manages GitHub using credentials and workflows stored in GitHub. Keep the provider token a manually-managed Actions secret (not a Terraform-managed resource), and be cautious about letting Terraform manage the branch protection / secrets that gate this repo's own CI until the setup is proven. A broken apply must never lock the repo out of its own credentials.
+The Terraform structure and authoring conventions — directory-per-owner root modules, shared modules encoding the standard, intent-named inputs, resource naming, import blocks, and the key divergence from the sibling repos' single-flat-root pattern — are catalogued in [`docs/reference/terraform-conventions.md`](docs/reference/terraform-conventions.md). That reference doc is canonical; consult it before adding or changing Terraform config here.
 
 ## Working with this repo in Claude Code
 

@@ -23,7 +23,7 @@ module "github_workflows" {
 
 The module local name should mirror the repository name with any character invalid
 in a Terraform identifier replaced by `_` (e.g. `authentik.flungo.net` →
-`module "authentik_flungo_net"`), per `CLAUDE.md` § Terraform conventions.
+`module "authentik_flungo_net"`), per [Terraform conventions](../../docs/reference/terraform-conventions.md).
 
 Adopting a repository that already exists on GitHub? Pair the module call with an
 `import {}` block targeting the module's internal resource address —
