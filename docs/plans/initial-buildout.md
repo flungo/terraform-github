@@ -267,7 +267,7 @@ shared-module design.
 > is its own **root module** that is `terraform init`/`plan`/`apply`'d
 > independently — not subdirectories of a single root. This is a deliberate
 > divergence from the sibling repos' "root module only, flat" convention, which
-> is documented in `CLAUDE.md` § Terraform conventions.
+> is documented in [Terraform conventions](../reference/terraform-conventions.md).
 
 ---
 

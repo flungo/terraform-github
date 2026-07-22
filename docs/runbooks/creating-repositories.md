@@ -11,7 +11,7 @@ Settle these before writing the module call — most map straight onto a module 
 > **🤖 Agent** — Don't ask these cold. Where the task gives you enough context to propose a sensible answer — or where a standard default applies (`visibility` defaults to private, `auto_init` to true) — suggest it and ask the human to confirm; ask open-endedly only where you genuinely can't infer. Work down the list, then confirm the full set before writing the module call.
 
 1. **Owner** — which account owns it, i.e. which `owners/<login>/` directory? (Personal `flungo`, or an organisation.)
-2. **Name** — the exact repository name. It becomes the `name` input, and the module call's local name with any character invalid in a Terraform identifier replaced by `_` (e.g. `my.repo` → `module "my_repo"`; see `CLAUDE.md` § Terraform conventions).
+2. **Name** — the exact repository name. It becomes the `name` input, and the module call's local name with any character invalid in a Terraform identifier replaced by `_` (e.g. `my.repo` → `module "my_repo"`; see [Terraform conventions](../reference/terraform-conventions.md)).
 3. **Visibility** — `public` or `private`? Standard is private; go public only when it must be readable/callable by others (e.g. hosting reusable workflows that private repos call).
 4. **Description** — the one-line repository description.
 5. **Topics** — any topics to set (optional; safe to include). Prefer topics from the [topics glossary](../reference/topics.md) so they stay consistent across the fleet.

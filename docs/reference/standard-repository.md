@@ -40,7 +40,7 @@ here rolls it out to all repositories on the next apply.
 The input set is kept small and grown deliberately. A repository is brought to
 the **standard by default**; a per-repo deviation from the encoded baseline is
 supported by adding an input **only when the user has explicitly confirmed** the
-deviation must be supported (see `CLAUDE.md` § Terraform conventions). When an
+deviation must be supported (see [Terraform conventions](terraform-conventions.md)). When an
 input maps to a GitHub provider argument it takes the provider's own name (e.g.
 `visibility`); otherwise it is named for the *intent* so one flag can drive
 several decisions.

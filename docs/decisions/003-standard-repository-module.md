@@ -33,7 +33,7 @@ repository** — and route every owner-directory repository through it.
   catalogue lives in [`docs/reference/standard-repository.md`](../reference/standard-repository.md).
 - **Standard first; grow inputs deliberately.** A repository is brought to the
   baseline by default; an input to preserve a deviation is added only on explicit
-  user confirmation (per `CLAUDE.md` § Terraform conventions).
+  user confirmation (per [Terraform conventions](../reference/terraform-conventions.md)).
 - **Migrate with `moved {}` blocks.** Each existing resource is relocated from its
   top-level address to `module.<name>.github_repository.this` via a `moved` block,
   so the refactor is a state move — not a destroy/recreate. The blocks are removed

@@ -1,5 +1,5 @@
 variable "name" {
-  description = "Repository name (e.g. \"github-workflows\"). Becomes github_repository.name; the caller's module local name should mirror it with invalid identifier characters replaced by \"_\" (see CLAUDE.md § Terraform conventions)."
+  description = "Repository name (e.g. \"github-workflows\"). Becomes github_repository.name; the caller's module local name should mirror it with invalid identifier characters replaced by \"_\" (see docs/reference/terraform-conventions.md)."
   type        = string
 }
 
