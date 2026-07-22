@@ -6,4 +6,5 @@ Examples this repo expects to grow: a catalogue of the **standard repository set
 
 | Document | Purpose |
 |---|---|
+| [`standard-repository.md`](standard-repository.md) | The settings the standard repository module (`modules/repository`) encodes vs exposes as inputs, and the rule for growing the input surface |
 | [`secrets.md`](secrets.md) | The GitHub Actions secrets CI uses (state backend token, per-owner provider token) and where each is rotated |

@@ -6,6 +6,7 @@ Decisions are numbered sequentially and never deleted or renumbered. Each file d
 |---|---|---|---|
 | [001](001-dedicated-terraform-github-repo.md) | Dedicated `terraform-github` repository for GitHub resources | Accepted | Manage GitHub resources across the personal account and organisations as code in a dedicated, provider-scoped repository, structured as one directory per owner consuming shared modules. HCP Terraform backend and CI conventions are inherited from `terraform-grafana-cloud`. |
 | [002](002-workspace-per-owner-topology.md) | Workspace-per-owner backend topology | Accepted | One HCP workspace per owner directory (`github-<login>`) in a dedicated `terraform-github` project, Local execution. Chosen for credential scoping and blast-radius isolation; per-owner overhead stays low because the HCP token and GitHub App key are shared and workspaces auto-create on first `init`. |
+| [003](003-standard-repository-module.md) | Standard repository module | Accepted | Extract `modules/repository` encoding the opinionated baseline (feature toggles, merge strategy) with a small per-repo input set; route every owner-directory repository through it, migrating existing resources via `moved {}` blocks (no destroy/recreate). Standard first; deviation inputs added only on explicit confirmation. |
 
 ## Adding a new ADR
 
