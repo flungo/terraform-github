@@ -13,7 +13,7 @@ Its scope is **the GitHub provider's surface**, not a fixed feature list. It sta
 | Terraform provider | `integrations/github ~> 6.0` (one provider configuration per owner) |
 | State backend | HCP Terraform — org `flungo`, **one workspace per owner directory**, **Local execution mode** (inherited from `terraform-grafana-cloud`) |
 | Structure | Directory per owner (`owners/<owner>/`) consuming shared modules (`modules/`) — **not** a single flat root module (see [Terraform conventions](docs/reference/terraform-conventions.md)) |
-| CI/CD | GitHub Actions — plan on PR, apply on merge |
+| CI/CD | GitHub Actions — a thin caller of the reusable [`flungo/github-workflows`](https://github.com/flungo/github-workflows) `terraform.yml` (`@v1`); plan on PR, apply on merge. `working-directory: owners/flungo`, owner-scoped `concurrency-group: terraform-flungo` and `plan-comment-marker` |
 | Secrets | GitHub Actions secrets — not HCP workspace variables |
 
 ## Sensitive information — never commit or expose
