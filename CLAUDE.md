@@ -140,7 +140,7 @@ Search for anything that may have changed (owner names, workspace names, provide
 
 | Plan | Status |
 |---|---|
-| [Initial build-out](docs/plans/initial-buildout.md) | In progress — owner skeleton, plan/apply CI, and the standard repository module have landed; the flungo repositories consume the module. Next: branch protection, shared secrets, and further repos/owners |
+| [Initial build-out](docs/plans/initial-buildout.md) | In progress — owner skeleton, plan/apply CI, the standard repository module, and the branch-protection module (piloted on authentik) have landed; the flungo repositories consume the modules. Next: roll protection out to the other repos, shared secrets, and further repos/owners |
 
 ## Key decisions
 
@@ -149,3 +149,4 @@ See [`docs/decisions/README.md`](docs/decisions/README.md) for the full index. S
 - Dedicated, provider-scoped `terraform-github` repo; Terraform over UI/scripts; multi-owner (personal + orgs); directory-per-owner consuming shared modules (ADR-001)
 - HCP backend, Local execution mode, and GitHub Actions plan/apply CI inherited from `terraform-grafana-cloud` (ADR-002 there); **workspace-per-owner topology** — one HCP workspace per owner directory (`github-<login>`) in a dedicated `terraform-github` project (ADR-002)
 - **Standard repository module** (`modules/repository`) encodes the opinionated baseline; owner directories route each repo through it, migrated via `moved {}` blocks; standard first, deviation inputs added only on explicit confirmation (ADR-003)
+- **Branch protection via repository rulesets** — a shared `modules/branch-protection` (a `github_repository_ruleset`, not the older `github_branch_protection`) protects default branches: require PR + conversation resolution + linear history, admin bypass unless `strict`; piloted on authentik (ADR-004)
