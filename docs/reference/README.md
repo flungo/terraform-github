@@ -8,5 +8,6 @@ Examples this repo expects to grow: a catalogue of the **standard repository set
 |---|---|
 | [`terraform-conventions.md`](terraform-conventions.md) | The Terraform structure and authoring conventions — directory-per-owner root modules, shared modules encoding the standard, resource naming, import blocks, and the divergence from the sibling repos' single-flat-root pattern |
 | [`standard-repository.md`](standard-repository.md) | The settings the standard repository module (`modules/repository`) encodes vs exposes as inputs, and the rule for growing the input surface |
+| [`branch-protection.md`](branch-protection.md) | The default rules the branch-protection module (`modules/branch-protection`) enforces and the inputs it exposes |
 | [`secrets.md`](secrets.md) | The GitHub Actions secrets CI uses (state backend token, per-owner provider token) and where each is rotated |
 | [`topics.md`](topics.md) | The shared vocabulary of GitHub repository topics used across the fleet, and the conventions for choosing them |
