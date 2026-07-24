@@ -1,0 +1,11 @@
+name: github-workflows version check
+on:
+  schedule:
+    - cron: '0 7 * * 1'   # weekly (Mon 07:00 UTC)
+  workflow_dispatch:
+jobs:
+  version-check:
+    permissions:
+      contents: read
+      issues: write
+    uses: flungo/github-workflows/.github/workflows/version-check.yml@v1
