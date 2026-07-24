@@ -138,6 +138,67 @@ jobs:
               });
             }
 
+      # When the plan fails on the branch-protection guard, surface the offending
+      # repositories' *classic* branch protection settings. The guard's data source
+      # exposes only each rule's pattern, so it can't compare — this fetches the
+      # full settings via GraphQL (using the provider PAT, which already has admin
+      # on the managed repos) and prints them to the log and the run summary. It is
+      # the read side of the classic→ruleset migration: compare these against the
+      # ruleset before removing the classic rule. See
+      # docs/runbooks/migrating-classic-protection-to-ruleset.md.
+      - name: Surface blocking classic protection
+        if: steps.plan.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.FLUNGO_GITHUB_TOKEN }}
+        run: |
+          repos=$(jq -rR '
+            fromjson?
+            | select(.["@level"] == "error"
+              and .diagnostic.summary == "Resource postcondition failed"
+              and (.diagnostic.detail | test(" has classic branch protection rule")))
+            | .diagnostic.detail
+            | capture("^(?<r>[^ ]+) has classic branch protection").r
+          ' plan.jsonl | sort -u) || repos=""
+          if [ -z "$repos" ]; then
+            echo "No branch-protection guard failures in this plan; nothing to surface."
+            exit 0
+          fi
+          for repo in $repos; do
+            {
+              echo "## Classic branch protection blocking \`$repo\`"
+              echo
+              echo "Compare against the ruleset before removing it (repo → Settings → Branches)."
+              echo
+              echo '```json'
+              gh api graphql -f owner=flungo -f name="$repo" -f query='
+                query($owner: String!, $name: String!) {
+                  repository(owner: $owner, name: $name) {
+                    branchProtectionRules(first: 100) {
+                      nodes {
+                        pattern
+                        requiresApprovingReviews
+                        requiredApprovingReviewCount
+                        requiresCodeOwnerReviews
+                        dismissesStaleReviews
+                        requiresConversationResolution
+                        requiresLinearHistory
+                        requiresStatusChecks
+                        requiresStrictStatusChecks
+                        requiredStatusCheckContexts
+                        requiresCommitSignatures
+                        isAdminEnforced
+                        restrictsPushes
+                        allowsForcePushes
+                        allowsDeletions
+                        lockBranch
+                      }
+                    }
+                  }
+                }' || echo "(failed to fetch settings for $repo)"
+              echo '```'
+            } | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+
       - name: Fail on plan error
         if: steps.plan.outcome == 'failure'
         run: exit 1
