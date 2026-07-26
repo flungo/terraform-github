@@ -1,0 +1,19 @@
+# Keep this repo's own directly-referenced actions current (currently just
+# actions/download-artifact in the surface-classic-protection job). The
+# reusable-workflow callers pin the moving flungo/github-workflows @v1, which
+# Dependabot can't track and which version-check.yml owns — so those are ignored.
+# See flungo/github-workflows ADR-007.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "flungo/github-workflows*"
+    commit-message:
+      prefix: ci
