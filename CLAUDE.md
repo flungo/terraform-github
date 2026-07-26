@@ -64,7 +64,7 @@ docs/
 
 ## Terraform conventions
 
-The Terraform structure and authoring conventions — directory-per-owner root modules, shared modules encoding the standard, intent-named inputs, resource naming, import blocks, and the key divergence from the sibling repos' single-flat-root pattern — are catalogued in [`docs/reference/terraform-conventions.md`](docs/reference/terraform-conventions.md). That reference doc is canonical; consult it before adding or changing Terraform config here.
+Generic HCL authoring conventions (resource naming, sensitive values, durations, provider pinning + lockfile, `import {}` / `moved {}` blocks) come from the **`terraform-standards`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`). This repo's structure-specific conventions — directory-per-owner root modules, shared modules encoding the standard, intent-named inputs, by-subject `.tf` grouping, and the key divergence from the sibling repos' single-flat-root pattern — are catalogued in [`docs/reference/terraform-conventions.md`](docs/reference/terraform-conventions.md). That reference doc is canonical for this repo; consult it, and the plugin, before adding or changing Terraform config here.
 
 ## Working with this repo in Claude Code
 
@@ -94,47 +94,13 @@ Claude sessions must **never commit directly to `main`**. All work happens on a 
 
 ## Documentation standards
 
-Documentation is a first-class deliverable. Stale docs are actively harmful — they mislead future sessions into re-deriving settled decisions or acting on wrong assumptions. These rules apply after every change.
+Documentation conventions come from the **`docs-standards`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`): the Diátaxis `docs/` split (`decisions/`, `plans/`, `runbooks/`, `reference/`, each with a `README.md` index kept current in the same commit), the Nygard ADR format, the ephemeral two-PR plan lifecycle, the 🤖 Agent / Verify callouts, semantic line breaks, and the end-of-session staleness scan — for which the plugin ships the `Stop` hook that prints the doc-maintenance checklist. The plugin complements this file; where this repo differs, this file wins.
 
-### Agent-directed callouts
+This repo's specific doc hooks, on top of the plugin's generic ones:
 
-Docs here are read by both humans and AI agents. When a passage is an instruction to an **agent** following the doc — what to *do*, not a fact everyone needs — mark it with an agent callout so it is unmistakable, and so a human can see what the agent was told:
-
-> **🤖 Agent** — \<what the agent should do\>
-
-Reserve it for agent behaviour (e.g. "propose a value from context and ask the human to confirm, rather than asking cold"); shared facts and steps stay as normal prose. Keep each callout to the action — one instruction per callout.
-
-### Plans vs runbooks vs reference vs ADRs
-
-Following the [Divio/Diátaxis](https://diataxis.fr/) split — docs are task-oriented (how-to) or information-oriented (reference); ADRs add a decision-oriented kind.
-
-- **Plans** (`docs/plans/`) — one-time procedures tracked to completion then **retired** (deleted). Numbered checkboxes; status in `docs/plans/README.md`. The permanent record lives in ADRs and reference docs, not the plan.
-- **Runbooks** (`docs/runbooks/`) — repeatable *how-to* guides referenced indefinitely (owner onboarding, token rotation). No completion checkboxes.
-- **Reference** (`docs/reference/`) — *information-oriented*, descriptive not procedural (standard-settings catalogue, shared-secret names). If it has no steps and exists to be looked up, it goes here.
-- **ADRs** (`docs/decisions/`) — decision-oriented; numbered sequentially, never deleted or renumbered. Superseded ADRs keep their file with a note pointing to the newer one.
-
-### After making an architectural decision
-1. Create a new ADR in `docs/decisions/` using the template in `docs/decisions/README.md` (format: `# ADR-NNN: Title`, Date, Status, Context, Decision, Consequences).
-2. Update `docs/decisions/README.md` with a one-sentence summary.
-3. If it supersedes an existing ADR, update the old ADR's status to `Superseded by ADR-NNN`.
-
-### After implementing new resources or features
-1. Update `README.md` → "What this manages" if a new resource type is introduced.
-2. Update the relevant directory's `providers.tf` / `variables.tf` docs if new provider configs or variables are added.
-3. If the feature introduces a new credential, add a runbook in `docs/runbooks/` for rotating it and note it in the § Sensitive information list / any secrets table.
-
-### After any change to `docs/`
-- **Always refresh the relevant `README.md` index** (decisions, plans, runbooks, reference) in the same commit. Stale index rows are actively misleading — update the status field whenever the underlying document changes.
-
-### Plan lifecycle (two-PR retirement)
-1. **Active** — plan doc exists, README row shows "In progress" / "Planning". Mark steps `[x]` as they complete.
-2. **Complete** — when all steps are done, set the README row to `Complete (YYYY-MM-DD)`, update § Active work here, and open a PR. Verify every structural decision has an ADR before marking complete.
-3. **Retired** — once the completion PR is merged and the user confirms, open a second PR to delete the plan file and remove its README row. Git history preserves it.
-
-**Plans are ephemeral — never reference them from permanent docs or code.** Architecture, decisions, and repeatable procedures belong in their permanent home (README, ADRs, runbooks, Terraform comments), expressed as outcomes — not as links to the plan that produced them. The one exception is the § Active work section below, which may link a plan while it is in progress.
-
-### End-of-session staleness scan
-Search for anything that may have changed (owner names, workspace names, provider version, module names, secret names), close any resolved open decisions in the docs, verify § Active work still reflects reality, and audit every README row whose document was touched. If something is probably stale but unverifiable without live access, add a `> **Verify:** …` callout rather than leaving silent uncertainty.
+- **New resource type** → update `README.md` → "What this manages".
+- **New provider config or variable** → update the relevant directory's `providers.tf` / `variables.tf` docs.
+- **New credential** → add a rotation runbook in `docs/runbooks/` and note it in the § Sensitive information list and [`docs/reference/secrets.md`](docs/reference/secrets.md).
 
 ## Active work
 
