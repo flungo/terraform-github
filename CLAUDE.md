@@ -140,7 +140,7 @@ Search for anything that may have changed (owner names, workspace names, provide
 
 | Plan | Status |
 |---|---|
-| [Initial build-out](docs/plans/initial-buildout.md) | In progress — owner skeleton, plan/apply CI, the standard repository module, and the branch-protection module (piloted on authentik) have landed; the flungo repositories consume the modules. Next: roll protection out to the other repos, shared secrets, and further repos/owners |
+| [Initial build-out](docs/plans/initial-buildout.md) | In progress — owner skeleton, plan/apply CI, the standard repository module, and the branch-protection module (piloted on authentik, rolled out to every managed repo) have landed; the flungo repositories consume the modules. Next: shared secrets, then further repos/owners |
 
 ## Key decisions
 
