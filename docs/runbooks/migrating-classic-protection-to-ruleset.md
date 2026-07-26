@@ -16,7 +16,7 @@ weaken the branch's protection.
 
 ## Procedure
 
-1. **Add the module call** for the repo in `owners/<owner>/branch-protection.tf`:
+1. **Add the module call** to the repo's own file `owners/<owner>/<repo>.tf` (each repo's config lives in one by-subject file named for it):
 
    ```hcl
    module "<repo>_protection" {
