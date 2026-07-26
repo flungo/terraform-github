@@ -11,7 +11,7 @@ Repositories are managed through the shared standard repository module ([`module
 
 ## Procedure
 
-1. **Add config in a PR.** In `owners/<login>/repositories.tf`, add a module call and an `import {}` block targeting its internal resource address:
+1. **Add config in a PR.** In the repo's own file `owners/<login>/<repo>.tf` (each repo's config lives in one by-subject file named for it — create it if new), add a module call and an `import {}` block targeting its internal resource address:
 
    ```hcl
    import {

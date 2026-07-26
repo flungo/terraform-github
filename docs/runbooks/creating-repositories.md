@@ -25,7 +25,7 @@ Settle these before writing the module call — most map straight onto a module 
 
 ## Procedure
 
-1. **Add config in a PR.** In `owners/<login>/repositories.tf`, add a module call with the answers above — and **no `import {}` block**:
+1. **Add config in a PR.** In a new file `owners/<login>/<repo>.tf` (each repo's config lives in one by-subject file named for it), add a module call with the answers above — and **no `import {}` block**:
 
    ```hcl
    module "<name>" {
