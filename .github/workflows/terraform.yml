@@ -34,3 +34,82 @@ jobs:
     secrets:
       TF_TOKEN_APP_TERRAFORM_IO: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
       provider_token: ${{ secrets.FLUNGO_GITHUB_TOKEN }}
+
+  # When the plan fails on the branch-protection guard (a repo still carries classic
+  # branch protection), surface that repo's full classic settings so they can be
+  # compared against the ruleset before the classic rule is removed. The guard's data
+  # source only exposes the pattern, so this reads the reusable workflow's plan
+  # artifact and fetches the settings via GraphQL. Runs only on a failed plan and
+  # no-ops when there is nothing to surface. See
+  # docs/runbooks/migrating-classic-protection-to-ruleset.md.
+  surface-classic-protection:
+    needs: terraform
+    # always() overrides the default "skip a job whose needs failed" — without a
+    # status function the guard-failure case (which is exactly when this must run)
+    # would self-skip. Scoped to a genuine failure, not a cancellation.
+    if: ${{ always() && needs.terraform.result == 'failure' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan
+        continue-on-error: true
+      - name: Surface blocking classic protection
+        env:
+          GH_TOKEN: ${{ secrets.FLUNGO_GITHUB_TOKEN }}
+        run: |
+          plan="$(find . -name plan.jsonl -print -quit)"
+          if [ -z "$plan" ]; then
+            echo "No plan artifact found (expected the reusable workflow to publish 'terraform-plan'); nothing to surface."
+            exit 0
+          fi
+          repos=$(jq -rR '
+            fromjson?
+            | select(.["@level"] == "error"
+              and .diagnostic.summary == "Resource postcondition failed"
+              and (.diagnostic.detail | test(" has classic branch protection rule")))
+            | .diagnostic.detail
+            | capture("^(?<r>[^ ]+) has classic branch protection").r
+          ' "$plan" | sort -u) || repos=""
+          if [ -z "$repos" ]; then
+            echo "Plan failed, but not on the branch-protection guard; nothing to surface."
+            exit 0
+          fi
+          for repo in $repos; do
+            {
+              echo "## Classic branch protection blocking \`$repo\`"
+              echo
+              echo "Compare against the ruleset before removing it (repo → Settings → Branches)."
+              echo
+              echo '```json'
+              gh api graphql -f owner=flungo -f name="$repo" -f query='
+                query($owner: String!, $name: String!) {
+                  repository(owner: $owner, name: $name) {
+                    branchProtectionRules(first: 100) {
+                      nodes {
+                        pattern
+                        requiresApprovingReviews
+                        requiredApprovingReviewCount
+                        requiresCodeOwnerReviews
+                        dismissesStaleReviews
+                        requiresConversationResolution
+                        requiresLinearHistory
+                        requiresStatusChecks
+                        requiresStrictStatusChecks
+                        requiredStatusCheckContexts
+                        requiresCommitSignatures
+                        isAdminEnforced
+                        restrictsPushes
+                        allowsForcePushes
+                        allowsDeletions
+                        lockBranch
+                      }
+                    }
+                  }
+                }' || echo "(failed to fetch settings for $repo)"
+              echo '```'
+            } | tee -a "$GITHUB_STEP_SUMMARY"
+          done
