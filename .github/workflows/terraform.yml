@@ -34,6 +34,13 @@ jobs:
     secrets:
       TF_TOKEN_APP_TERRAFORM_IO: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
       provider_token: ${{ secrets.FLUNGO_GITHUB_TOKEN }}
+      # Shared secret values written into managed repos (repository-secrets module),
+      # composed from this repo's own Actions secrets via toJSON (escape-safe). The
+      # reusable exports each as a masked TF_VAR_<key> — TF_VAR_lychee_github_token,
+      # TF_VAR_hcp_token — feeding the owner-dir variables of the same name.
+      tf_secret_vars: >-
+        {"lychee_github_token": ${{ toJSON(secrets.LYCHEE_GITHUB_TOKEN) }},
+        "hcp_token": ${{ toJSON(secrets.TF_TOKEN_APP_TERRAFORM_IO) }}}
 
   # When the plan fails on the branch-protection guard (a repo still carries classic
   # branch protection), surface that repo's full classic settings so they can be
