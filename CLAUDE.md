@@ -74,23 +74,7 @@ Once CI exists, on-demand runs are triggered with `mcp__github__actions_run_trig
 
 ## Branch management
 
-Claude sessions must **never commit directly to `main`**. All work happens on a feature branch.
-
-**At the start of every session:**
-- If `main` is checked out: pull to ensure it is up to date, then create a new feature branch before making any changes.
-- If a non-`main` branch is already checked out: confirm with the user whether to continue on it or start fresh before proceeding.
-
-**After each user prompt:** fetch from upstream and, if there are new commits on `main`, rebase the current feature branch onto it (`git fetch origin main` then `git rebase origin/main` only if fetch produced new commits). Review what changed; if upstream changes affect work on the branch, adjust (via rebase amend). If anything is unclear or conflicts with a decision already made on the branch, **stop and ask** rather than silently picking an interpretation.
-
-**Commit messages — [Conventional Commits](https://www.conventionalcommits.org/):** `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, etc. Imperative subject, no trailing period. The body is for the *why*, not a restatement of the diff.
-
-**Landing branches — always via PR.** Claude never pushes to `main`; open a PR and let the user merge. Delete the remote branch after merge.
-
-**Linear history — no merge commits.** Land via squash or rebase, never `git merge`. **Squash** when the branch is a single logical change (regardless of working-commit count); **rebase** (fast-forward, no squash) when it holds several distinct logical changes worth preserving. When in doubt, squash. Force-pushing is allowed on feature branches (after `--amend`/rebase), never on `main`.
-
-**Rebase hygiene — no "fix-up" commits.** When correcting a minor inaccuracy on a branch, amend/fixup the relevant commit rather than appending a corrective commit. History should read as though the work was always correct.
-
-**PR monitoring — prefer subscriptions, avoid `send_later`.** When watching a PR via activity subscriptions, do not schedule `send_later` self check-ins: either review comments arrive as events that wake the session, or the user returns. Only propose `send_later` when polling a CI job's outcome is critical *and* that outcome may complete without emitting an event.
+Branch and PR hygiene comes from the **`git-conventions`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`): never commit to `main` — a feature branch per change; at session start pull `main` and branch (confirm before continuing on an existing non-`main` branch); fetch and rebase onto `main` before finishing; [Conventional Commits](https://www.conventionalcommits.org/); linear history — squash a single logical change, rebase (no squash) to preserve several distinct ones; rebase hygiene — amend rather than leaving fix-up commits; force-push feature branches only, never `main`; land via PR and delete the branch after merge; and monitor PRs via activity subscriptions, not `send_later`. The plugin complements this file; where this repo differs, this file wins.
 
 ## Documentation standards
 
