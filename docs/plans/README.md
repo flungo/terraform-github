@@ -4,4 +4,4 @@
 
 | File | Description | Status |
 |---|---|---|
-| [initial-buildout.md](initial-buildout.md) | Bootstrap the repo: module structure, directory-per-owner layout, HCP workspace topology, provider/credential model, CI, and build sequence | Planning — awaiting review of this PR before any Terraform is written |
+| [initial-buildout.md](initial-buildout.md) | Bootstrap the repo: module structure, directory-per-owner layout, HCP workspace topology, provider/credential model, CI, and build sequence | In progress — §7 steps 1–5 landed (`repository`, `branch-protection`, `repository-secrets` modules on the `flungo` owner); step 6 (standard-repository composite) next |

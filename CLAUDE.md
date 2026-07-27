@@ -40,8 +40,10 @@ When a sensitive value is needed in docs or config, use a placeholder (e.g. `<gi
 ```
 modules/            Shared, opinionated modules, consumed by owner directories via a
   repository/       relative source path. `repository` is the standard repository
-                    module — the baseline repo settings; more (repository-secrets,
-                    branch protection) are added as the build-out proceeds.
+                    module (baseline repo settings); `branch-protection` and
+                    `repository-secrets` add default-branch protection and the
+                    shared Actions secrets. More modules are added as the
+                    build-out proceeds.
 owners/
   flungo/           The personal (user) account, by login — its own HCP workspace,
                     provider, and state. The only user account; named by login.
@@ -90,7 +92,7 @@ This repo's specific doc hooks, on top of the plugin's generic ones:
 
 | Plan | Status |
 |---|---|
-| [Initial build-out](docs/plans/initial-buildout.md) | In progress — owner skeleton, plan/apply CI, the standard repository module, and the branch-protection module (piloted on authentik, rolled out to every managed repo) have landed; the flungo repositories consume the modules. Next: shared secrets, then further repos/owners |
+| [Initial build-out](docs/plans/initial-buildout.md) | In progress — owner skeleton, plan/apply CI, the standard repository module, the branch-protection module, and the shared-secrets module (`repository-secrets`, piloted on authentik) have landed; the flungo repositories consume the modules. Next: the standard-repository composite, then further repos/owners |
 
 ## Key decisions
 

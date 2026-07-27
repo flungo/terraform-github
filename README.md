@@ -15,7 +15,8 @@ Terraform manages these GitHub resources for the `flungo` account (in `owners/fl
   - `github-workflows` — created by this config to host the fleet's shared reusable workflows and CI standards
   - `claude-plugins` — created by this config; the personal Claude Code / claude.ai plugin marketplace
 - **Branch protection** — each managed repo's default branch is protected via the shared branch-protection module (`modules/branch-protection`, a repository ruleset): require a pull request, conversation resolution, and linear history. Piloted on `authentik.flungo.net`.
-- **Growth** — common Actions secrets/variables, webhooks, teams and membership, and other `integrations/github` resources
+- **Shared secrets** — the fleet's common Actions secrets are attached to each managed repo via the shared secrets module (`modules/repository-secrets`): `LYCHEE_GITHUB_TOKEN` on every repo, plus the HCP token (`TF_TOKEN_APP_TERRAFORM_IO`) where the repo holds Terraform config. Piloted on `authentik.flungo.net`.
+- **Growth** — webhooks, teams and membership, org-level shared secrets, and other `integrations/github` resources
 
 ## Structure
 
