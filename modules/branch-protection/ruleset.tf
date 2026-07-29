@@ -1,9 +1,9 @@
 # Standard branch protection, implemented as a repository ruleset (the modern,
 # more expressive resource — see docs/decisions/004-branch-protection-rulesets.md).
 # Default rules: require a pull request, require conversation resolution, require
-# linear history, restrict deletion, and require any named status checks. Repository
-# admins may bypass unless var.strict is set. The catalogue of defaults and inputs
-# lives in docs/reference/branch-protection.md.
+# linear history, block force-pushes, restrict deletion, and require any named
+# status checks. Repository admins may bypass unless var.strict is set. The
+# catalogue of defaults and inputs lives in docs/reference/branch-protection.md.
 resource "github_repository_ruleset" "this" {
   name        = "standard"
   repository  = var.repository
@@ -40,6 +40,11 @@ resource "github_repository_ruleset" "this" {
 
     # Require linear history — no merge commits.
     required_linear_history = true
+
+    # Block force-pushes. Redundant while a pull request is required — that
+    # already blocks every direct push — but encoded so the guarantee is
+    # explicit and survives any future relaxation of the PR rule.
+    non_fast_forward = true
 
     # Require a pull request before merging; no required approvals (the owner works
     # solo, so requiring an approval would block their own PRs), but conversation
