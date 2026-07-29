@@ -15,15 +15,3 @@ module "claude_plugins" {
 
   shared_secrets = local.shared_secrets
 }
-
-# State moves from the previous per-primitive module calls into the composite;
-# removed in a follow-up PR once the migrating apply has run.
-moved {
-  from = module.claude_plugins.github_repository.this
-  to   = module.claude_plugins.module.repository.github_repository.this
-}
-
-moved {
-  from = module.claude_plugins_protection
-  to   = module.claude_plugins.module.branch_protection
-}
