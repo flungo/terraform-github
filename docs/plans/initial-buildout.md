@@ -1,6 +1,6 @@
 # Plan: Initial build-out of `terraform-github`
 
-Status: In progress — structure ratified (ADR-001–005); the `owners/flungo/` skeleton, plan/apply CI, `modules/repository`, `modules/branch-protection` (piloted on authentik, then rolled out to every managed repo), and `modules/repository-secrets` (shared secrets, piloted on authentik) have landed. §7 steps 1–5 done; step 6 (standard-repository composite) next.
+Status: In progress — structure ratified (ADR-001–006); the `owners/flungo/` skeleton, plan/apply CI, `modules/repository`, `modules/branch-protection`, `modules/repository-secrets`, and the `modules/standard-repository` composite have landed; every managed repo is one composite call. §7 steps 1–7 done; step 8 (onboard the rest of the `flungo` set) next.
 Related: [ADR-001](../decisions/001-dedicated-terraform-github-repo.md) (founding decisions)
 
 ## Goal
@@ -500,6 +500,20 @@ Each step is its own PR (own plan, own review gate), in order:
 > on every repo, plus `TF_TOKEN_APP_TERRAFORM_IO` where `terraform = true`) have
 > landed, enabled by the reusable workflow's new `tf_secret_vars` injection
 > ([flungo/github-workflows#16](https://github.com/flungo/github-workflows/pull/16)).
+> Step 6 (`modules/standard-repository`, [ADR-006](../decisions/006-standard-repository-composite.md))
+> is done — and, going beyond the step as originally scoped, **all three** managed
+> repos were migrated to one composite call each, which attached the shared
+> secrets to `github-workflows` and `claude-plugins` as a side effect (they had
+> none). Secret values are composed once at owner level (`local.shared_secrets`)
+> and passed to every call as one uniform reference, and a `manage_secrets`
+> opt-out covers the self-referential case (`terraform-github` itself at step 8,
+> per the §5 circularity note). One deliberate deviation from §1: the `terraform` flag does **not** yet
+> add the Terraform plan check to `required_status_checks` — fleet CI isn't
+> uniform (`authentik.flungo.net` has no Terraform workflow), and a required
+> context that never runs blocks merges behind a perpetual "Expected" entry;
+> revisit once Terraform CI is standardised. Checks are an explicit
+> `required_status_checks` input meanwhile. With CI already live since step 2,
+> steps 1–7 are all complete.
 
 1. **Ratify structure** — merge this repo's docs (this PR). Confirm the workspace
    recommendation (§3) and credential model (§5); write **ADR-002** (workspace

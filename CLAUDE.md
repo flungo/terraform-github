@@ -4,7 +4,7 @@ This repository manages GitHub resources as code with Terraform, across the user
 
 Its scope is **the GitHub provider's surface**, not a fixed feature list. It starts with a standard repository template and shared/common secrets, and grows to branch protection, webhooks, teams, and other resources exposed by [`integrations/github`](https://registry.terraform.io/providers/integrations/github/latest). It is named for the provider, not the initial use case, so that growth needs no rename. See [ADR-001](docs/decisions/001-dedicated-terraform-github-repo.md).
 
-> **Status: build-out under way.** The `owners/flungo/` skeleton, the plan/apply CI, and the standard repository module (`modules/repository`) have landed; the flungo repositories are managed through the module. The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md). Keep this file, the README, and the ADR index current as resources land.
+> **Status: build-out under way.** The `owners/flungo/` skeleton, the plan/apply CI, the primitive modules (`repository`, `branch-protection`, `repository-secrets`), and the `standard-repository` composite have landed; each managed flungo repository is a single composite call. The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md). Keep this file, the README, and the ADR index current as resources land.
 
 ## Architecture
 
@@ -38,31 +38,35 @@ When a sensitive value is needed in docs or config, use a placeholder (e.g. `<gi
 ## Repo layout
 
 ```
-modules/            Shared, opinionated modules, consumed by owner directories via a
-  repository/       relative source path. `repository` is the standard repository
-                    module (baseline repo settings); `branch-protection` and
-                    `repository-secrets` add default-branch protection and the
-                    shared Actions secrets. More modules are added as the
-                    build-out proceeds.
+modules/                Shared, opinionated modules, consumed by owner directories
+                        via a relative source path; more are added as the build-out
+                        proceeds.
+  standard-repository/  The caller-facing composite — one call per managed repo —
+                        composing the three primitives below.
+  repository/           Baseline repository settings — the standard project template
+                        (feature toggles, merge strategy).
+  branch-protection/    Default-branch protection, as a repository ruleset.
+  repository-secrets/   Shared Actions secrets — LYCHEE_GITHUB_TOKEN on every repo,
+                        plus the HCP token where the repo holds Terraform config.
 owners/
-  flungo/           The personal (user) account, by login — its own HCP workspace,
-                    provider, and state. The only user account; named by login.
-  <organisation>/   One directory per organisation account (every non-flungo owner
-                    is an org). "owner" is GitHub's own term — the {owner} in
-                    /repos/{owner}/{repo} and the provider's `owner` argument —
-                    which is why the container is `owners/` (not the UI term
-                    "accounts/"). "namespace"/"group" are GitLab terms, not GitHub's.
+  flungo/               The personal (user) account, by login — its own HCP workspace,
+                        provider, and state. The only user account; named by login.
+  <organisation>/       One directory per organisation account (every non-flungo owner
+                        is an org). "owner" is GitHub's own term — the {owner} in
+                        /repos/{owner}/{repo} and the provider's `owner` argument —
+                        which is why the container is `owners/` (not the UI term
+                        "accounts/"). "namespace"/"group" are GitLab terms, not GitHub's.
 docs/
-  decisions/        ADRs — numbered, never deleted or renumbered. README.md is the index.
-  plans/            One-time build/onboarding procedures with status tracking; retired
-                    (deleted) when complete. README.md is the index.
-  runbooks/         Repeatable operational procedures (owner onboarding, token rotation,
-                    importing repos). README.md is the index.
-  reference/        Information-oriented lookup docs (standard-settings catalogue, shared-
-                    secret names, provider coverage map). README.md is the index.
+  decisions/            ADRs — numbered, never deleted or renumbered. README.md is the index.
+  plans/                One-time build/onboarding procedures with status tracking; retired
+                        (deleted) when complete. README.md is the index.
+  runbooks/             Repeatable operational procedures (owner onboarding, token rotation,
+                        importing repos). README.md is the index.
+  reference/            Information-oriented lookup docs (standard-settings catalogue, shared-
+                        secret names, provider coverage map). README.md is the index.
 ```
 
-`modules/repository/` is the first shared module — the standard repository, consumed by every owner directory. `owners/flungo/` is the first owner directory.
+`modules/standard-repository/` is the composite every owner directory consumes — one call per managed repo. `owners/flungo/` is the first owner directory.
 
 ## Terraform conventions
 
@@ -92,7 +96,7 @@ This repo's specific doc hooks, on top of the plugin's generic ones:
 
 | Plan | Status |
 |---|---|
-| [Initial build-out](docs/plans/initial-buildout.md) | In progress — owner skeleton, plan/apply CI, the standard repository module, the branch-protection module, and the shared-secrets module (`repository-secrets`, piloted on authentik) have landed; the flungo repositories consume the modules. Next: the standard-repository composite, then further repos/owners |
+| [Initial build-out](docs/plans/initial-buildout.md) | In progress — owner skeleton, plan/apply CI, the three primitives (`repository`, `branch-protection`, `repository-secrets`), and the `standard-repository` composite have landed; each managed flungo repo is one composite call (§7 steps 1–7 done). Next: step 8 — onboard the rest of the flungo repos, then App auth and the first org |
 
 ## Key decisions
 
@@ -102,3 +106,4 @@ See [`docs/decisions/README.md`](docs/decisions/README.md) for the full index. S
 - HCP backend, Local execution mode, and GitHub Actions plan/apply CI inherited from `terraform-grafana-cloud` (ADR-002 there); **workspace-per-owner topology** — one HCP workspace per owner directory (`github-<login>`) in a dedicated `terraform-github` project (ADR-002)
 - **Standard repository module** (`modules/repository`) encodes the opinionated baseline; owner directories route each repo through it, migrated via `moved {}` blocks; standard first, deviation inputs added only on explicit confirmation (ADR-003)
 - **Branch protection via repository rulesets** — a shared `modules/branch-protection` (a `github_repository_ruleset`, not the older `github_branch_protection`) protects default branches: require PR, conversation resolution, linear history, and block deletion; PR-scoped admin bypass unless `strict`; guards against pre-existing classic protection; piloted on authentik (ADR-004)
+- **Standard-repository composite** (`modules/standard-repository`) — the caller-facing surface: one call composes the three primitives per repo. Secret values come from one owner-level `local.shared_secrets` source (never wired per repo file); a `manage_secrets` opt-out exists for the self-referential case (terraform-github itself). The `terraform` flag attaches the HCP secret but does not yet add a required plan-check context (fleet CI isn't uniform) (ADR-006)

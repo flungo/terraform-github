@@ -1,24 +1,31 @@
 # authentik.flungo.net — Terraform config/docs repo for Fabrizio's Authentik
-# server. Managed through the shared modules: standard repository settings and
-# default-branch protection.
+# server. Managed through the standard-repository composite: standard repository
+# settings, default-branch protection, and the shared Actions secrets.
 
 module "authentik_flungo_net" {
-  source = "../../modules/repository"
+  source = "../../modules/standard-repository"
 
   name        = "authentik.flungo.net"
   description = "Terraform configuration, architecture documentation, and operational records for Fabrizio's Authentik server."
+
+  terraform = true # authentik.flungo.net holds Terraform config
+
+  shared_secrets = local.shared_secrets
 }
 
-module "authentik_flungo_net_protection" {
-  source     = "../../modules/branch-protection"
-  repository = module.authentik_flungo_net.name
+# State moves from the previous per-primitive module calls into the composite;
+# removed in a follow-up PR once the migrating apply has run.
+moved {
+  from = module.authentik_flungo_net.github_repository.this
+  to   = module.authentik_flungo_net.module.repository.github_repository.this
 }
 
-module "authentik_flungo_net_secrets" {
-  source     = "../../modules/repository-secrets"
-  repository = module.authentik_flungo_net.name
+moved {
+  from = module.authentik_flungo_net_protection
+  to   = module.authentik_flungo_net.module.branch_protection
+}
 
-  lychee_github_token = var.lychee_github_token
-  terraform           = true # authentik.flungo.net holds Terraform config
-  hcp_token           = var.hcp_token
+moved {
+  from = module.authentik_flungo_net_secrets
+  to   = module.authentik_flungo_net.module.secrets[0]
 }
