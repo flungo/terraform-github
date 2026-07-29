@@ -12,20 +12,3 @@ module "authentik_flungo_net" {
 
   shared_secrets = local.shared_secrets
 }
-
-# State moves from the previous per-primitive module calls into the composite;
-# removed in a follow-up PR once the migrating apply has run.
-moved {
-  from = module.authentik_flungo_net.github_repository.this
-  to   = module.authentik_flungo_net.module.repository.github_repository.this
-}
-
-moved {
-  from = module.authentik_flungo_net_protection
-  to   = module.authentik_flungo_net.module.branch_protection
-}
-
-moved {
-  from = module.authentik_flungo_net_secrets
-  to   = module.authentik_flungo_net.module.secrets[0]
-}

@@ -16,15 +16,3 @@ module "github_workflows" {
 
   shared_secrets = local.shared_secrets
 }
-
-# State moves from the previous per-primitive module calls into the composite;
-# removed in a follow-up PR once the migrating apply has run.
-moved {
-  from = module.github_workflows.github_repository.this
-  to   = module.github_workflows.module.repository.github_repository.this
-}
-
-moved {
-  from = module.github_workflows_protection
-  to   = module.github_workflows.module.branch_protection
-}
