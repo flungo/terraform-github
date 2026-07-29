@@ -38,6 +38,15 @@ variable "required_status_checks" {
   default     = []
 }
 
+variable "release_branches" {
+  description = "Protect the repo's release branches with a second (\"release\") ruleset: pattern is the full ref pattern the branches match, fnmatch as rulesets interpret it (e.g. \"refs/heads/v[0-9]*\"); push_bypass_app_ids are the numeric IDs of the GitHub Apps allowed to push those branches directly (annotate each with the App it names) — the release automation's identity, everyone else lands via a PR. Default null: no release-branch ruleset. See docs/reference/branch-protection.md."
+  type = object({
+    pattern             = string
+    push_bypass_app_ids = list(number)
+  })
+  default = null
+}
+
 variable "terraform" {
   description = "Whether this repository holds Terraform config. When true, the org-wide HCP Terraform token (TF_TOKEN_APP_TERRAFORM_IO) is attached as an Actions secret so the repo can plan/apply in its own CI — the flag's primary effect. Branch protection applies to every repo regardless of this flag."
   type        = bool

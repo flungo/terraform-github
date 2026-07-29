@@ -10,7 +10,7 @@ partial case appears:
 | Primitive | Concern | Catalogue |
 |---|---|---|
 | [`modules/repository`](../../modules/repository) | Repository settings, feature toggles, merge strategy | this page |
-| [`modules/branch-protection`](../../modules/branch-protection) | Default-branch protection ruleset | [`branch-protection.md`](branch-protection.md) |
+| [`modules/branch-protection`](../../modules/branch-protection) | Branch-protection rulesets — the default branch always; release branches where declared | [`branch-protection.md`](branch-protection.md) |
 | [`modules/repository-secrets`](../../modules/repository-secrets) | Shared Actions secrets | [`secrets.md`](secrets.md) |
 
 The composite adds no opinion of its own — the baselines are encoded in the
@@ -51,13 +51,15 @@ The composite's full input surface:
 | `auto_init` | `bool` | `true` | Seed an initial commit so `main` exists at creation. Applies only at creation; later drift is ignored. Set `false` for an empty repo populated by a bulk push. |
 | `strict` | `bool` | `false` | Remove the admin bypass from branch protection so the rules bind everyone. |
 | `required_status_checks` | `list(string)` | `[]` | Check contexts that must pass before merging, as they appear on the repo's PRs. Empty enforces no checks; a context the repo's CI never reports blocks merges behind a perpetual "Expected" entry, so list only contexts that actually run. |
+| `release_branches` | `object` | `null` | Protect release branches with a second, `"release"` ruleset: `pattern` is the full ref pattern (fnmatch, e.g. `"refs/heads/v[0-9]*"`); `push_bypass_app_ids` the numeric IDs of the GitHub Apps allowed to push them directly (the release automation's identity — everyone else lands via a PR; annotate each ID with the App it names). `required_status_checks` is not applied to it — see [ADR-007](../decisions/007-release-branch-protection.md). |
 | `terraform` | `bool` | `false` | The repo holds Terraform config → attach the HCP token secret (`TF_TOKEN_APP_TERRAFORM_IO`). Does **not** currently add a plan-check context to `required_status_checks` — see [ADR-006](../decisions/006-standard-repository-composite.md). |
 | `manage_secrets` | `bool` | `true` | Opt-out of shared-secret management. Set `false` only where Terraform must not manage the repo's secrets — the self-referential case (`terraform-github` itself; see ADR-005's circularity note). |
 | `shared_secrets` | `object` (sensitive) | `null` | The owner's shared secret values (`lychee_github_token`, optional `hcp_token`), composed once at owner level in a `locals` block and passed to every call as `shared_secrets = local.shared_secrets`. Required unless `manage_secrets = false`. |
 
-The branch-protection `pattern` is deliberately not exposed: it stays at the
+The standard ruleset's `pattern` is deliberately not exposed: it stays at the
 primitive's `~DEFAULT_BRANCH` default, so the composite protects the default
-branch without knowing its name.
+branch without knowing its name. Release branches are the exception — their
+pattern is genuinely per-repo, so `release_branches` carries it explicitly.
 
 ## Growing the input surface
 

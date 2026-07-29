@@ -1,9 +1,12 @@
 # Standard branch protection
 
 The [`modules/branch-protection`](../../modules/branch-protection) module protects a
-repository's default branch with a `github_repository_ruleset` (see
+repository branch — by default, the default branch — with a `github_repository_ruleset` (see
 [ADR-004](../decisions/004-branch-protection-rulesets.md) for the ruleset-over-branch-protection
 choice). This page catalogues the rules it encodes and the inputs it exposes.
+A repository can carry several instances (distinct `name`s): the composite adds a
+second, `"release"` ruleset where a repo declares release branches
+([ADR-007](../decisions/007-release-branch-protection.md)).
 
 To change the standard fleet-wide, edit the module in one place — not each owner
 directory — then re-apply each owner to roll the change out.
@@ -25,8 +28,10 @@ The ruleset is `target = "branch"`, `enforcement = "active"`, and applies these 
 | Input | Type | Default | Notes |
 |---|---|---|---|
 | `repository` | `string` | — (required) | Repository name to protect. |
+| `name` | `string` | `"standard"` | The ruleset's name in the repository's rules settings. A second ruleset on the same repository needs a distinct name (the composite's release-branch instance uses `"release"`). |
 | `pattern` | `string` | `"~DEFAULT_BRANCH"` | Ref the ruleset targets; the module protects any branch, so it takes a pattern rather than assuming `main`. |
 | `strict` | `bool` | `false` | When `true`, removes the admin bypass entirely so the rules bind everyone. When `false`, admins keep a deliberate, PR-scoped bypass (override within a pull request); the rules still apply by default and admins cannot push straight to the branch. |
+| `push_bypass_app_ids` | `list(number)` | `[]` | Numeric IDs of GitHub Apps that may push directly to the protected branch — an `"always"` bypass exempting them from every rule. For narrowly-scoped automation identities only (e.g. a release workflow's App); annotate each ID with the App it names. See [Bypass](#bypass). |
 | `required_status_checks` | `list(string)` | `[]` | Check contexts that must pass before merging. Empty enforces none — GitHub has no "require all checks" option, and a context is only selectable once it has run on the protected branch. |
 
 ## Bypass
@@ -37,6 +42,17 @@ merge a pull request that doesn't meet the rules, but the rules still apply by
 default and direct pushes to the branch stay blocked even for admins. The bypass is
 a deliberate action, never automatic. Setting `strict = true` drops the bypass block
 entirely, binding everyone.
+
+Each App in `push_bypass_app_ids` gets an **`always`** bypass
+(`actor_type = "Integration"`), exempting it from every rule in the ruleset —
+direct pushes included. That is the mechanism for release automation (an App whose
+short-lived token a workflow mints in-run, e.g. `flungo-release` fast-forwarding
+`github-workflows`' `v*` branches), so unlike the admin bypass it is **not**
+dropped by `strict`. Apps are referenced by their numeric ID — public,
+safe-to-commit information, annotated with a comment naming the App — because a
+private App cannot be resolved by slug (`GET /apps/{slug}` 404s unless the App is
+public or the caller authenticates as the App itself).
+See [ADR-007](../decisions/007-release-branch-protection.md).
 
 ## Classic-protection guard
 
