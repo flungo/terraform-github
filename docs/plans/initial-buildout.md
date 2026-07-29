@@ -48,7 +48,7 @@ so that a caller states *what* they want, not every attribute.
 
 | Module | Composes | Purpose |
 |---|---|---|
-| `modules/standard-repository` | `repository` + `branch-protection` + `repository-secrets` | The one-call "my standard repo": creates the repo with standard settings, applies standard branch protection, attaches the shared secrets. An owner directory instantiates this once per repository (or over a map of repositories) and gets a fully-standardised repo. Intentional per-repo variation is expressed through **simple module inputs** (e.g. `visibility`, `topics`, and intent flags like `terraform`), scoped as we onboard repositories and discover the variations that actually recur — not by forking the module. |
+| `modules/standard-repository` | `repository` + `branch-protection` + `repository-secrets` | The one-call "my standard repo": creates the repo with standard settings, applies standard branch protection, attaches the shared secrets — sourcing the secret **values** from owner-level variables rather than each caller passing them, so per-repo boilerplate stays minimal (a `manage_secrets`-style opt-out lets a repo skip shared-secret management, e.g. `terraform-github` itself). An owner directory instantiates this once per repository (or over a map of repositories) and gets a fully-standardised repo. Intentional per-repo variation is expressed through **simple module inputs** (e.g. `visibility`, `topics`, and intent flags like `terraform`), scoped as we onboard repositories and discover the variations that actually recur — not by forking the module. |
 
 ### Module inputs & variable naming
 
@@ -525,7 +525,19 @@ Each step is its own PR (own plan, own review gate), in order:
    `terraform = true`, §1). (`modules/org-secrets` is not needed until the first org,
    step 10.)
 6. **`modules/standard-repository` composite** — compose repository + branch
-   protection + secrets; migrate `authentik.flungo.net` to one module call.
+   protection + secrets; migrate `authentik.flungo.net` to one module call. Two
+   requirements settled while piloting `repository-secrets`:
+   - **Source the shared secret values centrally.** The composite pulls the common
+     secret values (`lychee_github_token`, the HCP token) from one owner-level
+     source, so a consumer names the repo and flips flags rather than passing each
+     token per call — this is where the per-consumer boilerplate of calling
+     `repository-secrets` directly goes away.
+   - **Carry a self-secrets opt-out.** `terraform-github`'s own CI-gating tokens
+     stay manually managed for now (see the circularity note in §5); the composite
+     needs a way to opt a repo out of shared-secret management so onboarding
+     `terraform-github` itself (step 8) doesn't try to Terraform-manage the very
+     tokens that gate its own CI. Self-management is a deliberately deferred later
+     step — see [ADR-005](../decisions/005-shared-secrets-module.md).
 7. **CI** — add `terraform.yml` (§6). Prove plan-on-PR / apply-on-merge for the
    single-repo `flungo` workspace.
 8. **Onboard the rest of the initial `flungo` set** — only now, with the pipeline
