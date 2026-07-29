@@ -1,18 +1,27 @@
 # Standard repository settings
 
-The [`modules/repository`](../../modules/repository) module is the standard
-repository for the fleet. It hard-codes the opinionated baseline below so every
-repository is uniform, and exposes only the genuinely per-repo attributes as
-inputs. This page catalogues what the module encodes, what it leaves to the
-caller, and the rule for growing the input surface.
+The [`modules/standard-repository`](../../modules/standard-repository) composite
+is the caller-facing surface for a managed repository: one module call creates
+(or adopts) the repository with the standard settings, protects its default
+branch, and attaches the fleet's shared Actions secrets. It composes three
+primitive modules, each of which stays independently usable where a genuine
+partial case appears:
 
-To change the standard fleet-wide, edit it in one place — the module, not each
-owner directory — then re-apply each owner to roll the change out.
+| Primitive | Concern | Catalogue |
+|---|---|---|
+| [`modules/repository`](../../modules/repository) | Repository settings, feature toggles, merge strategy | this page |
+| [`modules/branch-protection`](../../modules/branch-protection) | Default-branch protection ruleset | [`branch-protection.md`](branch-protection.md) |
+| [`modules/repository-secrets`](../../modules/repository-secrets) | Shared Actions secrets | [`secrets.md`](secrets.md) |
+
+The composite adds no opinion of its own — the baselines are encoded in the
+primitives. To change the standard fleet-wide, edit it in one place — the
+relevant module, not each owner directory — then re-apply each owner to roll the
+change out.
 
 ## Encoded baseline (not configurable)
 
-These are set in the module and are the same for every repository. Changing one
-here rolls it out to all repositories on the next apply.
+These are set in `modules/repository` and are the same for every repository.
+Changing one here rolls it out to all repositories on the next apply.
 
 | Setting | Value | Why |
 |---|---|---|
@@ -25,15 +34,30 @@ here rolls it out to all repositories on the next apply.
 | `allow_rebase_merge` | `true` | Rebase for several distinct changes worth preserving. |
 | `delete_branch_on_merge` | `true` | Keeps the branch list tidy after merge. |
 
+Branch protection likewise applies its encoded defaults to every repo (require a
+pull request, conversation resolution, linear history, block deletion; admin
+bypass unless `strict`) — see [`branch-protection.md`](branch-protection.md).
+
 ## Per-repo inputs (configurable)
+
+The composite's full input surface:
 
 | Input | Type | Default | Notes |
 |---|---|---|---|
 | `name` | `string` | — (required) | The repository name. |
 | `description` | `string` | — (required) | One-line description. |
 | `visibility` | `string` | `"private"` | `"public"` only where the repo must be readable/callable by others (e.g. hosting reusable workflows). |
-| `topics` | `list(string)` | `[]` | Repository topics. |
-| `auto_init` | `bool` | `true` | Seed an initial commit so `main` exists at creation. Applies only at creation; the module ignores later drift on it. Set `false` for an empty repo populated by a bulk push. |
+| `topics` | `list(string)` | `[]` | Repository topics — prefer the [topics glossary](topics.md). |
+| `auto_init` | `bool` | `true` | Seed an initial commit so `main` exists at creation. Applies only at creation; later drift is ignored. Set `false` for an empty repo populated by a bulk push. |
+| `strict` | `bool` | `false` | Remove the admin bypass from branch protection so the rules bind everyone. |
+| `required_status_checks` | `list(string)` | `[]` | Check contexts that must pass before merging, as they appear on the repo's PRs. Empty enforces no checks; a context the repo's CI never reports blocks merges behind a perpetual "Expected" entry, so list only contexts that actually run. |
+| `terraform` | `bool` | `false` | The repo holds Terraform config → attach the HCP token secret (`TF_TOKEN_APP_TERRAFORM_IO`). Does **not** currently add a plan-check context to `required_status_checks` — see [ADR-006](../decisions/006-standard-repository-composite.md). |
+| `manage_secrets` | `bool` | `true` | Opt-out of shared-secret management. Set `false` only where Terraform must not manage the repo's secrets — the self-referential case (`terraform-github` itself; see ADR-005's circularity note). |
+| `shared_secrets` | `object` (sensitive) | `null` | The owner's shared secret values (`lychee_github_token`, optional `hcp_token`), composed once at owner level in a `locals` block and passed to every call as `shared_secrets = local.shared_secrets`. Required unless `manage_secrets = false`. |
+
+The branch-protection `pattern` is deliberately not exposed: it stays at the
+primitive's `~DEFAULT_BRANCH` default, so the composite protects the default
+branch without knowing its name.
 
 ## Growing the input surface
 
@@ -43,7 +67,9 @@ supported by adding an input **only when the user has explicitly confirmed** the
 deviation must be supported (see [Terraform conventions](terraform-conventions.md)). When an
 input maps to a GitHub provider argument it takes the provider's own name (e.g.
 `visibility`); otherwise it is named for the *intent* so one flag can drive
-several decisions.
+several decisions. An input added to a primitive is invisible to composite
+callers until the composite re-exposes it — add it in both places in the same
+change.
 
 > **🤖 Agent** — When a repository's live setting differs from the encoded
 > baseline, propose bringing it to the standard and ask the user to confirm per

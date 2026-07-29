@@ -10,6 +10,10 @@ checks — with a deliberate admin bypass (an override *within a pull request*, 
 direct-push exemption) unless `strict` is set. The full catalogue of defaults and inputs is
 in [`docs/reference/branch-protection.md`](../../docs/reference/branch-protection.md).
 
+> Owner directories normally consume this via the
+> [`standard-repository`](../standard-repository) composite rather than calling it
+> directly; call it directly only for a genuine partial case.
+
 The module also **guards against classic branch protection**: it reads the
 repository's classic rules and fails the plan if any exist, so a legacy rule can't
 silently double-enforce alongside the ruleset. The guard is read-only — Terraform

@@ -4,18 +4,19 @@ Terraform configuration for managing GitHub resources across the personal accoun
 
 The repository is named for the **provider**, not its initial use case: scope is expected to grow to the full GitHub-manageable surface without a rename. See [ADR-001](docs/decisions/001-dedicated-terraform-github-repo.md) for the founding rationale.
 
-> **Status: build-out under way.** The first owner directory (`owners/flungo/`), the plan-on-PR / apply-on-merge CI workflow, and the standard repository module (`modules/repository`) have landed; the `flungo` account's repositories are managed through the module. The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md).
+> **Status: build-out under way.** The first owner directory (`owners/flungo/`), the plan-on-PR / apply-on-merge CI workflow, the primitive modules (`repository`, `branch-protection`, `repository-secrets`), and the `standard-repository` composite have landed; each of the `flungo` account's managed repositories is a single composite call. The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md).
 
 ## What this manages
 
 Terraform manages these GitHub resources for the `flungo` account (in `owners/flungo/`); apply runs on merge to `main` via CI.
 
-- **Repositories** — each managed through the shared standard repository module (`modules/repository`), which applies the standard settings, merge strategy, and feature toggles. Under management:
+- **Repositories** — each managed through the standard-repository composite (`modules/standard-repository`), one module call that applies the standard settings via the primitives below. Under management:
   - `authentik.flungo.net` — adopted (imported) from the pre-existing repo
   - `github-workflows` — created by this config to host the fleet's shared reusable workflows and CI standards
   - `claude-plugins` — created by this config; the personal Claude Code / claude.ai plugin marketplace
-- **Branch protection** — each managed repo's default branch is protected via the shared branch-protection module (`modules/branch-protection`, a repository ruleset): require a pull request, conversation resolution, and linear history. Piloted on `authentik.flungo.net`.
-- **Shared secrets** — the fleet's common Actions secrets are attached to each managed repo via the shared secrets module (`modules/repository-secrets`): `LYCHEE_GITHUB_TOKEN` on every repo, plus the HCP token (`TF_TOKEN_APP_TERRAFORM_IO`) where the repo holds Terraform config. Piloted on `authentik.flungo.net`.
+- **Repository settings** — the standard settings, merge strategy, and feature toggles (`modules/repository`).
+- **Branch protection** — each managed repo's default branch is protected via `modules/branch-protection` (a repository ruleset): require a pull request, conversation resolution, and linear history.
+- **Shared secrets** — the fleet's common Actions secrets are attached to each managed repo via `modules/repository-secrets`: `LYCHEE_GITHUB_TOKEN` on every repo, plus the HCP token (`TF_TOKEN_APP_TERRAFORM_IO`) where the repo holds Terraform config.
 - **Growth** — webhooks, teams and membership, org-level shared secrets, and other `integrations/github` resources
 
 ## Structure
@@ -34,7 +35,7 @@ docs/
   reference/        # Information-oriented lookup docs (standard settings, secret catalogue)
 ```
 
-See the [decision records](docs/decisions/) for the directory-per-owner layout (ADR-001), the workspace-per-owner topology (ADR-002), and the standard repository module (ADR-003); the module's settings are catalogued in [`docs/reference/standard-repository.md`](docs/reference/standard-repository.md).
+See the [decision records](docs/decisions/) for the directory-per-owner layout (ADR-001), the workspace-per-owner topology (ADR-002), the standard repository module (ADR-003), and the standard-repository composite (ADR-006); the standard's settings are catalogued in [`docs/reference/standard-repository.md`](docs/reference/standard-repository.md).
 
 ## Backend & CI
 

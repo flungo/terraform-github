@@ -8,6 +8,10 @@ are inputs. Change the standard once here and re-apply each owner to roll it out
 The encoded baseline and the rule for growing the input surface are catalogued in
 [`docs/reference/standard-repository.md`](../../docs/reference/standard-repository.md).
 
+> Owner directories normally consume this via the
+> [`standard-repository`](../standard-repository) composite rather than calling it
+> directly; call it directly only for a genuine partial case.
+
 ## Usage
 
 ```hcl

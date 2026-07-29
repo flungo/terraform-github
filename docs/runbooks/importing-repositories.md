@@ -2,7 +2,7 @@
 
 Bring a repository that already exists on GitHub under Terraform management, with the divergence from the live repo reviewed on the PR **before** anything is applied.
 
-Repositories are managed through the shared standard repository module ([`modules/repository`](../../modules/repository)); an adoption pairs a module call with an `import {}` block that targets the module's internal resource.
+Repositories are managed through the standard-repository composite ([`modules/standard-repository`](../../modules/standard-repository)); an adoption pairs a module call with an `import {}` block that targets the composite's internal repository resource. Only the repository itself is imported — the branch-protection ruleset and shared secrets are **created** by the same apply (they are additions, not adoptions; a pre-existing *classic* protection rule fails the plan via the guard — see [`migrating-classic-protection-to-ruleset.md`](migrating-classic-protection-to-ruleset.md)).
 
 ## Prerequisites
 
@@ -15,21 +15,26 @@ Repositories are managed through the shared standard repository module ([`module
 
    ```hcl
    import {
-     to = module.<name>.github_repository.this
+     to = module.<name>.module.repository.github_repository.this
      id = "<repo-name>" # import ID is the repo name; owner comes from the provider
    }
 
    module "<name>" {
-     source = "../../modules/repository"
+     source = "../../modules/standard-repository"
 
      name        = "<repo-name>"
      description = "<live description>"
      visibility  = "<public|private>" # match the live repo
-     # topics, auto_init as needed; the module supplies the standard toggles and merge strategy
+     # topics as needed; the module supplies the standard toggles and merge strategy
+     # terraform = true for a repo holding Terraform config
+     # manage_secrets = false ONLY for the self-referential case (terraform-github
+     # itself — its CI-gating tokens stay manually managed; ADR-005)
+
+     shared_secrets = local.shared_secrets
    }
    ```
 
-2. **Let CI post the plan.** The `Terraform` workflow runs `terraform plan` against the live repo and posts it as a PR comment — showing the adoption plus every attribute where the config (module baseline + inputs) diverges from the live repository.
+2. **Let CI post the plan.** The `Terraform` workflow runs `terraform plan` against the live repo and posts it as a PR comment — showing the adoption plus every attribute where the config (module baseline + inputs) diverges from the live repository, and the composite's additions (the protection ruleset and shared secret(s)).
 
 3. **Iterate to a clean import.** Adjust the inputs from the posted plan until the only remaining changes are *intended* ones. Match identity attributes (`visibility`, `description`, `topics`) to the **live** values. Where the live repo deviates from the module's encoded baseline (e.g. Projects enabled), decide per repo: **standardise** it (accept the module baseline — the plan will show that change) or **preserve** the deviation (which requires adding a module input, on the user's explicit confirmation; see [`../reference/standard-repository.md`](../reference/standard-repository.md)). The target is **no unexpected difference** — the adoption itself plus only the changes you meant to make.
 

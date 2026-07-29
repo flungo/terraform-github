@@ -8,6 +8,10 @@ when the first organisation is onboarded — the two are not symmetric (a person
 account has no org-level secret), which is why shared secrets are their own
 module rather than folded into `repository`.
 
+> Owner directories normally consume this via the
+> [`standard-repository`](../standard-repository) composite rather than calling it
+> directly; call it directly only for a genuine partial case.
+
 The common set today:
 
 - **`LYCHEE_GITHUB_TOKEN`** — attached to **every** managed repository; the token

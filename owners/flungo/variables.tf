@@ -15,3 +15,15 @@ variable "hcp_token" {
   type        = string
   sensitive   = true
 }
+
+# The owner's shared secret values, composed once and passed to every
+# standard-repository call as `shared_secrets = local.shared_secrets` — repo
+# files never wire individual secret values. A new shared secret is a new
+# variable above, a new key here, and a new input on the modules; the repo files
+# don't change.
+locals {
+  shared_secrets = {
+    lychee_github_token = var.lychee_github_token
+    hcp_token           = var.hcp_token
+  }
+}

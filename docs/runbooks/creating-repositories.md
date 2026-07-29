@@ -2,7 +2,7 @@
 
 Bring a **new** repository into existence by declaring it in Terraform — the apply creates it. Contrast [`importing-repositories.md`](importing-repositories.md), which *adopts* a repository that already exists on GitHub. A create needs **no `import {}` block**: there is no live repository to reconcile against, so the module call is written directly and the plan is a pure addition.
 
-Repositories are managed through the shared standard repository module ([`modules/repository`](../../modules/repository)); a create is a new call to it. The module supplies the standard feature toggles and merge strategy — you provide only the per-repo inputs.
+Repositories are managed through the standard-repository composite ([`modules/standard-repository`](../../modules/standard-repository)); a create is a new call to it. The module supplies the standard feature toggles and merge strategy, protects the default branch, and attaches the shared Actions secrets — you provide only the per-repo inputs.
 
 ## Questions to answer first
 
@@ -16,7 +16,9 @@ Settle these before writing the module call — most map straight onto a module 
 4. **Description** — the one-line repository description.
 5. **Topics** — any topics to set (optional; safe to include). Prefer topics from the [topics glossary](../reference/topics.md) so they stay consistent across the fleet.
 6. **Initialise now?** — `auto_init` (default `true`) seeds an initial commit with a placeholder `README.md` (the repo name and description) so a default branch (`main`) exists up front — suits populating via the usual branch + PR flow. Set it `false` for an empty repo whose first bulk push establishes `main`.
-7. **Standard deviations** — the module encodes the baseline (issues on; wiki/projects/downloads off; merge commits off, squash + rebase on, delete-branch-on-merge on). You do **not** set these per repo. If the repo genuinely needs to deviate, that requires adding a module input and the human's explicit confirmation that the deviation must be supported (see [`../reference/standard-repository.md`](../reference/standard-repository.md)).
+7. **Terraform repo?** — `terraform = true` marks a repo that holds Terraform config, which attaches the HCP token secret so it can plan/apply in its own CI (the value comes from the owner-level `shared_secrets`).
+8. **Required status checks** — check contexts that must pass before merging, if the repo's CI is already known (they can be added later once the checks run; a context that never runs blocks merges behind a perpetual "Expected" entry).
+9. **Standard deviations** — the module encodes the baseline (issues on; wiki/projects/downloads off; merge commits off, squash + rebase on, delete-branch-on-merge on; the standard protection rules). You do **not** set these per repo. If the repo genuinely needs to deviate, that requires adding a module input and the human's explicit confirmation that the deviation must be supported (see [`../reference/standard-repository.md`](../reference/standard-repository.md)).
 
 ## Prerequisites
 
@@ -29,7 +31,7 @@ Settle these before writing the module call — most map straight onto a module 
 
    ```hcl
    module "<name>" {
-     source = "../../modules/repository"
+     source = "../../modules/standard-repository"
 
      name        = "<repo-name>"
      description = "<one-line description>"
@@ -37,10 +39,13 @@ Settle these before writing the module call — most map straight onto a module 
 
      visibility = "<public|private>"
      # auto_init defaults to true (seeds main); add auto_init = false for an empty repo
+     # terraform = true for a repo holding Terraform config
+
+     shared_secrets = local.shared_secrets
    }
    ```
 
-2. **Let CI post the plan.** The `Terraform` workflow runs `terraform plan` and posts it as a PR comment. Confirm it reads **`1 to add, 0 to change, 0 to destroy`** and that the only resource is `module.<name>.github_repository.this` — a create must not change or destroy anything else. Check the attributes (`visibility`, `auto_init`, feature toggles, topics) match the answers.
+2. **Let CI post the plan.** The `Terraform` workflow runs `terraform plan` and posts it as a PR comment. Confirm the additions are exactly the composite's resources for this repo — `module.<name>.module.repository.github_repository.this`, the `module.<name>.module.branch_protection` ruleset, and the `module.<name>.module.secrets` secret(s) (`LYCHEE_GITHUB_TOKEN`, plus the HCP token when `terraform = true`) — with **`0 to change, 0 to destroy`**; a create must not touch anything else. Check the attributes (`visibility`, `auto_init`, feature toggles, topics) match the answers.
 
 3. **Merge → apply.** Merging runs `terraform apply`, which creates the repository. There is no import block to remove afterwards.
 
