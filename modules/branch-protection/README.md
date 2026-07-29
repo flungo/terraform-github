@@ -5,9 +5,10 @@ Standard branch protection for a repository's default branch, implemented as a
 for why a ruleset over the older `github_branch_protection`).
 
 It applies the fleet's default rules — require a pull request, require conversation
-resolution, require linear history, restrict deletion, and require any named status
-checks — with a deliberate admin bypass (an override *within a pull request*, not a
-direct-push exemption) unless `strict` is set. The full catalogue of defaults and inputs is
+resolution, require linear history, block force-pushes, restrict deletion, and require
+any named status checks — with a deliberate admin bypass (an override *within a pull
+request*, not a direct-push exemption) unless `strict` is set. The full catalogue of
+defaults and inputs is
 in [`docs/reference/branch-protection.md`](../../docs/reference/branch-protection.md).
 
 > Owner directories normally consume this via the

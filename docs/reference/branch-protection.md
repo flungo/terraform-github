@@ -17,6 +17,7 @@ The ruleset is `target = "branch"`, `enforcement = "active"`, and applies these 
 | Pull request required | yes, `required_approving_review_count = 0` | Changes go through a PR, but no approval is required — the owner works solo, so requiring one would block their own PRs. |
 | Conversation resolution | `required_review_thread_resolution = true` | Review threads must be resolved before merge. |
 | Linear history | `required_linear_history = true` | No merge commits. |
+| Block force-pushes | `non_fast_forward = true` | Redundant while a pull request is required — that already blocks every direct push — but encoded so the guarantee is explicit and survives any future relaxation of the PR rule. |
 | Restrict deletion | `deletion = true` | A protected branch must not be deletable (only bypass actors may). GitHub blocks deleting the default branch anyway, but the module protects any branch, so this doesn't rely on that. |
 
 ## Per-repo inputs (configurable)
