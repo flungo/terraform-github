@@ -5,7 +5,7 @@
 # status checks. Repository admins may bypass unless var.strict is set. The
 # catalogue of defaults and inputs lives in docs/reference/branch-protection.md.
 resource "github_repository_ruleset" "this" {
-  name        = "standard"
+  name        = var.name
   repository  = var.repository
   target      = "branch"
   enforcement = "active"
@@ -31,6 +31,21 @@ resource "github_repository_ruleset" "this" {
     }
   }
 
+  # Automation identities (GitHub Apps) that may push directly to the branch.
+  # bypass_mode "always" exempts them from every rule in this ruleset, so the
+  # input is reserved for narrowly-scoped workflow Apps — the first case is a
+  # release workflow's App fast-forwarding a release branch (see ADR-007).
+  # Unlike the admin bypass above, this one is not dropped by var.strict: it is
+  # the mechanism the ruleset exists to encode, not an escape hatch.
+  dynamic "bypass_actors" {
+    for_each = toset(var.push_bypass_app_ids)
+    content {
+      actor_id    = bypass_actors.value
+      actor_type  = "Integration"
+      bypass_mode = "always"
+    }
+  }
+
   rules {
     # Restrict deletion — a protected branch must not be deletable (only actors with
     # bypass may delete it). GitHub already refuses to delete the *default* branch,
@@ -43,7 +58,8 @@ resource "github_repository_ruleset" "this" {
 
     # Block force-pushes. Redundant while a pull request is required — that
     # already blocks every direct push — but encoded so the guarantee is
-    # explicit and survives any future relaxation of the PR rule.
+    # explicit and survives any future relaxation of the PR rule. Bypass
+    # actors are exempt from every rule in the ruleset, this one included.
     non_fast_forward = true
 
     # Require a pull request before merging; no required approvals (the owner works

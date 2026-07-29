@@ -18,3 +18,23 @@ module "branch_protection" {
   strict                 = var.strict
   required_status_checks = var.required_status_checks
 }
+
+# Release-branch protection — a second ruleset, created only where the repo
+# declares release branches. Same standard rules as the default branch, plus
+# an "always" bypass for the release automation's GitHub App(s): the branches
+# move only by that automation's push (a release workflow's fast-forward) or a
+# merged PR — never a direct human/agent push. Required status checks are not
+# passed: the caller's contexts are chosen for PRs into the default branch,
+# and a context that never runs on a PR into a release branch would block its
+# merges behind a perpetual "Expected" entry. First case: github-workflows'
+# moving-major v* branches. See docs/decisions/007-release-branch-protection.md.
+module "release_branch_protection" {
+  count  = var.release_branches == null ? 0 : 1
+  source = "../branch-protection"
+
+  repository          = module.repository.name
+  name                = "release"
+  pattern             = var.release_branches.pattern
+  strict              = var.strict
+  push_bypass_app_ids = var.release_branches.push_bypass_app_ids
+}

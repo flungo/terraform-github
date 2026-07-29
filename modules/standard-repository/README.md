@@ -4,8 +4,9 @@ The caller-facing composite for the `terraform-github` fleet — the one-call "m
 standard repo" (see
 [ADR-006](../../docs/decisions/006-standard-repository-composite.md)). One call
 per managed repository composes the three primitives: [`repository`](../repository)
-(baseline settings), [`branch-protection`](../branch-protection) (default-branch
-ruleset), and [`repository-secrets`](../repository-secrets) (shared Actions
+(baseline settings), [`branch-protection`](../branch-protection) (branch-protection
+rulesets — the default branch always, release branches where declared), and
+[`repository-secrets`](../repository-secrets) (shared Actions
 secrets). The composite wires them together and adds no opinion of its own — the
 baselines stay encoded in the primitives; the full catalogue is in
 [`docs/reference/standard-repository.md`](../../docs/reference/standard-repository.md).
@@ -50,6 +51,7 @@ the protection ruleset and secrets are created (not imported) by the same apply.
 | `auto_init` | `bool` | `true` | Seed an initial commit so `main` exists at creation (creation-time only; later drift ignored). |
 | `strict` | `bool` | `false` | Remove the branch-protection admin bypass so the rules bind everyone. |
 | `required_status_checks` | `list(string)` | `[]` | Check contexts that must pass before merging, as reported on the repo's PRs. Empty enforces no checks; a context that never runs blocks merges behind a perpetual "Expected" entry. |
+| `release_branches` | `object` | `null` | Protect release branches with a second, `"release"` ruleset: `{ pattern, push_bypass_app_ids }` — the ref pattern the branches match (e.g. `"refs/heads/v[0-9]*"`) and the numeric IDs of the GitHub Apps allowed to push them directly. See [ADR-007](../../docs/decisions/007-release-branch-protection.md). |
 | `terraform` | `bool` | `false` | The repo holds Terraform config → attach the HCP token secret. Does **not** (yet) add a plan-check context — see [ADR-006](../../docs/decisions/006-standard-repository-composite.md). |
 | `manage_secrets` | `bool` | `true` | Opt-out of shared-secret management; `false` only for the self-referential case (`terraform-github` itself — see [ADR-005](../../docs/decisions/005-shared-secrets-module.md)). |
 | `shared_secrets` | `object` (sensitive) | `null` | The owner-level secret values (`lychee_github_token`, optional `hcp_token`). Required unless `manage_secrets = false`. |
