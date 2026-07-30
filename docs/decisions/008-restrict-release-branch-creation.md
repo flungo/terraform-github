@@ -81,10 +81,35 @@ actors, which would block backport and revert PRs from merging into
   major outside `release.yml`, or restoring a deleted one, requires
   temporarily relaxing the ruleset. Accepted: the same deliberate,
   visible act is already required to force-push or delete one.
-- **Unverified assumption:** that GitHub's fnmatch honours `[0-9]` as a
-  character class. It is standard fnmatch and documented as fnmatch, but
-  it was not confirmed against the live API, and no bypassed push proves
-  it (the App bypasses the ruleset either way). If character classes were
-  *not* supported, the pattern would match nothing and the release
-  branches would be unprotected. A single attempted direct push to `v1`
-  by a non-bypass user settles it.
+
+## Verification
+
+Both halves of this decision were confirmed against the live repository
+on 2026-07-30, after the apply.
+
+The Decision above rests on GitHub's fnmatch honouring `[0-9]` as a
+character class. That was an **assumption** when this ADR was written:
+it is standard fnmatch and documented as fnmatch, but it had not been
+confirmed against the API, and no successful release push could confirm
+it — the App bypasses the ruleset either way. Had character classes not
+been supported, `refs/heads/v[0-9]*` would have matched nothing and the
+release branches would have been unprotected while appearing protected.
+
+Pushing an existing commit to `refs/heads/v0` — inside the pattern but
+outside the release line, so a *success* would have been harmless and
+easily undone — was rejected:
+
+```text
+remote: error: GH013: Repository rule violations found for refs/heads/v0.
+remote: - Cannot create ref due to creations being restricted.
+```
+
+So the pattern does match real refs, and the creation restriction does
+bind a non-bypass identity. The rejection also demonstrates the
+trade-off recorded above: it names the rule, not the reason.
+
+This exercises `creation` on a ref that does not yet exist. The
+force-push and deletion rules on a *live* release branch were not
+separately tested, since doing so would risk the branches consumers pin.
+The push path is covered instead by the release App's fast-forwards
+through the applied ruleset (github-workflows#20 and #21).
