@@ -83,6 +83,8 @@ one and commit to it.
   contexts you name** (see `required_status_checks` below)
 - Require conversation resolution before merging
 - Require linear history
+- Block force-pushes
+- Restrict deletion of the protected branch
 
 **Inputs:**
 
@@ -91,10 +93,12 @@ one and commit to it.
   pattern rather than assuming `main`. The `standard-repository` composite defaults
   this to the **repo's default branch**, so a caller normally never sets it — but
   the primitive itself does not hard-code `main`.
-- **`strict`** (bool, default `false`) — when `true`, **do not allow bypassing**
-  the above (no bypass actors / no admin override). Left `false` by default so the
-  owner can still act directly during bootstrap and incident response; flip to
-  `true` on repos that should be strictly enforced.
+- **`strict`** (bool, default `false`) — when `true`, drop the **admin** bypass so
+  the rules bind every human. Left `false` by default so the owner can still act
+  directly during bootstrap and incident response; flip to `true` on repos that
+  should be strictly enforced. Note it does *not* drop a release automation's App
+  push bypass, which survives `strict` deliberately — see
+  [ADR-007](../decisions/007-release-branch-protection.md).
 - **`required_status_checks`** (list(string), default `[]`) — the check contexts
   that must pass. **Important GitHub semantics:** an empty list enforces *nothing*
   — there is no "require all checks" option, and a check context is only selectable
@@ -166,9 +170,15 @@ variation. **This is a proposal — review / adjust; open questions are flagged 
 |---|---|---|---|
 | `repository` | string | — (required) | target repo |
 | `pattern` | string | — (required) | protected branch/glob — matches the provider's `pattern` field (the module protects *any* branch; the composite defaults it to the repo's default branch) |
-| `strict` | bool | `false` | forbid bypass (no bypass actors / no admin override) |
+| `strict` | bool | `false` | drop the admin bypass so the rules bind every human (an App push bypass survives it — [ADR-007](../decisions/007-release-branch-protection.md)) |
 | `required_status_checks` | list(string) | `[]` | check contexts that must pass. **Empty ⇒ enforces nothing** (GitHub has no "require all"; a context is selectable only after it has run on the protected branch) |
-| _(baked defaults)_ | — | — | require PR · conversation resolution · linear history · require-status-checks (teeth only via `required_status_checks`) |
+| _(baked defaults)_ | — | — | require PR · conversation resolution · linear history · block force-pushes · restrict deletion · require-status-checks (teeth only via `required_status_checks`) |
+
+> This table is the module **as scoped at step 4**. It has since grown a `name`
+> input and release-branch support ([ADR-007](../decisions/007-release-branch-protection.md));
+> the current surface is catalogued in
+> [`docs/reference/branch-protection.md`](../reference/branch-protection.md), which
+> is canonical.
 
 **`modules/repository-secrets` (per-repo) · `modules/org-secrets` (org-level)**
 
