@@ -1,9 +1,10 @@
 # Standard branch protection, implemented as a repository ruleset (the modern,
 # more expressive resource — see docs/decisions/004-branch-protection-rulesets.md).
 # Default rules: require a pull request, require conversation resolution, require
-# linear history, block force-pushes, restrict deletion, and require any named
-# status checks. Repository admins may bypass unless var.strict is set. The
-# catalogue of defaults and inputs lives in docs/reference/branch-protection.md.
+# linear history, block force-pushes, restrict deletion, optionally restrict
+# creation (var.restrict_creation), and require any named status checks.
+# Repository admins may bypass unless var.strict is set. The catalogue of
+# defaults and inputs lives in docs/reference/branch-protection.md.
 resource "github_repository_ruleset" "this" {
   name        = var.name
   repository  = var.repository
@@ -47,8 +48,15 @@ resource "github_repository_ruleset" "this" {
   }
 
   rules {
+    # Restrict creation — only *always*-bypass actors may create a matching ref;
+    # the PR-scoped admin bypass no more covers creation than it covers deletion.
+    # Off by default (meaningless for an existing default branch); on where refs are
+    # made by automation, so a mistyped or stray branch is rejected outright
+    # rather than created and then held permanently by the deletion rule below.
+    creation = var.restrict_creation
+
     # Restrict deletion — a protected branch must not be deletable (only actors with
-    # bypass may delete it). GitHub already refuses to delete the *default* branch,
+    # an *always* bypass may). GitHub already refuses to delete the *default* branch,
     # but this module protects any branch by pattern, so encode it rather than lean
     # on that incidental protection.
     deletion = true

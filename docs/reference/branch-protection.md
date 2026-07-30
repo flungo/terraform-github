@@ -21,7 +21,11 @@ The ruleset is `target = "branch"`, `enforcement = "active"`, and applies these 
 | Conversation resolution | `required_review_thread_resolution = true` | Review threads must be resolved before merge. |
 | Linear history | `required_linear_history = true` | No merge commits. |
 | Block force-pushes | `non_fast_forward = true` | Redundant while a pull request is required — that already blocks every direct push — but encoded so the guarantee is explicit and survives any future relaxation of the PR rule. |
-| Restrict deletion | `deletion = true` | A protected branch must not be deletable (only bypass actors may). GitHub blocks deleting the default branch anyway, but the module protects any branch, so this doesn't rely on that. |
+| Restrict deletion | `deletion = true` | A protected branch must not be deletable (only `always`-bypass actors may). GitHub blocks deleting the default branch anyway, but the module protects any branch, so this doesn't rely on that. |
+
+One further rule is **switchable** rather than encoded: `creation` — restricting
+who may create a matching ref — is off by default and driven by the
+`restrict_creation` input below.
 
 ## Per-repo inputs (configurable)
 
@@ -29,10 +33,30 @@ The ruleset is `target = "branch"`, `enforcement = "active"`, and applies these 
 |---|---|---|---|
 | `repository` | `string` | — (required) | Repository name to protect. |
 | `name` | `string` | `"standard"` | The ruleset's name in the repository's rules settings. A second ruleset on the same repository needs a distinct name (the composite's release-branch instance uses `"release"`). |
-| `pattern` | `string` | `"~DEFAULT_BRANCH"` | Ref the ruleset targets; the module protects any branch, so it takes a pattern rather than assuming `main`. |
+| `pattern` | `string` | `"~DEFAULT_BRANCH"` | Ref the ruleset targets; the module protects any branch, so it takes a pattern rather than assuming `main`. **fnmatch, not regex** — see [Pattern syntax](#pattern-syntax). |
+| `restrict_creation` | `bool` | `false` | Only `always`-bypass actors may create matching refs — the PR-scoped admin bypass does not cover creation, so admins cannot either. For refs created by automation; no effect on a branch that already exists, and what makes a deliberately broad `pattern` safe. See [ADR-008](../decisions/008-restrict-release-branch-creation.md). |
 | `strict` | `bool` | `false` | When `true`, removes the admin bypass entirely so the rules bind everyone. When `false`, admins keep a deliberate, PR-scoped bypass (override within a pull request); the rules still apply by default and admins cannot push straight to the branch. |
 | `push_bypass_app_ids` | `list(number)` | `[]` | Numeric IDs of GitHub Apps that may push directly to the protected branch — an `"always"` bypass exempting them from every rule. For narrowly-scoped automation identities only (e.g. a release workflow's App); annotate each ID with the App it names. See [Bypass](#bypass). |
 | `required_status_checks` | `list(string)` | `[]` | Check contexts that must pass before merging. Empty enforces none — GitHub has no "require all checks" option, and a context is only selectable once it has run on the protected branch. |
+
+## Pattern syntax
+
+Ruleset ref targeting is **fnmatch**, not regex. There is no anchoring and no `+`
+quantifier: `[0-9]` matches exactly one digit and `*` then matches *any* remaining
+characters. So `refs/heads/v[0-9]*` does **not** mean "v followed by digits" — it
+also matches `v1x`, `v2-test` and `v9-scratch`.
+
+That matters more than it looks: `deletion` is blocked for everything a pattern
+matches, and the admin bypass is pull-request-scoped and does not cover deletion,
+so an over-reaching pattern could leave a stray branch that **no human can delete**.
+
+The fix is `restrict_creation`, **not** a narrower pattern. Restricting creation
+means nobody can make the extra refs an over-reaching glob covers, so the
+over-reach costs nothing — while narrowing invites the opposite and worse failure:
+an enumerated pattern (`v[0-9]`, `v[0-9][0-9]`) silently misses `v100`, leaving a
+real release branch unprotected with nothing to surface it. Prefer a glob that
+cannot under-reach, and pair it with `restrict_creation`. See
+[ADR-008](../decisions/008-restrict-release-branch-creation.md).
 
 ## Bypass
 

@@ -39,7 +39,7 @@ variable "required_status_checks" {
 }
 
 variable "release_branches" {
-  description = "Protect the repo's release branches with a second (\"release\") ruleset: pattern is the full ref pattern the branches match, fnmatch as rulesets interpret it (e.g. \"refs/heads/v[0-9]*\"); push_bypass_app_ids are the numeric IDs of the GitHub Apps allowed to push those branches directly (annotate each with the App it names) — the release automation's identity, everyone else lands via a PR. Default null: no release-branch ruleset. See docs/reference/branch-protection.md."
+  description = "Protect the repo's release branches with a second (\"release\") ruleset: pattern is the full ref pattern the branches match, **fnmatch** as rulesets interpret it (e.g. \"refs/heads/v[0-9]*\") — prefer a glob that cannot under-reach, since the ruleset also restricts creation to the same Apps, so nobody can create the extra refs it over-reaches onto. push_bypass_app_ids are the numeric IDs of the GitHub Apps allowed to push and create those branches (annotate each with the App it names) — the release automation's identity, everyone else lands via a PR. Default null: no release-branch ruleset. See docs/reference/branch-protection.md."
   type = object({
     pattern             = string
     push_bypass_app_ids = list(number)
