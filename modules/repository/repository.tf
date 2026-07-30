@@ -28,6 +28,18 @@ resource "github_repository" "this" {
   allow_rebase_merge     = true
   delete_branch_on_merge = true
 
+  # Squash commit message: take the subject from the pull request title and the
+  # body from its description. With Conventional Commits enforced on PR titles,
+  # the PR title *is* the commit subject, so the provider's defaults
+  # (COMMIT_OR_PR_TITLE / COMMIT_MESSAGES) would splice the branch's working
+  # commit messages into main's history instead.
+  squash_merge_commit_title   = "PR_TITLE"
+  squash_merge_commit_message = "PR_BODY"
+
+  # Off: branches are brought up to date by rebasing, which keeps the linear
+  # history the ruleset requires.
+  allow_update_branch = false
+
   # auto_init only takes effect when the repository is created; ignore later drift
   # so an already-created repo never shows a spurious diff for it.
   lifecycle {
