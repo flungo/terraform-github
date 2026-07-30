@@ -3,11 +3,6 @@
 # standard-repository composite: standard repository settings, default-branch
 # protection, and the shared Actions secrets.
 
-import {
-  to = module.stalwart_flungo_net.module.repository.github_repository.this
-  id = "stalwart.flungo.net" # import ID is the repo name; owner comes from the provider
-}
-
 module "stalwart_flungo_net" {
   source = "../../modules/standard-repository"
 

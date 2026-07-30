@@ -4,11 +4,6 @@
 # repository settings, default-branch protection, and the shared Actions
 # secrets.
 
-import {
-  to = module.terraform_provider_stalwart.module.repository.github_repository.this
-  id = "terraform-provider-stalwart" # import ID is the repo name; owner comes from the provider
-}
-
 module "terraform_provider_stalwart" {
   source = "../../modules/standard-repository"
 

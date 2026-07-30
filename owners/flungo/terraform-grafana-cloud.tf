@@ -4,11 +4,6 @@
 # standard repository settings, default-branch protection, and the shared
 # Actions secrets.
 
-import {
-  to = module.terraform_grafana_cloud.module.repository.github_repository.this
-  id = "terraform-grafana-cloud" # import ID is the repo name; owner comes from the provider
-}
-
 module "terraform_grafana_cloud" {
   source = "../../modules/standard-repository"
 
