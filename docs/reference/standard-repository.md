@@ -34,6 +34,14 @@ Changing one here rolls it out to all repositories on the next apply.
 | `allow_squash_merge` | `true` | Squash for single logical changes. |
 | `allow_rebase_merge` | `true` | Rebase for several distinct changes worth preserving. |
 | `delete_branch_on_merge` | `true` | Keeps the branch list tidy after merge. |
+| `squash_merge_commit_title` | `PR_TITLE` | With Conventional Commits on PR titles, the PR title *is* the commit subject. |
+| `squash_merge_commit_message` | `PR_BODY` | The PR description becomes the commit body, rather than the branch's working commit messages. |
+| `allow_update_branch` | `false` | Branches are brought up to date by rebasing, which keeps the linear history the ruleset requires. |
+
+Leaving a setting out of the baseline is not a way to leave it alone: the provider
+resets an unset attribute to its own default on every apply, so an omission is
+just a silent vote for that default. Anything the standard has a view on belongs
+in the table above, stated explicitly.
 
 Branch protection likewise applies its encoded defaults to every repo (require a
 pull request, conversation resolution, linear history, block force-pushes, block
