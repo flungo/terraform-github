@@ -10,9 +10,15 @@ variable "name" {
 }
 
 variable "pattern" {
-  description = "Which ref the ruleset targets. Defaults to the repository's default branch (\"~DEFAULT_BRANCH\"); the module protects any branch, so it takes the pattern rather than assuming main."
+  description = "Which ref the ruleset targets. Defaults to the repository's default branch (\"~DEFAULT_BRANCH\"); the module protects any branch, so it takes the pattern rather than assuming main. This is **fnmatch**, not regex — no anchoring and no + quantifier, so \"v[0-9]*\" means \"v, one digit, then anything\" and also captures v1x or v2-test. Prefer a glob that cannot under-reach and pair it with restrict_creation, rather than narrowing it: over-reach that nobody can create is harmless, whereas a pattern that misses a real ref fails silently (ADR-008)."
   type        = string
   default     = "~DEFAULT_BRANCH"
+}
+
+variable "restrict_creation" {
+  description = "When true, only actors with an *always* bypass may create refs matching the pattern (the PR-scoped admin bypass does not cover creation, just as it does not cover deletion). Use where the refs are created by automation rather than by hand: it turns an accidental creation into a clean rejection instead of a branch that the deletion rule then makes undeletable — which is also what makes a deliberately broad pattern safe. Leave false for a ruleset targeting a branch that already exists (the default branch), where it has no effect."
+  type        = bool
+  default     = false
 }
 
 variable "strict" {

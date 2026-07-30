@@ -45,7 +45,8 @@ modules/                Shared, opinionated modules, consumed by owner directori
                         composing the three primitives below.
   repository/           Baseline repository settings — the standard project template
                         (feature toggles, merge strategy).
-  branch-protection/    Default-branch protection, as a repository ruleset.
+  branch-protection/    Branch protection as a repository ruleset — the default
+                        branch, plus release branches where a repo declares them.
   repository-secrets/   Shared Actions secrets — LYCHEE_GITHUB_TOKEN on every repo,
                         plus the HCP token where the repo holds Terraform config.
 owners/
@@ -108,3 +109,4 @@ See [`docs/decisions/README.md`](docs/decisions/README.md) for the full index. S
 - **Branch protection via repository rulesets** — a shared `modules/branch-protection` (a `github_repository_ruleset`, not the older `github_branch_protection`) protects default branches: require PR, conversation resolution, linear history, and block deletion; PR-scoped admin bypass unless `strict`; guards against pre-existing classic protection; piloted on authentik (ADR-004)
 - **Standard-repository composite** (`modules/standard-repository`) — the caller-facing surface: one call composes the three primitives per repo. Secret values come from one owner-level `local.shared_secrets` source (never wired per repo file); a `manage_secrets` opt-out exists for the self-referential case (terraform-github itself). The `terraform` flag attaches the HCP secret but does not yet add a required plan-check context (fleet CI isn't uniform) (ADR-006)
 - **Release-branch protection with an App push bypass** — the branch-protection primitive takes `name` and `push_bypass_app_ids` (numeric App IDs — private Apps cannot be resolved by slug — `"always"` bypass, kept under `strict`) and encodes `non_fast_forward`; a `release_branches` composite input adds a `"release"` ruleset. First case: `github-workflows`' `v*` branches, pushed only by its `flungo-release` App or a merged PR (ADR-007)
+- **Release-branch creation restricted to the automation** — ruleset ref targeting is fnmatch, *not* regex, so `v[0-9]*` also reaches `v1x`/`v2-test`; combined with the deletion block (and a PR-scoped admin bypass that does not cover deletion) such a branch was undeletable. `restrict_creation` — set by the composite for release rulesets — means only the release App can create a matching ref, turning the trap into a clean rejection. The broad glob is then kept on purpose: narrowing to enumerated shapes would silently miss `v100`, and under-reach fails quietly where over-reach nobody can create costs nothing. `update` stays unrestricted deliberately: it would block backport PRs (ADR-008)

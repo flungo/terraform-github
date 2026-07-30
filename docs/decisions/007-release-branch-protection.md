@@ -3,6 +3,10 @@
 Date: 2026-07-29
 Status: Accepted
 
+Refined by [ADR-008](008-restrict-release-branch-creation.md), which restricts
+creation of matching refs to the release App and — on that basis — deliberately
+keeps the broad fnmatch pattern rather than narrowing it.
+
 ## Context
 
 `github-workflows` versions its reusable workflows with moving major branches

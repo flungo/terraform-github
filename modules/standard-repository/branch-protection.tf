@@ -28,6 +28,16 @@ module "branch_protection" {
 # and a context that never runs on a PR into a release branch would block its
 # merges behind a perpetual "Expected" entry. First case: github-workflows'
 # moving-major v* branches. See docs/decisions/007-release-branch-protection.md.
+#
+# Creation is restricted to the same Apps, not exposed as a knob: release
+# branches are cut by the release automation, never by hand, so a stray or
+# mistyped one is a mistake worth rejecting outright. Without it the deletion
+# rule would hold that mistake permanently — a human cannot delete a matching
+# ref, since the admin bypass is pull-request-scoped and does not cover
+# deletion. It is also what lets the caller's pattern be a deliberately broad
+# glob: nobody can create the extra refs it reaches onto, so over-reach costs
+# nothing, while a narrower pattern risks silently missing a real release
+# branch. See docs/decisions/008-restrict-release-branch-creation.md.
 module "release_branch_protection" {
   count  = var.release_branches == null ? 0 : 1
   source = "../branch-protection"
@@ -37,4 +47,5 @@ module "release_branch_protection" {
   pattern             = var.release_branches.pattern
   strict              = var.strict
   push_bypass_app_ids = var.release_branches.push_bypass_app_ids
+  restrict_creation   = true
 }

@@ -6,11 +6,11 @@ Standard branch protection for a repository branch — the default branch unless
 for why a ruleset over the older `github_branch_protection`).
 
 It applies the fleet's default rules — require a pull request, require conversation
-resolution, require linear history, block force-pushes, restrict deletion, and require
-any named status checks — with a deliberate admin bypass (an override *within a pull
-request*, not a direct-push exemption) unless `strict` is set. The full catalogue of
-defaults and inputs is
-in [`docs/reference/branch-protection.md`](../../docs/reference/branch-protection.md).
+resolution, require linear history, block force-pushes, restrict deletion (and
+optionally creation), and require any named status checks — with a deliberate admin
+bypass (an override *within a pull request*, not a direct-push exemption) unless
+`strict` is set. The full catalogue of defaults and inputs is in
+[`docs/reference/branch-protection.md`](../../docs/reference/branch-protection.md).
 
 A repository can carry more than one instance under distinct `name`s: the
 [`standard-repository`](../standard-repository) composite adds a second, `"release"`
@@ -49,7 +49,8 @@ repository — the repo is created/managed before it is protected.
 |---|---|---|---|
 | `repository` | `string` | — (required) | Repository name to protect. |
 | `name` | `string` | `"standard"` | The ruleset's name. A second ruleset on the same repository needs a distinct one (the composite's release instance uses `"release"`). |
-| `pattern` | `string` | `"~DEFAULT_BRANCH"` | Ref the ruleset targets; defaults to the repo's default branch. |
+| `pattern` | `string` | `"~DEFAULT_BRANCH"` | Ref the ruleset targets; defaults to the repo's default branch. **fnmatch, not regex** — `v[0-9]*` also matches `v1x`. Prefer a glob that cannot under-reach and pair it with `restrict_creation`. |
+| `restrict_creation` | `bool` | `false` | Only `always`-bypass actors may create matching refs (not admins — their bypass is PR-scoped). For refs created by automation; also what makes a broad `pattern` safe. |
 | `strict` | `bool` | `false` | When `true`, remove the admin bypass so the rules bind everyone. |
 | `push_bypass_app_ids` | `list(number)` | `[]` | Numeric IDs of GitHub Apps granted an `"always"` bypass, so they may push the branch directly (release automation); annotate each ID with the App it names. Not dropped by `strict`. |
 | `required_status_checks` | `list(string)` | `[]` | Check contexts that must pass; empty enforces none. |
