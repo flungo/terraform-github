@@ -3,7 +3,8 @@
 The [`modules/standard-repository`](../../modules/standard-repository) composite
 is the caller-facing surface for a managed repository: one module call creates
 (or adopts) the repository with the standard settings, protects its default
-branch, and attaches the fleet's shared Actions secrets. It composes three
+branch — and its release branches, where the repo declares them — and attaches
+the fleet's shared Actions secrets. It composes three
 primitive modules, each of which stays independently usable where a genuine
 partial case appears:
 
