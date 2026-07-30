@@ -35,8 +35,8 @@ Changing one here rolls it out to all repositories on the next apply.
 | `delete_branch_on_merge` | `true` | Keeps the branch list tidy after merge. |
 
 Branch protection likewise applies its encoded defaults to every repo (require a
-pull request, conversation resolution, linear history, block deletion; admin
-bypass unless `strict`) — see [`branch-protection.md`](branch-protection.md).
+pull request, conversation resolution, linear history, block force-pushes, block
+deletion; admin bypass unless `strict`) — see [`branch-protection.md`](branch-protection.md).
 
 ## Per-repo inputs (configurable)
 
