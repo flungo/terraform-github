@@ -1,6 +1,6 @@
 # Plan: Initial build-out of `terraform-github`
 
-Status: In progress — structure ratified (ADR-001–008); the `owners/flungo/` skeleton, plan/apply CI, `modules/repository`, `modules/branch-protection`, `modules/repository-secrets`, and the `modules/standard-repository` composite have landed; every managed repo is one composite call. §7 steps 1–7 done; step 8 (onboard the rest of the `flungo` set) under way — the first five repos are adopted, `terraform-github` itself follows.
+Status: In progress — structure ratified (ADR-001–009); the `owners/flungo/` skeleton, plan/apply CI, `modules/repository`, `modules/branch-protection`, `modules/repository-secrets`, and the `modules/standard-repository` composite have landed; every managed repo is one composite call. §7 steps 1–7 done; step 8 (onboard the rest of the `flungo` set) under way — the first five repos are adopted, `terraform-github` itself follows.
 Related: [ADR-001](../decisions/001-dedicated-terraform-github-repo.md) (founding decisions)
 
 ## Goal
@@ -592,9 +592,13 @@ Each step is its own PR (own plan, own review gate), in order:
    **`stalwart.flungo.net`, `claude-code-sandbox`, `terraform-grafana-cloud`,
    `terraform-provider-stalwart`, `terraform-cloudflare`**, then **`terraform-github`
    itself** (its self-referential branch protection lands here — it is deliberately
-   not among the first onboarded; see the §5 circularity note). Each gets the
-   standard module call (protection + secrets). Remaining `flungo` repos are left to
-   the MCP/API discovery pass (final step).
+   not among the first onboarded; see the §5 circularity note). Each gets **one
+   `standard-repository` composite call** (settings + protection + secrets) plus an
+   `import {}` block targeting the nested repository resource, per
+   [`docs/runbooks/importing-repositories.md`](../runbooks/importing-repositories.md).
+   `terraform-github` itself sets **`manage_secrets = false`** — the opt-out built at
+   step 6 — so its own CI-gating tokens stay manually managed.
+   Remaining `flungo` repos are left to the MCP/API discovery pass (final step).
 9. **GitHub App** — stand up the App, install it on the personal account, and cut
    `flungo` over from the PAT to App auth (§5). This is the self-bootstrapping
    pivot: from here, onboarding a new owner is installing the App and adding a
