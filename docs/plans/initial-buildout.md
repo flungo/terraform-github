@@ -1,6 +1,6 @@
 # Plan: Initial build-out of `terraform-github`
 
-Status: In progress — structure ratified (ADR-001–006); the `owners/flungo/` skeleton, plan/apply CI, `modules/repository`, `modules/branch-protection`, `modules/repository-secrets`, and the `modules/standard-repository` composite have landed; every managed repo is one composite call. §7 steps 1–7 done; step 8 (onboard the rest of the `flungo` set) next.
+Status: In progress — structure ratified (ADR-001–008); the `owners/flungo/` skeleton, plan/apply CI, `modules/repository`, `modules/branch-protection`, `modules/repository-secrets`, and the `modules/standard-repository` composite have landed; every managed repo is one composite call. §7 steps 1–7 done; step 8 (onboard the rest of the `flungo` set) under way — the first five repos are adopted, `terraform-github` itself follows.
 Related: [ADR-001](../decisions/001-dedicated-terraform-github-repo.md) (founding decisions)
 
 ## Goal
@@ -523,7 +523,26 @@ Each step is its own PR (own plan, own review gate), in order:
 > context that never runs blocks merges behind a perpetual "Expected" entry;
 > revisit once Terraform CI is standardised. Checks are an explicit
 > `required_status_checks` input meanwhile. With CI already live since step 2,
-> steps 1–7 are all complete.
+> steps 1–7 are all complete. Step 8 is **under way**: the five non-self repos
+> (`stalwart.flungo.net`, `claude-code-sandbox`, `terraform-grafana-cloud`,
+> `terraform-provider-stalwart`, `terraform-cloudflare`) are adopted in one
+> batch — the CI plan surfaces all five adoptions, and any classic-protection
+> blocker, in a single round rather than five. `terraform-github` itself follows
+> in its own change, since its apply touches this repo's own branch protection
+> and it is the one call carrying `manage_secrets = false`. One judgement call
+> on the batch: `terraform-provider-stalwart` takes `terraform = false` — the
+> flag attaches the HCP token to repos that plan/apply real infrastructure in
+> their own CI, and a repo that *implements* a provider holds Go source, not
+> configuration with an HCP backend. All five are adopted with their live topics
+> (none has any), leaving fleet-wide tagging to a deliberate later pass. The
+> batch's plan found no classic branch protection anywhere, but it did surface a
+> gap in the standard: an attribute the module leaves unset is **not** left
+> alone — the provider resets it to its own default, which was reverting
+> `terraform-grafana-cloud`'s deliberate `PR_TITLE` / `PR_BODY` squash commit
+> settings. Those are now part of the baseline (confirmed 2026-07-29), so the
+> fleet gains them on this apply, along with `allow_update_branch = false` —
+> stated explicitly rather than left to the provider default, since omitting a
+> setting is only ever a silent vote for that default.
 
 1. **Ratify structure** — merge this repo's docs (this PR). Confirm the workspace
    recommendation (§3) and credential model (§5); write **ADR-002** (workspace
