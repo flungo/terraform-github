@@ -16,14 +16,19 @@ weaken the branch's protection.
 
 ## Procedure
 
-1. **Add the module call** to the repo's own file `owners/<owner>/<repo>.tf` (each repo's config lives in one by-subject file named for it):
+1. **Adopt the repository into Terraform.** A repo carrying a classic rule exists on
+   GitHub but is not yet managed here, so this step is an *adoption*: a
+   `standard-repository` call in the repo's own by-subject file
+   `owners/<owner>/<repo>.tf`, paired with an `import {}` block for the repository
+   resource. Follow [`importing-repositories.md`](importing-repositories.md) for the
+   call, the import block, and the settings to reconcile.
 
-   ```hcl
-   module "<repo>_protection" {
-     source     = "../../modules/branch-protection"
-     repository = module.<repo>.name
-   }
-   ```
+   Do **not** add a standalone [`branch-protection`](../../modules/branch-protection)
+   call: the composite already creates the ruleset, and a second one would apply
+   alongside it. The primitive is for a genuine partial case only.
+
+   Already-managed repo? Then there is nothing to add — skip to step 2, where the
+   guard is already failing every plan.
 
 2. **Open the PR / run the plan.** The plan fails on the guard with
    `<repo> has classic branch protection rule(s) matching [<pattern>]`.
@@ -74,8 +79,11 @@ weaken the branch's protection.
    briefly unprotected between removal and the ruleset applying (step 7); negligible
    for a solo repo, but sequence it so the window is short.
 
-6. **Re-run the plan.** With the classic rule gone the guard passes and the plan
-   shows the ruleset as `1 to add` (two, for a repo that also declares `release_branches`).
+6. **Re-run the plan.** With the classic rule gone the guard passes. For an
+   already-managed repo the plan shows just the ruleset as `1 to add` (two, where the
+   repo also declares `release_branches`); for an adoption it shows the composite's
+   full set — the imported repository plus the ruleset(s) and shared secret(s) — as
+   [`importing-repositories.md`](importing-repositories.md) describes.
 
 7. **Merge.** The apply on merge creates the ruleset; the branch is protected again.
 
