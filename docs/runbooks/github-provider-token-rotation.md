@@ -10,12 +10,12 @@ This PAT is the **bootstrap** credential. The intended end state is a **GitHub A
 |---|---|
 | Token name | `terraform-github-flungo` |
 | Type | Fine-grained PAT — `flungo` account, **all repositories** |
-| Permissions | Repository → **Administration: Read and write**, **Metadata: Read-only** |
+| Permissions | Repository → **Administration: Read and write**, **Secrets: Read and write**, **Metadata: Read-only** |
 | Actions secret | `FLUNGO_GITHUB_TOKEN` (repo secret) → env `TF_VAR_github_token` |
 | Expiry | 90 days |
 
-> **Permissions grow with scope.** Administration + Metadata cover repository *settings* — the current scope (`github_repository`, and later branch protection / rulesets, which are also under Administration). Additional resources need additional fine-grained permissions, added to the token when they land:
-> - **Shared Actions secrets** (build-out step 5): Repository → **Secrets: Read and write** (and **Actions** / **Dependabot secrets** for those resource types).
+> **Permissions grow with scope.** The current set covers everything managed today: **Administration** for repository settings and rulesets (`github_repository`, `github_repository_ruleset` — branch protection included), **Secrets** for the shared Actions secrets written to managed repos (`github_actions_secret`), and **Metadata**, which is always required. Additional resources need additional fine-grained permissions, added to the token when they land:
+> - **Dependabot secrets:** Repository → **Dependabot secrets** (the `Secrets` permission covers Actions secrets only).
 > - **Webhooks:** Repository → **Webhooks**.
 > - **Teams / membership** (organisation owners): the corresponding **Organization** permissions.
 >
