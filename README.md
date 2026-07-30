@@ -14,6 +14,11 @@ Terraform manages these GitHub resources for the `flungo` account (in `owners/fl
   - `authentik.flungo.net` — adopted (imported) from the pre-existing repo
   - `github-workflows` — created by this config to host the fleet's shared reusable workflows and CI standards
   - `claude-plugins` — created by this config; the personal Claude Code / claude.ai plugin marketplace
+  - `stalwart.flungo.net` — adopted; Terraform config for the Stalwart mail server
+  - `claude-code-sandbox` — adopted; the personal Claude Code container image
+  - `terraform-grafana-cloud` — adopted; Terraform config for Grafana Cloud
+  - `terraform-provider-stalwart` — adopted; the Terraform provider for Stalwart
+  - `terraform-cloudflare` — adopted; Terraform config for Cloudflare
 - **Repository settings** — the standard settings, merge strategy, and feature toggles (`modules/repository`).
 - **Branch protection** — each managed repo's default branch is protected via `modules/branch-protection` (a repository ruleset): require a pull request, conversation resolution, linear history, block force-pushes, and block deletion. Repos with release branches declare them for a second, `"release"` ruleset whose only direct-push exemption is the release automation's GitHub App — which is also the only actor that may create or delete a matching branch. First case: `github-workflows`' moving-major `v*` branches and its `flungo-release` App.
 - **Shared secrets** — the fleet's common Actions secrets are attached to each managed repo via `modules/repository-secrets`: `LYCHEE_GITHUB_TOKEN` on every repo, plus the HCP token (`TF_TOKEN_APP_TERRAFORM_IO`) where the repo holds Terraform config.
