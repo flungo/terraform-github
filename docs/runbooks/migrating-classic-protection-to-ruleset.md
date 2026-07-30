@@ -75,7 +75,7 @@ weaken the branch's protection.
    for a solo repo, but sequence it so the window is short.
 
 6. **Re-run the plan.** With the classic rule gone the guard passes and the plan
-   shows the ruleset as `1 to add`.
+   shows the ruleset as `1 to add` (two, for a repo that also declares `release_branches`).
 
 7. **Merge.** The apply on merge creates the ruleset; the branch is protected again.
 
@@ -83,8 +83,11 @@ weaken the branch's protection.
 
 The full catalogue is [`docs/reference/branch-protection.md`](../reference/branch-protection.md).
 In brief, the ruleset enforces on the default branch: pull request required
-(0 approvals), conversation resolution, linear history, and any named status checks;
-admins get a `pull_request`-scoped bypass unless `strict`.
+(0 approvals), conversation resolution, linear history, blocked force-pushes,
+restricted deletion, and any named status checks; admins get a
+`pull_request`-scoped bypass unless `strict`. Creation restriction (`creation`) is
+available but off for default-branch rulesets, where it has no effect —
+see [ADR-008](../decisions/008-restrict-release-branch-creation.md).
 
 ## Classic → ruleset field mapping
 
@@ -103,8 +106,9 @@ Use this to map each classic setting to its ruleset equivalent when comparing:
 | `dismissesStaleReviews` | *(not encoded)* | Not modelled (0 required approvals makes it moot). |
 | `requiresCommitSignatures` | *(not encoded)* | Flag if set — the module doesn't require signed commits. |
 | `restrictsPushes` / push allowances | conditions / `bypass_actors` | The ruleset restricts pushes to PRs implicitly (PR required). Explicit push allowlists aren't modelled. |
-| `allowsForcePushes` | PR required (no direct pushes) | A required pull request blocks all direct pushes to the branch, force-pushes included. |
-| `allowsDeletions` | `deletion = true` | The module restricts deletion of the protected branch (only bypass actors may delete it). |
+| `allowsForcePushes` | `non_fast_forward = true` | The module encodes the force-push block directly. (A required pull request already blocks every direct push, so this is belt-and-braces — but it is a real rule, not an implication.) |
+| `allowsDeletions` | `deletion = true` | The module restricts deletion of the protected branch (only `always`-bypass actors may — a PR-scoped admin bypass does not cover deletion). |
+| *(no classic equivalent)* | `creation` | Rulesets can restrict who may *create* a matching ref; classic protection has no counterpart, so migration neither gains nor loses it. Off for default-branch rulesets; used for release branches (ADR-008). |
 | `lockBranch` | *(not encoded)* | The module doesn't lock branches. |
 
 A blank "ruleset equivalent" means the module doesn't encode that protection —
@@ -140,11 +144,11 @@ Field-by-field against the ruleset:
 | Stale-review dismissal | `false` | not encoded | No loss (moot at 0 approvals) |
 | Commit signatures | `false` | not encoded | No loss (classic doesn't set it) |
 | Restrict pushes | `false` | PR required (implicit) | **Ruleset ≥** |
-| Force pushes | `allowsForcePushes = false` | PR required (no direct pushes) | **Same** |
+| Force pushes | `allowsForcePushes = false` | `non_fast_forward = true` | **Same** |
 | Deletions | `allowsDeletions = false` | `deletion = true` | **Same** |
 | Lock branch | `false` | not encoded | No loss (classic doesn't set it) |
 
 **Verdict: the ruleset is equivalent-or-stronger on every setting authentik's classic
-rule enforces** — matching PR, conversation-resolution, linear-history, and deletion
-protection, and stronger on admin handling (a PR-scoped bypass rather than a full admin
+rule enforces** — matching PR, conversation-resolution, linear-history, force-push
+and deletion protection, and stronger on admin handling (a PR-scoped bypass rather than a full admin
 exemption). Removing the classic rule is therefore safe — no protection is lost.
