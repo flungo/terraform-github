@@ -83,6 +83,30 @@ Sessions use the **GitHub MCP** for all GitHub interactions (PRs, CI status, com
 
 Once CI exists, on-demand runs are triggered with `mcp__github__actions_run_trigger` (`workflow_id: "terraform.yml"`, `ref: "<branch>"`); after triggering, give the user a direct link (`https://github.com/flungo/terraform-github/actions/runs/<run_id>`) and report the outcome. (Pattern inherited from `terraform-grafana-cloud`.)
 
+### Validating Terraform locally
+
+CI is the authority — the `terraform.yml` plan on the PR is what proves a change. But `fmt`/`validate` locally first catches syntax and type errors without burning a CI round-trip. The session has no `terraform` binary, so fetch one; `init` then works normally against the registry:
+
+```bash
+S=<scratchpad>                     # a writable temp dir, not the repo
+# Subshell so the download and the binary land in $S, leaving the cwd at the repo root
+( cd "$S" \
+  && curl -sSLO https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_linux_amd64.zip \
+  && unzip -q -o terraform_1.9.8_linux_amd64.zip )
+
+export CHECKPOINT_DISABLE=1        # see the egress note below
+$S/terraform fmt -check -recursive          # from the repo root; needs no provider
+cd owners/flungo
+$S/terraform init -backend=false            # -backend=false: no HCP token needed
+$S/terraform validate
+```
+
+**Egress.** `registry.terraform.io` and `releases.hashicorp.com` are on the environment's allowlist. `checkpoint-api.hashicorp.com` (HashiCorp's optional version-check ping) is **not**, and returns 403 through the agent proxy — harmless, but set `CHECKPOINT_DISABLE=1` to keep it out of the output. If a host you genuinely need is blocked, report it and ask for the network policy to be updated (per `/root/.ccr/README.md`); never route around the proxy.
+
+**Afterwards:** delete `owners/<owner>/.terraform/` (gitignored, and large). **Keep `.terraform.lock.hcl` — it is committed** (see [Terraform conventions](docs/reference/terraform-conventions.md)). If `init` modified it, that is a real change: review and commit it deliberately rather than discarding it.
+
+`validate` currently emits pre-existing `default_branch` deprecation warnings from `modules/repository` — expected, not caused by your change. Local `plan` is not possible: it needs both the HCP backend token and a GitHub token.
+
 ## Branch management
 
 Branch and PR hygiene comes from the **`git-conventions`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`): never commit to `main` — a feature branch per change; at session start pull `main` and branch (confirm before continuing on an existing non-`main` branch); fetch and rebase onto `main` before finishing; [Conventional Commits](https://www.conventionalcommits.org/); linear history — squash a single logical change, rebase (no squash) to preserve several distinct ones; rebase hygiene — amend rather than leaving fix-up commits; force-push feature branches only, never `main`; land via PR and delete the branch after merge; and monitor PRs via activity subscriptions, not `send_later`. The plugin complements this file; where this repo differs, this file wins.
