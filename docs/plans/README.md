@@ -4,4 +4,4 @@
 
 | File | Description | Status |
 |---|---|---|
-| [initial-buildout.md](initial-buildout.md) | Bootstrap the repo: module structure, directory-per-owner layout, HCP workspace topology, provider/credential model, CI, and build sequence | In progress — §7 steps 1–7 landed (the `repository`, `branch-protection`, `repository-secrets` primitives and the `standard-repository` composite on the `flungo` owner); step 8 (onboard the rest of the `flungo` set) next |
+| [initial-buildout.md](initial-buildout.md) | Bootstrap the repo: module structure, directory-per-owner layout, HCP workspace topology, provider/credential model, CI, and build sequence | In progress — §7 steps 1–7 landed (the `repository`, `branch-protection`, `repository-secrets` primitives and the `standard-repository` composite on the `flungo` owner); step 8 (onboard the rest of the `flungo` set) under way — the first five repos are adopted, `terraform-github` itself follows |
