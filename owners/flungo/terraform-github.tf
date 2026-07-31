@@ -13,13 +13,11 @@ module "terraform_github" {
   # and holds no secrets — only their names.
   visibility = "public"
 
-  # Records that this repo holds Terraform config. Currently inert: the flag's
-  # only effect today is attaching the HCP token, and manage_secrets = false
-  # skips the secrets primitive entirely. Kept so the fact is stated where every
-  # other Terraform repo states it. It becomes live by either route — flipping
-  # manage_secrets, or widening what the flag itself drives (ADR-006 leaves a
-  # required plan-check context on the table) — and neither should have to
-  # rediscover that this repo holds Terraform config.
+  # Follows Fabrizio's Terraform standards, so the flag requires the check those
+  # jobs report. Its other effect, attaching the HCP token, is skipped here:
+  # manage_secrets = false takes the whole secrets primitive out. That split is
+  # deliberate — this repo supplies the token to itself by hand, but its CI
+  # reports the check like any other, so the check half still applies.
   terraform = true
 
   # The self-referential opt-out (ADR-005's circularity note). This repo's CI is

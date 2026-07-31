@@ -558,6 +558,32 @@ Each step is its own PR (own plan, own review gate), in order:
 > The whole initial `flungo` set is now under Terraform; the remaining `flungo`
 > repos are left to the discovery pass at step 12.
 
+### 7.1 Fleet CI alignment
+
+Adopting the fleet surfaced that its Terraform CI is **not** uniform, which
+[ADR-010](../decisions/010-terraform-flag-means-terraform-standards.md) resolves
+for the `terraform` flag's semantics but does not itself fix. The standing
+aspiration is that **every repository holding Terraform config follows Fabrizio's
+Terraform standards** — using the [`flungo/github-workflows`](https://github.com/flungo/github-workflows)
+Terraform jobs under the conventional job and secret names — and therefore carries
+`terraform = true`.
+
+Where each repository stands, and what closing the gap needs:
+
+| Repository | State | Needs |
+|---|---|---|
+| `terraform-github` | Follows the standards | — |
+| `terraform-grafana-cloud` | Follows the standards | — |
+| `stalwart.flungo.net` | Follows them, but cannot report the check — its check is excluded via `excluded_status_checks` | A self-hosted runner, and probably support for one in `github-workflows`. Tracked in **that repository's own docs** (`docs/plans/terraform-ci.md` § Phase 3), not here |
+| `authentik.flungo.net` | Holds Terraform config; CI is markdown lint/links and version-check only | Adopting the `github-workflows` Terraform jobs |
+| `terraform-cloudflare` | Empty — no config, no workflows | Its Terraform config, then those jobs |
+
+Until a gap closes the flag stays off, with a comment on the module call naming
+what adopting the standards needs — so the absence records pending work rather
+than an oversight. `stalwart.flungo.net` is the exception that proves the shape:
+it keeps the flag because it genuinely follows the standards, and excludes only
+the context it cannot report.
+
 1. **Ratify structure** — merge this repo's docs (this PR). Confirm the workspace
    recommendation (§3) and credential model (§5); write **ADR-002** (workspace
    topology) and, if the credential model is settled, an ADR for it.
