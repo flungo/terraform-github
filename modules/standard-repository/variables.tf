@@ -73,3 +73,9 @@ variable "shared_secrets" {
     error_message = "shared_secrets must be set when manage_secrets = true (pass the owner-level local.shared_secrets)."
   }
 }
+
+variable "repository_exists" {
+  description = "Whether the repository already exists on GitHub. Default true — every managed repo does, once created. Set false ONLY in the change that creates a brand-new repository, and remove it in a follow-up once the creating apply has run: it is transient, exactly like the import block an adoption carries. It gates the classic-protection guard, whose data source queries the live repository and errors with \"Could not resolve to a Repository\" when there is nothing to query yet. A repository that does not exist cannot carry classic protection, so skipping the guard for a create loses no cover. See ADR-009."
+  type        = bool
+  default     = true
+}

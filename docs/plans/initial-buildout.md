@@ -535,7 +535,11 @@ Each step is its own PR (own plan, own review gate), in order:
 > their own CI, and a repo that *implements* a provider holds Go source, not
 > configuration with an HCP backend. All five are adopted with their live topics
 > (none has any), leaving fleet-wide tagging to a deliberate later pass. The
-> batch's plan found no classic branch protection anywhere, but it did surface a
+> batch's plan appeared to find no classic branch protection anywhere — that was
+> the guard being deferred, not an absence: three of the five did carry classic
+> rules, and the apply created their rulesets before saying so. Corrected by
+> [ADR-009](../decisions/009-plan-time-classic-protection-guard.md); the rules
+> were migrated by hand afterwards. The plan did also surface a real
 > gap in the standard: an attribute the module leaves unset is **not** left
 > alone — the provider resets it to its own default, which was reverting
 > `terraform-grafana-cloud`'s deliberate `PR_TITLE` / `PR_BODY` squash commit

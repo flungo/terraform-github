@@ -5,7 +5,7 @@ the `github_branch_protection` resource) from before they were onboarded to
 Terraform. The [`branch-protection`](../../modules/branch-protection) module
 protects default branches with a **ruleset** instead (see
 [ADR-004](../decisions/004-branch-protection-rulesets.md)), and the two
-**double-enforce** if both are present. The module's guard therefore fails the plan
+**double-enforce** if both are present. The composite's guard therefore fails the plan
 while any classic rule exists, so onboarding a repo means *migrating* it off classic
 protection — not just adding the module call.
 

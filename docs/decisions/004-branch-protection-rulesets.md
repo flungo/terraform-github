@@ -8,6 +8,14 @@ App push bypass, and the encoded force-push block) and
 [ADR-008](008-restrict-release-branch-creation.md) (creation restricted to the release
 App). The rule list below is the contract as decided here.
 
+Refined by [ADR-009](009-plan-time-classic-protection-guard.md), which moves the
+classic-protection guard into the `standard-repository` composite and has it read a
+plan-time-known repository name. The claim below that the guard "makes double
+enforcement a plan-time error" did **not** hold as originally built: sourcing the
+name from the repository resource deferred the check to apply whenever that resource
+had pending changes — which an adoption always does — so the guard fired only after
+the rulesets it should have blocked had been created.
+
 ## Context
 
 Protecting the default branch is one of the motivators for managing GitHub as
