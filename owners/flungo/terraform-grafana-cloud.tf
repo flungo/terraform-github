@@ -10,7 +10,7 @@ module "terraform_grafana_cloud" {
   name        = "terraform-grafana-cloud"
   description = "Terraform configuration management for Grafana Cloud"
 
-  terraform = true # terraform-grafana-cloud holds Terraform config
+  terraform = true
 
   shared_secrets = local.shared_secrets
 }
