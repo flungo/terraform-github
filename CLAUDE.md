@@ -121,6 +121,17 @@ This repo's specific doc hooks, on top of the plugin's generic ones:
 - **New provider config or variable** → update the relevant directory's `providers.tf` / `variables.tf` docs.
 - **New credential** → add a rotation runbook in `docs/runbooks/` and note it in the § Sensitive information list and [`docs/reference/secrets.md`](docs/reference/secrets.md).
 
+### Docs in other repos that mirror this one
+
+Some of this repo's contracts are also documented in the repos that have to *meet* them, because that is where the reader adopting them is looking. Those copies go stale silently — nothing in this repo's CI reads them — so changing a contract below means opening a PR against the named repo in the same change:
+
+| Contract here | Mirrored in | What goes stale |
+|---|---|---|
+| The `terraform` flag ([ADR-010](docs/decisions/010-terraform-flag-means-terraform-standards.md)) — the `terraform / terraform` context it requires, the `terraform` caller-job name that context depends on, and the conventional secret names | [`flungo/github-workflows`](https://github.com/flungo/github-workflows) → `docs/runbooks/adopting-terraform-workflows.md` § "Adopting in a repository managed by `terraform-github`" | The naming constraints an adopter must follow, and the flag-first ordering |
+| `excluded_status_checks` and the `terraform` flag as they apply to `stalwart.flungo.net` | [`flungo/stalwart.flungo.net`](https://github.com/flungo/stalwart.flungo.net) → `docs/plans/terraform-ci.md` § Phase 3 | What that repo must do to drop its exclusion |
+
+> **🤖 Agent** — Treat the mirrored docs as part of the change, not follow-up work. If you lack push access to the repo in question, say so and ask for it (`add_repo`) rather than landing a half-change; the copy that goes stale is the one an adopter reads.
+
 ## Active work
 
 | Plan | Status |

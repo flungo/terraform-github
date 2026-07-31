@@ -3,6 +3,13 @@
 Date: 2026-07-29
 Status: Accepted
 
+Refined by [ADR-010](010-terraform-flag-means-terraform-standards.md), which resolves the
+deferral below: the `terraform` flag now adds the shared workflow's plan check as
+well as the HCP token. The deferral's premise turned out to understate the
+problem — the fleet's Terraform repos did not merely fail to run a plan check
+*uniformly*, most did not run the shared workflow at all, because the flag had
+been read as "holds Terraform config" rather than "runs that CI".
+
 ## Context
 
 The three primitive modules — `repository`
