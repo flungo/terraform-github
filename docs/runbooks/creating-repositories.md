@@ -23,6 +23,10 @@ Settle these before writing the module call — most map straight onto a module 
 
 ## Prerequisites
 
+- **The repository does not already exist on GitHub.** Check before you start (`https://github.com/<owner>/<repo>`). If it does, stop — this is an *adoption*, and the procedure is [`importing-repositories.md`](importing-repositories.md), which pairs the module call with an `import {}` block so Terraform takes over the live repository instead of trying to make a new one.
+
+  > **What happens if you get this wrong?** It fails, and fails safely. With no state entry and no `import {}` block Terraform plans a **create**, and GitHub rejects a duplicate name when the apply runs — so the apply errors having changed nothing. Terraform cannot silently adopt or overwrite an existing repository: taking over an existing resource always requires an explicit import. The cost is a wasted merge-and-apply cycle, not damage. And if the existing repository carries classic branch protection, leaving `repository_exists` at its default catches the mistake one step earlier still — the guard fails the *plan*.
+
 - The owner directory (`owners/<login>/`) exists with its backend, provider, and `github_token` variable.
 - The owner's GitHub token secret (`<OWNER>_GITHUB_TOKEN`, e.g. `FLUNGO_GITHUB_TOKEN`) and `TF_TOKEN_APP_TERRAFORM_IO` are set for the `Terraform` workflow, and the token can create repositories (Administration: read/write) for the owner.
 
