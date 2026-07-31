@@ -3,11 +3,6 @@
 # branch protection, so the pipeline was proven on every other repo first (see
 # the §5 circularity note in docs/plans/initial-buildout.md).
 
-import {
-  to = module.terraform_github.module.repository.github_repository.this
-  id = "terraform-github" # import ID is the repo name; owner comes from the provider
-}
-
 module "terraform_github" {
   source = "../../modules/standard-repository"
 
