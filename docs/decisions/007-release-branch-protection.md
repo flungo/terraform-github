@@ -5,7 +5,10 @@ Status: Accepted
 
 Refined by [ADR-008](008-restrict-release-branch-creation.md), which restricts
 creation of matching refs to the release App and — on that basis — deliberately
-keeps the broad fnmatch pattern rather than narrowing it.
+keeps the broad fnmatch pattern rather than narrowing it, and by
+[ADR-009](009-plan-time-classic-protection-guard.md), which moves the
+classic-protection guard to the composite and so removes the duplicate per-plan
+read noted in the trade-offs below.
 
 ## Context
 
@@ -78,3 +81,5 @@ Extend the existing primitives rather than adding a new module:
 - The classic-protection guard runs once per module instance, so a repo
   with release branches reads the live classic rules twice per plan —
   a harmless, read-only duplication.
+  *(No longer the case: the guard moved to the composite and now runs once
+  per repository — see [ADR-009](009-plan-time-classic-protection-guard.md).)*

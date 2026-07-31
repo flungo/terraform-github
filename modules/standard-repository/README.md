@@ -11,6 +11,19 @@ secrets). The composite wires them together and adds no opinion of its own — t
 baselines stay encoded in the primitives; the full catalogue is in
 [`docs/reference/standard-repository.md`](../../docs/reference/standard-repository.md).
 
+It does carry one check of its own: a **classic-protection guard** that fails the
+plan if the repository still has a classic branch protection rule, which would
+double-enforce against the ruleset. It reads `var.name` rather than the repository
+resource's name so the check evaluates at plan time even during an adoption, and it
+lives here rather than in the branch-protection primitive so it runs once per
+repository instead of once per ruleset — see
+[ADR-009](../../docs/decisions/009-plan-time-classic-protection-guard.md) and
+[`docs/runbooks/migrating-classic-protection-to-ruleset.md`](../../docs/runbooks/migrating-classic-protection-to-ruleset.md).
+Creating a brand-new repository is the one case where it must be skipped
+(`repository_exists = false`), because the guard cannot query a repository that
+does not exist yet — see
+[`docs/runbooks/creating-repositories.md`](../../docs/runbooks/creating-repositories.md).
+
 ## Usage
 
 ```hcl
@@ -55,6 +68,7 @@ the protection ruleset and secrets are created (not imported) by the same apply.
 | `terraform` | `bool` | `false` | The repo holds Terraform config → attach the HCP token secret. Does **not** (yet) add a plan-check context — see [ADR-006](../../docs/decisions/006-standard-repository-composite.md). |
 | `manage_secrets` | `bool` | `true` | Opt-out of shared-secret management; `false` only for the self-referential case (`terraform-github` itself — see [ADR-005](../../docs/decisions/005-shared-secrets-module.md)). |
 | `shared_secrets` | `object` (sensitive) | `null` | The owner-level secret values (`lychee_github_token`, optional `hcp_token`). Required unless `manage_secrets = false`. |
+| `repository_exists` | `bool` | `true` | Repository already exists on GitHub. Gates the classic-protection guard; **transient** — set `false` only in the change that creates the repository, then remove it (see [ADR-009](../../docs/decisions/009-plan-time-classic-protection-guard.md)). |
 
 ## Outputs
 

@@ -44,15 +44,22 @@ Settle these before writing the module call — most map straight onto a module 
      # release_branches = { pattern = "refs/heads/v[0-9]*", push_bypass_app_ids = [<id>] }
      #   ONLY for a repo publishing a moving branch consumers pin (ADR-007/ADR-008)
 
+     # Transient: removed in step 4, once the creating apply has run.
+     repository_exists = false
+
      shared_secrets = local.shared_secrets
    }
    ```
 
+   `repository_exists = false` skips the classic-protection guard, which queries the live repository and would otherwise fail the plan with `Could not resolve to a Repository` — there is nothing to query yet. Nothing is lost: a repository that does not exist cannot carry classic protection. It is transient, exactly like the `import {}` block an adoption carries and then drops ([ADR-009](../decisions/009-plan-time-classic-protection-guard.md)).
+
 2. **Let CI post the plan.** The `Terraform` workflow runs `terraform plan` and posts it as a PR comment. Confirm the additions are exactly the composite's resources for this repo — `module.<name>.module.repository.github_repository.this`, the `module.<name>.module.branch_protection` ruleset, the `module.<name>.module.secrets[0]` secret(s) (`LYCHEE_GITHUB_TOKEN`, plus the HCP token when `terraform = true`), and — only when `release_branches` is set — a second ruleset at `module.<name>.module.release_branch_protection[0]` — with **`0 to change, 0 to destroy`**; a create must not touch anything else. Check the attributes (`visibility`, `auto_init`, feature toggles, topics) match the answers.
 
-3. **Merge → apply.** Merging runs `terraform apply`, which creates the repository. There is no import block to remove afterwards.
+3. **Merge → apply.** Merging runs `terraform apply`, which creates the repository.
 
-4. **Populate the repository.** Add its content (workflows, docs, code) via the usual branch + PR flow. With `auto_init = true` the default branch already exists to branch from (replace the seeded placeholder README in that first change); with an empty repo, the first push establishes `main`.
+4. **Remove `repository_exists = false`.** In a follow-up PR, once the creating apply has run — the repository now exists, so the guard can and should run against it. Its plan should be **no changes**, which also confirms the create landed cleanly. Leaving the flag in place silently disables the classic-protection guard for that repository from then on, so this step is not optional. (This mirrors the adoption runbook's removal of the applied `import {}` block.)
+
+5. **Populate the repository.** Add its content (workflows, docs, code) via the usual branch + PR flow. With `auto_init = true` the default branch already exists to branch from (replace the seeded placeholder README in that first change); with an empty repo, the first push establishes `main`.
 
 ## Why a create is safe without a plan-reconcile loop
 

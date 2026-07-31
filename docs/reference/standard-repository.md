@@ -64,11 +64,47 @@ The composite's full input surface:
 | `terraform` | `bool` | `false` | The repo holds Terraform config → attach the HCP token secret (`TF_TOKEN_APP_TERRAFORM_IO`). Does **not** currently add a plan-check context to `required_status_checks` — see [ADR-006](../decisions/006-standard-repository-composite.md). |
 | `manage_secrets` | `bool` | `true` | Opt-out of shared-secret management. Set `false` only where Terraform must not manage the repo's secrets — the self-referential case (`terraform-github` itself; see ADR-005's circularity note). |
 | `shared_secrets` | `object` (sensitive) | `null` | The owner's shared secret values (`lychee_github_token`, optional `hcp_token`), composed once at owner level in a `locals` block and passed to every call as `shared_secrets = local.shared_secrets`. Required unless `manage_secrets = false`. |
+| `repository_exists` | `bool` | `true` | Whether the repository already exists on GitHub. Gates the classic-protection guard. **Transient** — set `false` only in the change that creates a brand-new repository, and remove it once that apply has run (the guard's data source cannot query a repository that does not exist yet, and fails the plan if asked to). See [ADR-009](../decisions/009-plan-time-classic-protection-guard.md). |
 
 The standard ruleset's `pattern` is deliberately not exposed: it stays at the
 primitive's `~DEFAULT_BRANCH` default, so the composite protects the default
 branch without knowing its name. Release branches are the exception — their
 pattern is genuinely per-repo, so `release_branches` carries it explicitly.
+
+## Classic-protection guard
+
+The composite reads each repository's *classic* branch protection rules
+(`github_branch_protection_rules`) and a `postcondition` fails the plan if any
+exist. GitHub applies rulesets and classic protection both at once, so a legacy
+rule left over from before onboarding would double-enforce against the ruleset.
+The guard is read-only — Terraform cannot delete a rule it does not manage — so it
+surfaces the drift for removal by hand, per
+[`../runbooks/migrating-classic-protection-to-ruleset.md`](../runbooks/migrating-classic-protection-to-ruleset.md).
+
+Two details are deliberate and load-bearing
+([ADR-009](../decisions/009-plan-time-classic-protection-guard.md)):
+
+- **It reads `var.name`, not the repository resource's name.** Terraform defers a
+  data source whose configuration depends on a resource with pending changes, and
+  an adoption always leaves the repository pending — so reading the resource's
+  name deferred the guard to apply, where a postcondition runs *after* the
+  resources it depends on and the ruleset it should have blocked already exists.
+  A literal name keeps the check at plan time.
+- **It lives in the composite, not the branch-protection primitive**, so it runs
+  once per repository rather than once per ruleset.
+- **It is skipped while `repository_exists = false`.** Reading a literal name is
+  what fixes adoption, but it breaks creation: asked about a repository GitHub has
+  never heard of, the data source fails the plan with `Could not resolve to a
+  Repository` rather than returning nothing. The flag is how the caller says which
+  case it is, and it is transient — see [creating a repository](../runbooks/creating-repositories.md).
+  Nothing is lost by skipping it: a repository that does not exist cannot carry
+  classic protection.
+
+The data source exposes only each rule's `pattern`, not its settings. When a plan
+fails on the guard, the CI `surface-classic-protection` job reads the plan
+artifact and fetches the full classic settings via GraphQL, printing them to its
+run summary — the comparison that confirms the ruleset is equivalent-or-stronger
+before the classic rule is removed.
 
 ## Growing the input surface
 

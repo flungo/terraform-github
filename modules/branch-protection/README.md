@@ -21,14 +21,15 @@ ruleset where a repo declares release branches
 > [`standard-repository`](../standard-repository) composite rather than calling it
 > directly; call it directly only for a genuine partial case.
 
-The module also **guards against classic branch protection**: it reads the
-repository's classic rules and fails the plan if any exist, so a legacy rule can't
-silently double-enforce alongside the ruleset. The guard is read-only — Terraform
-can't delete an unmanaged classic rule, so it surfaces the drift for removal by
-hand (repo Settings → Branches). The guard's data source exposes only the rule's
-pattern; when a plan fails on the guard, the CI `surface-classic-protection` job
-fetches the full classic settings so they can be compared against the ruleset before
-removal — see
+This module does **not** guard against classic branch protection — a repo carrying
+both a classic rule and a ruleset double-enforces, and the guard for that lives in
+the [`standard-repository`](../standard-repository) composite, which runs it once
+per repository rather than once per ruleset. It must read a repository name known
+at plan time, which the composite has and this module does not
+([ADR-009](../../docs/decisions/009-plan-time-classic-protection-guard.md)). A
+direct caller of this module is therefore unguarded and must check for classic
+rules itself — one more reason to go through the composite. The migration
+procedure is
 [`docs/runbooks/migrating-classic-protection-to-ruleset.md`](../../docs/runbooks/migrating-classic-protection-to-ruleset.md).
 
 ## Usage

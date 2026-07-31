@@ -82,19 +82,21 @@ See [ADR-007](../decisions/007-release-branch-protection.md).
 
 GitHub applies rulesets and classic branch protection (`github_branch_protection`,
 the repo's Settings → Branches) *both at once* — a repo can carry both and they
-double-enforce. To stop a legacy classic rule silently coexisting with the ruleset,
-the module reads the repo's classic rules with the `github_branch_protection_rules`
-data source and a `postcondition` fails the plan if any exist.
+double-enforce. The guard against that does **not** live in this module: it is in
+the [`standard-repository`](standard-repository.md) composite, which reads the
+repo's classic rules with the `github_branch_protection_rules` data source and
+fails the plan via a `postcondition` if any exist.
 
-The guard is **read-only and unconditional** — it runs on every repo the module
-protects, regardless of `strict`. Terraform can't delete a resource it doesn't
-manage, so the guard surfaces the drift rather than reconciling it: clear the classic
-rule by hand in the repository's Settings → Branches, then re-plan.
+It sits there for two reasons ([ADR-009](../decisions/009-plan-time-classic-protection-guard.md)).
+It must read a repository name that is **known at plan time**: sourcing the name
+from the repository resource made Terraform defer the read to apply whenever that
+resource had pending changes — which an adoption always does — so the guard
+evaluated too late to stop anything. And its scope is the *repository*, not the
+ruleset — it asks whether the repo carries classic protection at all, and the data
+source returns every classic rule in one read, so running it per ruleset repeats
+an identical query for no extra cover. It is also where the repo-wide baseline
+lives, and "rulesets, not classic protection" is a repo-wide policy.
 
-The data source exposes only each rule's `pattern`, not its settings — so when a plan
-fails on the guard, the CI `surface-classic-protection` job reads the reusable
-workflow's plan artifact and fetches the repo's full classic settings via GraphQL,
-printing them to its run summary. That comparison is the read side of the migration:
-confirm the ruleset is equivalent-or-stronger before removing the classic rule. The
-full procedure is
-[`docs/runbooks/migrating-classic-protection-to-ruleset.md`](../runbooks/migrating-classic-protection-to-ruleset.md).
+A direct caller of this module is therefore unguarded, and should check for
+classic rules itself. Every managed repository goes through the composite, so in
+practice the guard is unconditional across the fleet.
