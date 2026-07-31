@@ -3,20 +3,38 @@
 # "~DEFAULT_BRANCH" default, so the composite never needs to know the branch
 # name.
 #
-# The terraform flag deliberately does NOT add a Terraform plan check context
-# here (the plan's original intent): a required context that a repo's CI never
-# reports blocks its merges behind a perpetual "Expected" entry, and the fleet's
-# Terraform repos do not yet uniformly run a plan check (authentik.flungo.net
-# has no Terraform workflow at all). Callers list contexts their CI actually
-# reports via required_status_checks; wiring the flag to append the
-# conventional context is revisited once Terraform CI is standardised across
-# the fleet. See docs/decisions/006-standard-repository-composite.md.
+# Required checks are assembled in three parts: the contexts implied by the
+# standards flags, plus the caller's additional ones, minus any the caller
+# excludes. Flags imply checks because adopting a standard means adopting the
+# workflow that reports it — see
+# docs/decisions/010-terraform-flag-means-terraform-standards.md.
+#
+# excluded_status_checks is the escape hatch for a repo that legitimately takes
+# a flag's other effects but cannot report its check. Removing the context is
+# preferable to a per-flag opt-out: it generalises to any future flag/check
+# conflict without growing a matching boolean each time. It only ever applies to
+# a context a flag implies — a variable validation rejects one that also appears
+# in required_status_checks, since adding and then removing a context is the
+# same as never adding it.
+#
+# "terraform / terraform" is <caller job id> / <reusable job id>. The reusable
+# half is fixed by flungo/github-workflows; the caller half is whatever the repo
+# names its job — which is why the standards require that name. A repo that
+# adopts the workflow under a different job name reports a different context and
+# would block its own merges behind a perpetual "Expected" entry.
 module "branch_protection" {
   source = "../branch-protection"
 
-  repository             = module.repository.name
-  strict                 = var.strict
-  required_status_checks = var.required_status_checks
+  repository = module.repository.name
+  strict     = var.strict
+
+  required_status_checks = tolist(setsubtract(
+    concat(
+      var.terraform ? ["terraform / terraform"] : [],
+      var.required_status_checks,
+    ),
+    var.excluded_status_checks,
+  ))
 }
 
 # Release-branch protection — a second ruleset, created only where the repo

@@ -33,7 +33,7 @@ module "authentik_flungo_net" {
   name        = "authentik.flungo.net"
   description = "Terraform configuration and documentation for Fabrizio's Authentik server."
 
-  terraform = true # holds Terraform config → HCP token secret attached
+  terraform = true # follows Fabrizio's Terraform standards → HCP token + required check
 
   shared_secrets = local.shared_secrets
 }
@@ -63,9 +63,10 @@ the protection ruleset and secrets are created (not imported) by the same apply.
 | `topics` | `list(string)` | `[]` | Repository topics. |
 | `auto_init` | `bool` | `true` | Seed an initial commit so `main` exists at creation (creation-time only; later drift ignored). |
 | `strict` | `bool` | `false` | Remove the branch-protection admin bypass so the rules bind everyone. |
-| `required_status_checks` | `list(string)` | `[]` | Check contexts that must pass before merging, as reported on the repo's PRs. Empty enforces no checks; a context that never runs blocks merges behind a perpetual "Expected" entry. |
+| `required_status_checks` | `list(string)` | `[]` | **Additional** required check contexts, beyond any implied by the standards flags. No wildcards — GitHub names contexts individually, and one that never runs blocks merges behind a perpetual "Expected" entry. |
+| `excluded_status_checks` | `list(string)` | `[]` | Contexts to **remove** from the required set, applied after the implied and additional ones are combined. For a repo that takes a flag's other effects but cannot report the check it implies. A context listed in `required_status_checks` too is rejected by a validation — adding then removing it is the same as never adding it; comment out the `required_status_checks` entry instead. |
 | `release_branches` | `object` | `null` | Protect release branches with a second, `"release"` ruleset: `{ pattern, push_bypass_app_ids }` — the ref pattern the branches match (fnmatch, e.g. `"refs/heads/v[0-9]*"`) and the numeric IDs of the GitHub Apps allowed to push *and create* them. See [ADR-007](../../docs/decisions/007-release-branch-protection.md) and [ADR-008](../../docs/decisions/008-restrict-release-branch-creation.md). |
-| `terraform` | `bool` | `false` | The repo holds Terraform config → attach the HCP token secret. Does **not** (yet) add a plan-check context — see [ADR-006](../../docs/decisions/006-standard-repository-composite.md). |
+| `terraform` | `bool` | `false` | The repo **follows Fabrizio's Terraform standards** — the `flungo/github-workflows` Terraform jobs, under the conventional job and secret names — not merely "holds Terraform config". Attaches the HCP token those jobs read **and** requires the `terraform / terraform` check they report. See [ADR-010](../../docs/decisions/010-terraform-flag-means-terraform-standards.md). |
 | `manage_secrets` | `bool` | `true` | Opt-out of shared-secret management; `false` only for the self-referential case (`terraform-github` itself — see [ADR-005](../../docs/decisions/005-shared-secrets-module.md)). |
 | `shared_secrets` | `object` (sensitive) | `null` | The owner-level secret values (`lychee_github_token`, optional `hcp_token`). Required unless `manage_secrets = false`. |
 | `repository_exists` | `bool` | `true` | Repository already exists on GitHub. Gates the classic-protection guard; **transient** — set `false` only in the change that creates the repository, then remove it (see [ADR-009](../../docs/decisions/009-plan-time-classic-protection-guard.md)). |

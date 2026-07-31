@@ -33,9 +33,20 @@ variable "strict" {
 }
 
 variable "required_status_checks" {
-  description = "Check contexts that must pass before merging, as they appear on the repo's pull requests (e.g. \"terraform / terraform\"). Empty enforces no required checks — GitHub has no \"require all checks\" option, and a context that never runs on a PR blocks its merge behind a perpetual \"Expected\" entry, so list only contexts the repo's CI actually reports."
+  description = "Additional check contexts that must pass before merging, beyond any implied by the standards flags (e.g. terraform). Named as they appear on the repo's pull requests. GitHub has no \"require all checks\" option and no wildcard — contexts are named individually, and one that never runs on a pull request blocks its merge behind a perpetual \"Expected\" entry — so list only contexts the repo's CI actually reports, and do not repeat an implied one."
   type        = list(string)
   default     = []
+}
+
+variable "excluded_status_checks" {
+  description = "Check contexts to remove from the required set, applied after the implied and additional ones are combined. The escape hatch for a repo that legitimately takes a flag's other effects but cannot report the check that flag implies — e.g. one that follows Fabrizio's Terraform standards and needs the HCP token, but whose CI cannot run the shared workflow's baseline. Excluding the context is preferred to a per-flag opt-out because it generalises to any flag/check conflict without adding a matching boolean each time. It is for contexts a *flag* implies: a context the caller adds itself belongs in neither list, or commented out in required_status_checks if it is only temporarily disabled. Name what is excluded and why at the call site."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = length(setintersection(var.excluded_status_checks, var.required_status_checks)) == 0
+    error_message = "A context must not appear in both required_status_checks and excluded_status_checks (${join(", ", sort(tolist(setintersection(var.excluded_status_checks, var.required_status_checks))))}). Adding a context and then removing it leaves it not required, which is what omitting it from required_status_checks already does — so listing it in both is a mistake rather than an intent. To keep the entry in code but disabled, comment it out in required_status_checks."
+  }
 }
 
 variable "release_branches" {
@@ -48,7 +59,7 @@ variable "release_branches" {
 }
 
 variable "terraform" {
-  description = "Whether this repository holds Terraform config. When true, the org-wide HCP Terraform token (TF_TOKEN_APP_TERRAFORM_IO) is attached as an Actions secret so the repo can plan/apply in its own CI — the flag's primary effect. Branch protection applies to every repo regardless of this flag."
+  description = "Whether this repository follows Fabrizio's Terraform standards — which means it uses the flungo/github-workflows Terraform jobs, called under the conventional job name (`terraform`) and reading the conventional secret names. It is not merely \"holds Terraform config\": a repo can hold config without following the standards, and the two must not be conflated (see ADR-010). Adopting the standards is what makes both effects follow — the composite attaches the org-wide HCP Terraform token (TF_TOKEN_APP_TERRAFORM_IO) the jobs read, and requires the \"terraform / terraform\" check they report. Leave false, with a comment saying what adopting them needs, on a repo that holds Terraform config but does not yet follow them; where a repo follows them but genuinely cannot report the check, keep the flag and drop the context via excluded_status_checks. Branch protection itself applies regardless."
   type        = bool
   default     = false
 }
