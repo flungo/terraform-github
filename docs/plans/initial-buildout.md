@@ -1,6 +1,6 @@
 # Plan: Initial build-out of `terraform-github`
 
-Status: In progress — structure ratified (ADR-001–009); the `owners/flungo/` skeleton, plan/apply CI, `modules/repository`, `modules/branch-protection`, `modules/repository-secrets`, and the `modules/standard-repository` composite have landed; every managed repo is one composite call. §7 steps 1–7 done; step 8 (onboard the rest of the `flungo` set) under way — the first five repos are adopted, `terraform-github` itself follows.
+Status: In progress — structure ratified (ADR-001–009); the `owners/flungo/` skeleton, plan/apply CI, `modules/repository`, `modules/branch-protection`, `modules/repository-secrets`, and the `modules/standard-repository` composite have landed; every managed repo is one composite call. §7 steps 1–8 done — the whole initial `flungo` set is adopted, `terraform-github` itself included. Next: step 9 (GitHub App auth), then step 10 (the first organisation).
 Related: [ADR-001](../decisions/001-dedicated-terraform-github-repo.md) (founding decisions)
 
 ## Goal
@@ -547,6 +547,16 @@ Each step is its own PR (own plan, own review gate), in order:
 > fleet gains them on this apply, along with `allow_update_branch = false` —
 > stated explicitly rather than left to the provider default, since omitting a
 > setting is only ever a silent vote for that default.
+>
+> **Step 8 is complete.** `terraform-github` itself was adopted last, as this
+> section always intended — its apply touches this repo's own branch protection,
+> so the pipeline was proven on every other repo first. It is the one call
+> carrying `manage_secrets = false`: the composite would otherwise manage the
+> very secrets that gate this repo's CI, and a broken apply that rewrote them
+> would lock the repo out of the credentials needed to fix it (the §5 circularity
+> note). Taking self-management on is a deliberate later step, not an oversight.
+> The whole initial `flungo` set is now under Terraform; the remaining `flungo`
+> repos are left to the discovery pass at step 12.
 
 1. **Ratify structure** — merge this repo's docs (this PR). Confirm the workspace
    recommendation (§3) and credential model (§5); write **ADR-002** (workspace
