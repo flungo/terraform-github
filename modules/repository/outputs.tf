@@ -18,7 +18,11 @@ output "repo_id" {
   value       = github_repository.this.repo_id
 }
 
-output "default_branch" {
-  description = "The repository's default branch."
-  value       = github_repository.this.default_branch
-}
+# There is deliberately no default_branch output. The provider deprecated
+# github_repository.default_branch (setting a default branch is what
+# github_branch_default is for), so exposing it emitted a deprecation warning on
+# every validate for an output nothing consumed — branch protection targets the
+# default branch by the ruleset's own ~DEFAULT_BRANCH condition, not by name.
+# If a caller ever needs the name, read data.github_repository, whose
+# default_branch attribute is not deprecated; do not restore the resource
+# attribute.

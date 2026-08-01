@@ -52,4 +52,3 @@ follow [`docs/runbooks/importing-repositories.md`](../../docs/runbooks/importing
 | `full_name` | Full name in `owner/name` form. |
 | `node_id` | GraphQL node ID (referenced by downstream resources such as branch protection). |
 | `repo_id` | Numeric repository ID. |
-| `default_branch` | The repository's default branch. |

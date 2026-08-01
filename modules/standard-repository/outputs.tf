@@ -18,10 +18,7 @@ output "repo_id" {
   value       = module.repository.repo_id
 }
 
-output "default_branch" {
-  description = "The repository's default branch."
-  value       = module.repository.default_branch
-}
+# No default_branch output — see the note in modules/repository/outputs.tf.
 
 output "ruleset_id" {
   description = "ID of the standard branch-protection ruleset."

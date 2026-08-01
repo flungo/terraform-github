@@ -29,7 +29,6 @@ Changing one here rolls it out to all repositories on the next apply.
 | `has_issues` | `true` | Issues are the default tracker; on everywhere. |
 | `has_wiki` | `false` | Documentation lives in-repo (`docs/`), not a wiki. |
 | `has_projects` | `false` | Project boards are not used at the repo level. |
-| `has_downloads` | `false` | GitHub deprecated the Downloads feature; `true` does not persist (the API reports it back as `false`), so the baseline is off to avoid a perpetual plan diff. |
 | `allow_merge_commit` | `false` | Linear history — no merge commits. |
 | `allow_squash_merge` | `true` | Squash for single logical changes. |
 | `allow_rebase_merge` | `true` | Rebase for several distinct changes worth preserving. |
@@ -42,6 +41,15 @@ Leaving a setting out of the baseline is not a way to leave it alone: the provid
 resets an unset attribute to its own default on every apply, so an omission is
 just a silent vote for that default. Anything the standard has a view on belongs
 in the table above, stated explicitly.
+
+### The one deliberate absence: `has_downloads`
+
+`has_downloads` is **not** set, and is the single exception to the rule above.
+GitHub retired the Downloads feature and the provider deprecated the argument, so there is no behaviour left to have a view on — the vote the omission casts and the vote `false` casts are the same one.
+Setting it buys nothing and costs a deprecation warning on every `validate`, plus a break when the provider removes it.
+
+> **🤖 Agent** — Do not re-add `has_downloads`, and do not read its absence as an oversight the table should record.
+> A setting whose *argument* is deprecated is the exception; a setting whose *value* you merely think is the default is not.
 
 Branch protection likewise applies its encoded defaults to every repo (require a
 pull request, conversation resolution, linear history, block force-pushes, block
