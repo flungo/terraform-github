@@ -22,6 +22,7 @@ The ruleset is `target = "branch"`, `enforcement = "active"`, and applies these 
 | Linear history | `required_linear_history = true` | No merge commits. |
 | Block force-pushes | `non_fast_forward = true` | Redundant while a pull request is required — that already blocks every direct push — but encoded so the guarantee is explicit and survives any future relaxation of the PR rule. |
 | Restrict deletion | `deletion = true` | A protected branch must not be deletable (only `always`-bypass actors may). GitHub blocks deleting the default branch anyway, but the module protects any branch, so this doesn't rely on that. |
+| Branches up to date before merging (only where checks are required) | `strict_required_status_checks_policy = true` | A check that passed against a stale base says nothing about the merge — two pull requests can each be green against an older `main` and break it together. Encoded rather than exposed: it is what makes a required check mean anything. The block it lives in is emitted only when contexts are supplied, so it is absent entirely where `required_status_checks` is empty — including on release rulesets, which are passed none. See [ADR-011](../decisions/011-strict-required-status-checks.md). |
 
 One further rule is **switchable** rather than encoded: `creation` — restricting
 who may create a matching ref — is off by default and driven by the
@@ -37,7 +38,7 @@ who may create a matching ref — is off by default and driven by the
 | `restrict_creation` | `bool` | `false` | Only `always`-bypass actors may create matching refs — the PR-scoped admin bypass does not cover creation, so admins cannot either. For refs created by automation; no effect on a branch that already exists, and what makes a deliberately broad `pattern` safe. See [ADR-008](../decisions/008-restrict-release-branch-creation.md). |
 | `strict` | `bool` | `false` | When `true`, removes the admin bypass entirely so the rules bind everyone. When `false`, admins keep a deliberate, PR-scoped bypass (override within a pull request); the rules still apply by default and admins cannot push straight to the branch. |
 | `push_bypass_app_ids` | `list(number)` | `[]` | Numeric IDs of GitHub Apps that may push directly to the protected branch — an `"always"` bypass exempting them from every rule. For narrowly-scoped automation identities only (e.g. a release workflow's App); annotate each ID with the App it names. See [Bypass](#bypass). |
-| `required_status_checks` | `list(string)` | `[]` | Check contexts that must pass before merging. Empty enforces none — GitHub has no "require all checks" option, and a context is only selectable once it has run on the protected branch. |
+| `required_status_checks` | `list(string)` | `[]` | Check contexts that must pass before merging. Empty enforces none — GitHub has no "require all checks" option, and a context is only selectable once it has run on the protected branch. Supplying any context also activates the up-to-date-branch rule above, which is absent entirely while the list is empty. |
 
 ## Pattern syntax
 

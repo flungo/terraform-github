@@ -89,7 +89,16 @@ resource "github_repository_ruleset" "this" {
             context = required_check.value
           }
         }
-        strict_required_status_checks_policy = false
+
+        # Require the branch to be up to date with its base before merging, so a
+        # check that passed against a stale base cannot gate the merge. Without
+        # it, two pull requests can each be green against an older main and still
+        # break it together — the semantic conflict CI never saw. Encoded, not an
+        # input: it is what makes a required check mean anything, so a repo that
+        # requires checks at all wants this. The block above is emitted only when
+        # a context is supplied, so where none are the setting is never sent.
+        # See docs/decisions/011-strict-required-status-checks.md.
+        strict_required_status_checks_policy = true
       }
     }
   }

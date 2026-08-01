@@ -584,6 +584,12 @@ than an oversight. `stalwart.flungo.net` is the exception that proves the shape:
 it keeps the flag because it genuinely follows the standards, and excludes only
 the context it cannot report.
 
+**Strict checks ride this, not a rollout of their own.**
+[ADR-011](../decisions/011-strict-required-status-checks.md) encodes `strict_required_status_checks_policy = true` in the branch-protection module, inside a block the module emits only where a context is actually required.
+So each repository in the table above gains "branches must be up to date before merging" at the moment its gap closes and it starts requiring a check — there is no separate step, and no way to end up with required checks that are not strict.
+`terraform-github` and `terraform-grafana-cloud` have it now.
+`authentik.flungo.net` and `terraform-cloudflare` get it with the flag; `stalwart.flungo.net` already carries the flag, so it gets it when its `excluded_status_checks` entry comes off.
+
 1. **Ratify structure** — merge this repo's docs (this PR). Confirm the workspace
    recommendation (§3) and credential model (§5); write **ADR-002** (workspace
    topology) and, if the credential model is settled, an ADR for it.
