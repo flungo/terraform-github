@@ -16,6 +16,10 @@ name from the repository resource deferred the check to apply whenever that reso
 had pending changes — which an adoption always does — so the guard fired only after
 the rulesets it should have blocked had been created.
 
+Also refined by [ADR-011](011-strict-required-status-checks.md), which sets the
+`strict_required_status_checks_policy` this ADR left hardcoded `false` — so where a
+repository requires a check, its branches must also be up to date before merging.
+
 ## Context
 
 Protecting the default branch is one of the motivators for managing GitHub as

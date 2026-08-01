@@ -128,7 +128,7 @@ Those copies go stale silently — nothing in this repo's CI reads them — so c
 
 | Contract here | Mirrored in | What goes stale |
 |---|---|---|
-| The `terraform` flag ([ADR-010](docs/decisions/010-terraform-flag-means-terraform-standards.md)) — the `terraform / terraform` context it requires, the `terraform` caller-job name that context depends on, and the conventional secret names | [`flungo/github-workflows`](https://github.com/flungo/github-workflows) → `docs/runbooks/adopting-terraform-workflows.md` § "Adopting in a repository managed by `terraform-github`" | The naming constraints an adopter must follow, the flag-first ordering |
+| The `terraform` flag ([ADR-010](docs/decisions/010-terraform-flag-means-terraform-standards.md)) — the `terraform / terraform` context it requires, the `terraform` caller-job name that context depends on, and the conventional secret names | [`flungo/github-workflows`](https://github.com/flungo/github-workflows) → `docs/runbooks/adopting-terraform-workflows.md` § "Adopting in a repository managed by `terraform-github`" | The naming constraints an adopter must follow, the flag-first ordering, and the fact that the flag now also requires an up-to-date branch (ADR-011) |
 | `excluded_status_checks` and the `terraform` flag as they apply to `stalwart.flungo.net` | [`flungo/stalwart.flungo.net`](https://github.com/flungo/stalwart.flungo.net) → `docs/plans/terraform-ci.md` § Phase 3 | What that repo must do to drop its exclusion |
 
 > **🤖 Agent** — Treat the mirrored docs as part of the change, not follow-up work.
@@ -157,3 +157,6 @@ See [`docs/decisions/README.md`](docs/decisions/README.md) for the full index. S
 - **The `terraform` flag means "follows Fabrizio's Terraform standards"** — not "holds Terraform config"; the fleet proved those diverge (only two of five `terraform = true` repos used the shared jobs).
   Both effects follow from the one fact: the HCP token those jobs read is attached, and the `terraform / terraform` check they report is required.
   `required_status_checks` becomes additional-only, and `excluded_status_checks` drops an implied context where a repo follows the standards but cannot report the check (`stalwart.flungo.net`) — a validation rejects a context named in both lists (ADR-010)
+- **Branches must be up to date before merging** — `strict_required_status_checks_policy` is encoded in the branch-protection module, not exposed: there is no coherent position that wants a required check but not its strictness, and a second "strict" input beside the existing `strict` (which removes the admin bypass) would misread both.
+  The module emits the block it lives in only where contexts are supplied, so it is inert where none are required and arrives with each repository's CI adoption.
+  Merge queue — the richer answer — is gated on **organisation** ownership, not plan tier, so no upgrade reaches a personal account (ADR-011)
