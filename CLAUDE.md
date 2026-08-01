@@ -105,7 +105,7 @@ $S/terraform validate
 
 **Afterwards:** delete `owners/<owner>/.terraform/` (gitignored, and large). **Keep `.terraform.lock.hcl` — it is committed** (see [Terraform conventions](docs/reference/terraform-conventions.md)). If `init` modified it, that is a real change: review and commit it deliberately rather than discarding it.
 
-`validate` currently emits pre-existing `default_branch` deprecation warnings from `modules/repository` — expected, not caused by your change. Local `plan` is not possible: it needs both the HCP backend token and a GitHub token.
+`validate` is clean — no warnings. Treat any it does emit as caused by your change, not as background noise. Local `plan` is not possible: it needs both the HCP backend token and a GitHub token.
 
 ## Branch management
 

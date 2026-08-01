@@ -12,14 +12,17 @@ resource "github_repository" "this" {
   visibility = var.visibility
   auto_init  = var.auto_init
 
-  # Standard feature toggles: issues on; wiki, projects, and downloads off.
-  # GitHub deprecated the Downloads feature — has_downloads = true does not persist
-  # (the API reports it back as false), so the baseline is off to avoid a perpetual
-  # plan diff.
-  has_issues    = true
-  has_wiki      = false
-  has_projects  = false
-  has_downloads = false
+  # Standard feature toggles: issues on; wiki and projects off.
+  #
+  # has_downloads is deliberately absent, and is the one exception to the rule that
+  # the standard states every setting it has a view on: GitHub retired the Downloads
+  # feature and the provider deprecated the argument, so there is no longer a
+  # behaviour to vote on. Setting it emits a deprecation warning on every validate
+  # and will break when the provider drops it. Omitting it sends the same false the
+  # API reports back either way. Do not re-add it.
+  has_issues   = true
+  has_wiki     = false
+  has_projects = false
 
   # Standard merge strategy: merge commits off; squash and rebase on; branches
   # deleted on merge (keeps a linear history and a tidy branch list).

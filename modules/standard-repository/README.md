@@ -79,5 +79,4 @@ the protection ruleset and secrets are created (not imported) by the same apply.
 | `full_name` | Full name in `owner/name` form. |
 | `node_id` | GraphQL node ID of the repository. |
 | `repo_id` | Numeric repository ID. |
-| `default_branch` | The repository's default branch. |
 | `ruleset_id` | ID of the standard branch-protection ruleset. |
