@@ -58,6 +58,12 @@ Inherited from [`terraform-grafana-cloud`](https://github.com/flungo/terraform-g
 
 Terraform authenticates to GitHub with a token supplied per owner directory as `TF_VAR_github_token` (from a per-owner GitHub Actions secret). The HCP Terraform backend is authenticated via `TF_TOKEN_APP_TERRAFORM_IO`. The interim credential is a per-owner fine-grained PAT; consolidating onto a shared GitHub App is a tracked follow-up.
 
+## Account requirements
+
+The `flungo` owner is a personal account on **GitHub Pro**, which is a precondition rather than a detail: rulesets on *private* repositories need Pro, and the fleet has private repositories.
+Merge queue is separately gated on *organisation* ownership, so no plan upgrade reaches a personal account.
+Both, and why the plan is documented rather than asserted in Terraform, are catalogued in [`docs/reference/github-plan.md`](docs/reference/github-plan.md).
+
 ## Decision records
 
 See [`docs/decisions/`](docs/decisions/) for the reasoning behind key architectural choices, and [CLAUDE.md](CLAUDE.md) for agent-oriented conventions.
