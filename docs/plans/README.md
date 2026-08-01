@@ -1,6 +1,9 @@
 # Plans
 
-> **Lifecycle:** Plans track one-time procedures to completion, then are retired. When a plan is complete, delete it in a follow-up PR — do not archive or leave it in place. Extract decisions to ADRs, final state to the README/architecture docs, and repeatable procedures to `docs/runbooks/`. See `CLAUDE.md` § Documentation standards → "Plan lifecycle" for the full pre-deletion checklist.
+> **Lifecycle:** Plans track one-time procedures to completion, then are retired.
+> When a plan is complete, delete it in a follow-up PR — do not archive or leave it in place.
+> Extract decisions to ADRs, final state to the README/architecture docs, and repeatable procedures to `docs/runbooks/`.
+> See `CLAUDE.md` § Documentation standards → "Plan lifecycle" for the full pre-deletion checklist.
 
 | File | Description | Status |
 | --- | --- | --- |

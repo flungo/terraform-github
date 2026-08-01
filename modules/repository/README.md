@@ -1,16 +1,12 @@
 # Module: `repository`
 
-The standard repository for the `terraform-github` fleet. It wraps a single
-`github_repository` and hard-codes the opinionated baseline (feature toggles and
-merge strategy) so every repo is uniform; only the genuinely per-repo attributes
-are inputs. Change the standard once here and re-apply each owner to roll it out.
+The standard repository for the `terraform-github` fleet.
+It wraps a single `github_repository` and hard-codes the opinionated baseline (feature toggles and merge strategy) so every repo is uniform; only the genuinely per-repo attributes are inputs.
+Change the standard once here and re-apply each owner to roll it out.
 
-The encoded baseline and the rule for growing the input surface are catalogued in
-[`docs/reference/standard-repository.md`](../../docs/reference/standard-repository.md).
+The encoded baseline and the rule for growing the input surface are catalogued in [`docs/reference/standard-repository.md`](../../docs/reference/standard-repository.md).
 
-> Owner directories normally consume this via the
-> [`standard-repository`](../standard-repository) composite rather than calling it
-> directly; call it directly only for a genuine partial case.
+> Owner directories normally consume this via the [`standard-repository`](../standard-repository) composite rather than calling it directly; call it directly only for a genuine partial case.
 
 ## Usage
 
@@ -25,14 +21,10 @@ module "github_workflows" {
 }
 ```
 
-The module local name should mirror the repository name with any character invalid
-in a Terraform identifier replaced by `_` (e.g. `authentik.flungo.net` →
-`module "authentik_flungo_net"`), per [Terraform conventions](../../docs/reference/terraform-conventions.md).
+The module local name should mirror the repository name with any character invalid in a Terraform identifier replaced by `_` (e.g. `authentik.flungo.net` → `module "authentik_flungo_net"`), per [Terraform conventions](../../docs/reference/terraform-conventions.md).
 
-Adopting a repository that already exists on GitHub? Pair the module call with an
-`import {}` block targeting the module's internal resource address —
-`import { to = module.<name>.github_repository.this, id = "<repo-name>" }` — and
-follow [`docs/runbooks/importing-repositories.md`](../../docs/runbooks/importing-repositories.md).
+Adopting a repository that already exists on GitHub?
+Pair the module call with an `import {}` block targeting the module's internal resource address — `import { to = module.<name>.github_repository.this, id = "<repo-name>" }` — and follow [`docs/runbooks/importing-repositories.md`](../../docs/runbooks/importing-repositories.md).
 
 ## Inputs
 

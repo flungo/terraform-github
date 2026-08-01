@@ -2,9 +2,14 @@
 
 This repository manages GitHub resources as code with Terraform, across the user's personal account and the organisations they administer — under the user's own credentials.
 
-Its scope is **the GitHub provider's surface**, not a fixed feature list. It starts with a standard repository template and shared/common secrets, and grows to branch protection, webhooks, teams, and other resources exposed by [`integrations/github`](https://registry.terraform.io/providers/integrations/github/latest). It is named for the provider, not the initial use case, so that growth needs no rename. See [ADR-001](docs/decisions/001-dedicated-terraform-github-repo.md).
+Its scope is **the GitHub provider's surface**, not a fixed feature list.
+It starts with a standard repository template and shared/common secrets, and grows to branch protection, webhooks, teams, and other resources exposed by [`integrations/github`](https://registry.terraform.io/providers/integrations/github/latest).
+It is named for the provider, not the initial use case, so that growth needs no rename.
+See [ADR-001](docs/decisions/001-dedicated-terraform-github-repo.md).
 
-> **Status: build-out under way.** The `owners/flungo/` skeleton, the plan/apply CI, the primitive modules (`repository`, `branch-protection`, `repository-secrets`), and the `standard-repository` composite have landed; each managed flungo repository is a single composite call. The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md). Keep this file, the README, and the ADR index current as resources land.
+> **Status: build-out under way.** The `owners/flungo/` skeleton, the plan/apply CI, the primitive modules (`repository`, `branch-protection`, `repository-secrets`), and the `standard-repository` composite have landed; each managed flungo repository is a single composite call.
+> The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md).
+> Keep this file, the README, and the ADR index current as resources land.
 
 ## Architecture
 
@@ -35,7 +40,9 @@ Its scope is **the GitHub provider's surface**, not a fixed feature list. It sta
 - Webhook URLs (not their secrets), branch and ruleset names
 - Public keys, GitHub App IDs and client IDs (not secrets)
 
-When a sensitive value is needed in docs or config, use a placeholder (e.g. `<github-token>`) and note where the real value lives (a GitHub Actions secret, a secrets manager, or an environment variable). Provider tokens are supplied via `TF_VAR_github_token` from a per-owner Actions secret; they are declared `sensitive = true` and never hard-coded. The secrets CI uses, and their rotation, are catalogued in [`docs/reference/secrets.md`](docs/reference/secrets.md).
+When a sensitive value is needed in docs or config, use a placeholder (e.g. `<github-token>`) and note where the real value lives (a GitHub Actions secret, a secrets manager, or an environment variable).
+Provider tokens are supplied via `TF_VAR_github_token` from a per-owner Actions secret; they are declared `sensitive = true` and never hard-coded.
+The secrets CI uses, and their rotation, are catalogued in [`docs/reference/secrets.md`](docs/reference/secrets.md).
 
 ## Repo layout
 
@@ -69,25 +76,35 @@ docs/
                         secret names, provider coverage map). README.md is the index.
 ```
 
-`modules/standard-repository/` is the composite every owner directory consumes — one call per managed repo. `owners/flungo/` is the first owner directory.
+`modules/standard-repository/` is the composite every owner directory consumes — one call per managed repo.
+`owners/flungo/` is the first owner directory.
 
 ## Terraform conventions
 
-Generic HCL authoring conventions (resource naming, sensitive values, durations, provider pinning + lockfile, `import {}` / `moved {}` blocks) come from the **`terraform-standards`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`). This repo's structure-specific conventions — directory-per-owner root modules, shared modules encoding the standard, intent-named inputs, by-subject `.tf` grouping, and the key divergence from the sibling repos' single-flat-root pattern — are catalogued in [`docs/reference/terraform-conventions.md`](docs/reference/terraform-conventions.md). That reference doc is canonical for this repo; consult it, and the plugin, before adding or changing Terraform config here.
+Generic HCL authoring conventions (resource naming, sensitive values, durations, provider pinning + lockfile, `import {}` / `moved {}` blocks) come from the **`terraform-standards`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`).
+This repo's structure-specific conventions — directory-per-owner root modules, shared modules encoding the standard, intent-named inputs, by-subject `.tf` grouping, and the key divergence from the sibling repos' single-flat-root pattern — are catalogued in [`docs/reference/terraform-conventions.md`](docs/reference/terraform-conventions.md).
+That reference doc is canonical for this repo; consult it, and the plugin, before adding or changing Terraform config here.
 
-**Transient config — things that should never be found at rest.** `import {}` and `moved {}` blocks come out in a follow-up PR once their apply has run (the plugin's convention), and `repository_exists = false` on a `standard-repository` call is the same shape: it exists only for the change that *creates* a repository, and the [creation runbook](docs/runbooks/creating-repositories.md) removes it in the next PR. Finding any of them on `main` means a runbook was left half-finished — and for `repository_exists` that is not cosmetic, it silently disables the classic-protection guard on that repository ([ADR-009](docs/decisions/009-plan-time-classic-protection-guard.md)).
+**Transient config — things that should never be found at rest.** `import {}` and `moved {}` blocks come out in a follow-up PR once their apply has run (the plugin's convention), and `repository_exists = false` on a `standard-repository` call is the same shape: it exists only for the change that *creates* a repository, and the [creation runbook](docs/runbooks/creating-repositories.md) removes it in the next PR.
+Finding any of them on `main` means a runbook was left half-finished — and for `repository_exists` that is not cosmetic, it silently disables the classic-protection guard on that repository ([ADR-009](docs/decisions/009-plan-time-classic-protection-guard.md)).
 
-> **🤖 Agent** — Treat `repository_exists` in an owner directory as a defect, not configuration. The repository almost certainly exists by then, so deleting the line is the fix and its plan should be *no changes*. Never add it for a repository that already exists, and never carry it over when using an existing repo file as a template.
+> **🤖 Agent** — Treat `repository_exists` in an owner directory as a defect, not configuration.
+> The repository almost certainly exists by then, so deleting the line is the fix and its plan should be *no changes*.
+> Never add it for a repository that already exists, and never carry it over when using an existing repo file as a template.
 
 ## Working with this repo in Claude Code
 
-Sessions use the **GitHub MCP** for all GitHub interactions (PRs, CI status, comments) — there is no `gh` CLI. Use `mcp__github__*` tools.
+Sessions use the **GitHub MCP** for all GitHub interactions (PRs, CI status, comments) — there is no `gh` CLI.
+Use `mcp__github__*` tools.
 
-Once CI exists, on-demand runs are triggered with `mcp__github__actions_run_trigger` (`workflow_id: "terraform.yml"`, `ref: "<branch>"`); after triggering, give the user a direct link (`https://github.com/flungo/terraform-github/actions/runs/<run_id>`) and report the outcome. (Pattern inherited from `terraform-grafana-cloud`.)
+Once CI exists, on-demand runs are triggered with `mcp__github__actions_run_trigger` (`workflow_id: "terraform.yml"`, `ref: "<branch>"`); after triggering, give the user a direct link (`https://github.com/flungo/terraform-github/actions/runs/<run_id>`) and report the outcome.
+(Pattern inherited from `terraform-grafana-cloud`.)
 
 ### Validating Terraform locally
 
-CI is the authority — the `terraform.yml` plan on the PR is what proves a change. But `fmt`/`validate` locally first catches syntax and type errors without burning a CI round-trip. The session has no `terraform` binary, so fetch one; `init` then works normally against the registry:
+CI is the authority — the `terraform.yml` plan on the PR is what proves a change.
+But `fmt`/`validate` locally first catches syntax and type errors without burning a CI round-trip.
+The session has no `terraform` binary, so fetch one; `init` then works normally against the registry:
 
 ```bash
 S=<scratchpad>                     # a writable temp dir, not the repo
@@ -103,19 +120,27 @@ $S/terraform init -backend=false            # -backend=false: no HCP token neede
 $S/terraform validate
 ```
 
-**Egress.** `registry.terraform.io` and `releases.hashicorp.com` are on the environment's allowlist. `checkpoint-api.hashicorp.com` (HashiCorp's optional version-check ping) is **not**, and returns 403 through the agent proxy — harmless, but set `CHECKPOINT_DISABLE=1` to keep it out of the output. If a host you genuinely need is blocked, report it and ask for the network policy to be updated (per `/root/.ccr/README.md`); never route around the proxy.
+**Egress.** `registry.terraform.io` and `releases.hashicorp.com` are on the environment's allowlist.
+`checkpoint-api.hashicorp.com` (HashiCorp's optional version-check ping) is **not**, and returns 403 through the agent proxy — harmless, but set `CHECKPOINT_DISABLE=1` to keep it out of the output.
+If a host you genuinely need is blocked, report it and ask for the network policy to be updated (per `/root/.ccr/README.md`); never route around the proxy.
 
-**Afterwards:** delete `owners/<owner>/.terraform/` (gitignored, and large). **Keep `.terraform.lock.hcl` — it is committed** (see [Terraform conventions](docs/reference/terraform-conventions.md)). If `init` modified it, that is a real change: review and commit it deliberately rather than discarding it.
+**Afterwards:** delete `owners/<owner>/.terraform/` (gitignored, and large).
+**Keep `.terraform.lock.hcl` — it is committed** (see [Terraform conventions](docs/reference/terraform-conventions.md)).
+If `init` modified it, that is a real change: review and commit it deliberately rather than discarding it.
 
-`validate` is clean — no warnings. Treat any it does emit as caused by your change, not as background noise. Local `plan` is not possible: it needs both the HCP backend token and a GitHub token.
+`validate` is clean — no warnings.
+Treat any it does emit as caused by your change, not as background noise.
+Local `plan` is not possible: it needs both the HCP backend token and a GitHub token.
 
 ## Branch management
 
-Branch and PR hygiene comes from the **`git-conventions`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`): never commit to `main` — a feature branch per change; at session start pull `main` and branch (confirm before continuing on an existing non-`main` branch); fetch and rebase onto `main` before finishing; [Conventional Commits](https://www.conventionalcommits.org/); linear history — squash a single logical change, rebase (no squash) to preserve several distinct ones; rebase hygiene — amend rather than leaving fix-up commits; force-push feature branches only, never `main`; land via PR and delete the branch after merge; and monitor PRs via activity subscriptions, not `send_later`. The plugin complements this file; where this repo differs, this file wins.
+Branch and PR hygiene comes from the **`git-conventions`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`): never commit to `main` — a feature branch per change; at session start pull `main` and branch (confirm before continuing on an existing non-`main` branch); fetch and rebase onto `main` before finishing; [Conventional Commits](https://www.conventionalcommits.org/); linear history — squash a single logical change, rebase (no squash) to preserve several distinct ones; rebase hygiene — amend rather than leaving fix-up commits; force-push feature branches only, never `main`; land via PR and delete the branch after merge; and monitor PRs via activity subscriptions, not `send_later`.
+The plugin complements this file; where this repo differs, this file wins.
 
 ## Documentation standards
 
-Documentation conventions come from the **`docs-standards`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`): the Diátaxis `docs/` split (`decisions/`, `plans/`, `runbooks/`, `reference/`, each with a `README.md` index kept current in the same commit), the Nygard ADR format, the ephemeral two-PR plan lifecycle, the 🤖 Agent / Verify callouts, semantic line breaks, and the end-of-session staleness scan — for which the plugin ships the `Stop` hook that prints the doc-maintenance checklist. The plugin complements this file; where this repo differs, this file wins.
+Documentation conventions come from the **`docs-standards`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`): the Diátaxis `docs/` split (`decisions/`, `plans/`, `runbooks/`, `reference/`, each with a `README.md` index kept current in the same commit), the Nygard ADR format, the ephemeral two-PR plan lifecycle, the 🤖 Agent / Verify callouts, semantic line breaks, and the end-of-session staleness scan — for which the plugin ships the `Stop` hook that prints the doc-maintenance checklist.
+The plugin complements this file; where this repo differs, this file wins.
 
 This repo's specific doc hooks, on top of the plugin's generic ones:
 
@@ -144,18 +169,25 @@ Those copies go stale silently — nothing in this repo's CI reads them — so c
 
 ## Key decisions
 
-See [`docs/decisions/README.md`](docs/decisions/README.md) for the full index. Short version:
+See [`docs/decisions/README.md`](docs/decisions/README.md) for the full index.
+Short version:
 
 - Dedicated, provider-scoped `terraform-github` repo; Terraform over UI/scripts; multi-owner (personal + orgs); directory-per-owner consuming shared modules (ADR-001)
 - HCP backend, Local execution mode, and GitHub Actions plan/apply CI inherited from `terraform-grafana-cloud` (ADR-002 there); **workspace-per-owner topology** — one HCP workspace per owner directory (`github-<login>`) in a dedicated `terraform-github` project (ADR-002)
 - **Standard repository module** (`modules/repository`) encodes the opinionated baseline; owner directories route each repo through it, migrated via `moved {}` blocks; standard first, deviation inputs added only on explicit confirmation (ADR-003)
 - **Branch protection via repository rulesets** — a shared `modules/branch-protection` (a `github_repository_ruleset`, not the older `github_branch_protection`) protects default branches: require PR, conversation resolution, linear history, and block deletion; PR-scoped admin bypass unless `strict`; piloted on authentik (ADR-004)
-- **Classic-protection guard in the composite, evaluated at plan time** — a pre-existing classic branch protection rule double-enforces against the ruleset, so a `postcondition` fails the plan while one exists. It reads the caller's `name` input, not the repository resource's name: Terraform defers a data source that depends on a pending resource, and an adoption always leaves one pending, so the original placement in `modules/branch-protection` evaluated only during apply — after the rulesets it should have blocked were created. Living in the composite also means one guard per repository rather than one per ruleset (ADR-009)
+- **Classic-protection guard in the composite, evaluated at plan time** — a pre-existing classic branch protection rule double-enforces against the ruleset, so a `postcondition` fails the plan while one exists.
+  It reads the caller's `name` input, not the repository resource's name: Terraform defers a data source that depends on a pending resource, and an adoption always leaves one pending, so the original placement in `modules/branch-protection` evaluated only during apply — after the rulesets it should have blocked were created.
+  Living in the composite also means one guard per repository rather than one per ruleset (ADR-009)
 - **Standard-repository composite** (`modules/standard-repository`) — the caller-facing surface: one call composes the three primitives per repo.
   Secret values come from one owner-level `local.shared_secrets` source (never wired per repo file); a `manage_secrets` opt-out exists for the self-referential case (terraform-github itself).
   The `terraform` flag's second half — a required plan-check context — was deferred here and resolved by ADR-010 (ADR-006)
-- **Release-branch protection with an App push bypass** — the branch-protection primitive takes `name` and `push_bypass_app_ids` (numeric App IDs — private Apps cannot be resolved by slug — `"always"` bypass, kept under `strict`) and encodes `non_fast_forward`; a `release_branches` composite input adds a `"release"` ruleset. First case: `github-workflows`' `v*` branches, pushed only by its `flungo-release` App or a merged PR (ADR-007)
-- **Release-branch creation restricted to the automation** — ruleset ref targeting is fnmatch, *not* regex, so `v[0-9]*` also reaches `v1x`/`v2-test`; combined with the deletion block (and a PR-scoped admin bypass that does not cover deletion) such a branch was undeletable. `restrict_creation` — set by the composite for release rulesets — means only the release App can create a matching ref, turning the trap into a clean rejection. The broad glob is then kept on purpose: narrowing to enumerated shapes would silently miss `v100`, and under-reach fails quietly where over-reach nobody can create costs nothing. `update` stays unrestricted deliberately: it would block backport PRs (ADR-008)
+- **Release-branch protection with an App push bypass** — the branch-protection primitive takes `name` and `push_bypass_app_ids` (numeric App IDs — private Apps cannot be resolved by slug — `"always"` bypass, kept under `strict`) and encodes `non_fast_forward`; a `release_branches` composite input adds a `"release"` ruleset.
+  First case: `github-workflows`' `v*` branches, pushed only by its `flungo-release` App or a merged PR (ADR-007)
+- **Release-branch creation restricted to the automation** — ruleset ref targeting is fnmatch, *not* regex, so `v[0-9]*` also reaches `v1x`/`v2-test`; combined with the deletion block (and a PR-scoped admin bypass that does not cover deletion) such a branch was undeletable.
+  `restrict_creation` — set by the composite for release rulesets — means only the release App can create a matching ref, turning the trap into a clean rejection.
+  The broad glob is then kept on purpose: narrowing to enumerated shapes would silently miss `v100`, and under-reach fails quietly where over-reach nobody can create costs nothing.
+  `update` stays unrestricted deliberately: it would block backport PRs (ADR-008)
 - **The `terraform` flag means "follows Fabrizio's Terraform standards"** — not "holds Terraform config"; the fleet proved those diverge (only two of five `terraform = true` repos used the shared jobs).
   Both effects follow from the one fact: the HCP token those jobs read is attached, and the `terraform / terraform` check they report is required.
   `required_status_checks` becomes additional-only, and `excluded_status_checks` drops an implied context where a repo follows the standards but cannot report the check (`stalwart.flungo.net`) — a validation rejects a context named in both lists (ADR-010)

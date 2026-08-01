@@ -1,28 +1,12 @@
 # Module: `standard-repository`
 
-The caller-facing composite for the `terraform-github` fleet — the one-call "my
-standard repo" (see
-[ADR-006](../../docs/decisions/006-standard-repository-composite.md)). One call
-per managed repository composes the three primitives: [`repository`](../repository)
-(baseline settings), [`branch-protection`](../branch-protection) (branch-protection
-rulesets — the default branch always, release branches where declared), and
-[`repository-secrets`](../repository-secrets) (shared Actions
-secrets). The composite wires them together and adds no opinion of its own — the
-baselines stay encoded in the primitives; the full catalogue is in
-[`docs/reference/standard-repository.md`](../../docs/reference/standard-repository.md).
+The caller-facing composite for the `terraform-github` fleet — the one-call "my standard repo" (see [ADR-006](../../docs/decisions/006-standard-repository-composite.md)).
+One call per managed repository composes the three primitives: [`repository`](../repository) (baseline settings), [`branch-protection`](../branch-protection) (branch-protection rulesets — the default branch always, release branches where declared), and [`repository-secrets`](../repository-secrets) (shared Actions secrets).
+The composite wires them together and adds no opinion of its own — the baselines stay encoded in the primitives; the full catalogue is in [`docs/reference/standard-repository.md`](../../docs/reference/standard-repository.md).
 
-It does carry one check of its own: a **classic-protection guard** that fails the
-plan if the repository still has a classic branch protection rule, which would
-double-enforce against the ruleset. It reads `var.name` rather than the repository
-resource's name so the check evaluates at plan time even during an adoption, and it
-lives here rather than in the branch-protection primitive so it runs once per
-repository instead of once per ruleset — see
-[ADR-009](../../docs/decisions/009-plan-time-classic-protection-guard.md) and
-[`docs/runbooks/migrating-classic-protection-to-ruleset.md`](../../docs/runbooks/migrating-classic-protection-to-ruleset.md).
-Creating a brand-new repository is the one case where it must be skipped
-(`repository_exists = false`), because the guard cannot query a repository that
-does not exist yet — see
-[`docs/runbooks/creating-repositories.md`](../../docs/runbooks/creating-repositories.md).
+It does carry one check of its own: a **classic-protection guard** that fails the plan if the repository still has a classic branch protection rule, which would double-enforce against the ruleset.
+It reads `var.name` rather than the repository resource's name so the check evaluates at plan time even during an adoption, and it lives here rather than in the branch-protection primitive so it runs once per repository instead of once per ruleset — see [ADR-009](../../docs/decisions/009-plan-time-classic-protection-guard.md) and [`docs/runbooks/migrating-classic-protection-to-ruleset.md`](../../docs/runbooks/migrating-classic-protection-to-ruleset.md).
+Creating a brand-new repository is the one case where it must be skipped (`repository_exists = false`), because the guard cannot query a repository that does not exist yet — see [`docs/runbooks/creating-repositories.md`](../../docs/runbooks/creating-repositories.md).
 
 ## Usage
 
@@ -39,19 +23,11 @@ module "authentik_flungo_net" {
 }
 ```
 
-The module local name mirrors the repository name with any character invalid in a
-Terraform identifier replaced by `_`, per
-[Terraform conventions](../../docs/reference/terraform-conventions.md).
-`shared_secrets` is composed **once** at owner level (a `locals` block over the
-owner directory's sensitive variables) and passed to every call as the same
-uniform reference — repo files never wire individual secret values.
+The module local name mirrors the repository name with any character invalid in a Terraform identifier replaced by `_`, per [Terraform conventions](../../docs/reference/terraform-conventions.md).
+`shared_secrets` is composed **once** at owner level (a `locals` block over the owner directory's sensitive variables) and passed to every call as the same uniform reference — repo files never wire individual secret values.
 
-Adopting a repository that already exists on GitHub? Pair the call with an
-`import {}` block targeting the composite's internal repository resource —
-`import { to = module.<name>.module.repository.github_repository.this, id = "<repo-name>" }`
-— and follow
-[`docs/runbooks/importing-repositories.md`](../../docs/runbooks/importing-repositories.md);
-the protection ruleset and secrets are created (not imported) by the same apply.
+Adopting a repository that already exists on GitHub?
+Pair the call with an `import {}` block targeting the composite's internal repository resource — `import { to = module.<name>.module.repository.github_repository.this, id = "<repo-name>" }` — and follow [`docs/runbooks/importing-repositories.md`](../../docs/runbooks/importing-repositories.md); the protection ruleset and secrets are created (not imported) by the same apply.
 
 ## Inputs
 

@@ -1,7 +1,6 @@
 # ADR-011: Require branches to be up to date before merging
 
-Date: 2026-07-31
-Status: Accepted
+Date: 2026-07-31 Status: Accepted
 
 Refines [ADR-004](004-branch-protection-rulesets.md), which stands.
 

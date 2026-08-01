@@ -1,10 +1,7 @@
 # Repository topics
 
-A shared vocabulary of GitHub repository topics, so the same concept is tagged
-the same way across the fleet. Topics are set through the `topics` input on the
-standard repository module (see [`standard-repository.md`](standard-repository.md));
-this page catalogues the topics the fleet uses — what each one signals and when to
-apply it — and the conventions for choosing them.
+A shared vocabulary of GitHub repository topics, so the same concept is tagged the same way across the fleet.
+Topics are set through the `topics` input on the standard repository module (see [`standard-repository.md`](standard-repository.md)); this page catalogues the topics the fleet uses — what each one signals and when to apply it — and the conventions for choosing them.
 
 ## Glossary
 
@@ -37,9 +34,8 @@ apply it — and the conventions for choosing them.
 
 ### Plugins and distribution
 
-These are **ecosystem-agnostic** — they describe the *kind* of artefact, for any
-software, not a particular platform. A Claude-specific set is narrowed by pairing
-them with `claude` / `claude-code`, not by redefining these.
+These are **ecosystem-agnostic** — they describe the *kind* of artefact, for any software, not a particular platform.
+A Claude-specific set is narrowed by pairing them with `claude` / `claude-code`, not by redefining these.
 
 | Topic | Signals — and when to apply it |
 | --- | --- |
@@ -48,49 +44,27 @@ them with `claude` / `claude-code`, not by redefining these.
 
 ## Conventions for choosing topics
 
-- **Keep a repo's existing topics by default.** Adoption imports the live topics
-  (see [`../runbooks/importing-repositories.md`](../runbooks/importing-repositories.md));
-  don't churn them without reason.
-- **Prefer a topic already in this glossary** over coining a near-synonym, so one
-  concept is tagged identically fleet-wide.
-- **Prefer a widely-used topic over a niche one.** When a concept isn't in the
-  glossary yet, reach for an established topic already common across GitHub — weigh
-  its repo count and follow the **Related Topics** on `github.com/topics/<name>` to
-  find the established neighbours — rather than a bespoke tag. Widely-used topics
-  aid discoverability for people, search engines, and bots, and keep the fleet
-  aligned with each ecosystem's conventions. Then record it here.
-- **Skip topics that don't narrow anything.** Avoid tags too broad to be meaningful
-  (e.g. `ai`, `devops`) and vendor tags that merely restate a more specific one
-  (e.g. `hashicorp` on a `terraform` repo). A vendor tag earns its place only where
-  the ecosystem actively uses it for discovery (e.g. `anthropic` in the Claude
-  ecosystem).
-- **Add a new topic to this glossary only when a genuinely new category is needed**
-  that no existing entry covers — in the *same* change that first applies it,
-  never speculatively.
-- **Follow GitHub's topic rules.** Topics are lowercase; words are separated by
-  hyphens (no spaces or underscores); digits are allowed and a topic may start
-  with one. A topic is at most 50 characters, and a repository may carry up to 20.
-- **Topics are always public** — a topic set on a private repository is still
-  visible publicly, so never encode anything sensitive in one.
+- **Keep a repo's existing topics by default.** Adoption imports the live topics (see [`../runbooks/importing-repositories.md`](../runbooks/importing-repositories.md)); don't churn them without reason.
+- **Prefer a topic already in this glossary** over coining a near-synonym, so one concept is tagged identically fleet-wide.
+- **Prefer a widely-used topic over a niche one.** When a concept isn't in the glossary yet, reach for an established topic already common across GitHub — weigh its repo count and follow the **Related Topics** on `github.com/topics/<name>` to find the established neighbours — rather than a bespoke tag.
+  Widely-used topics aid discoverability for people, search engines, and bots, and keep the fleet aligned with each ecosystem's conventions.
+  Then record it here.
+- **Skip topics that don't narrow anything.** Avoid tags too broad to be meaningful (e.g. `ai`, `devops`) and vendor tags that merely restate a more specific one (e.g. `hashicorp` on a `terraform` repo).
+  A vendor tag earns its place only where the ecosystem actively uses it for discovery (e.g. `anthropic` in the Claude ecosystem).
+- **Add a new topic to this glossary only when a genuinely new category is needed** that no existing entry covers — in the *same* change that first applies it, never speculatively.
+- **Follow GitHub's topic rules.** Topics are lowercase; words are separated by hyphens (no spaces or underscores); digits are allowed and a topic may start with one.
+  A topic is at most 50 characters, and a repository may carry up to 20.
+- **Topics are always public** — a topic set on a private repository is still visible publicly, so never encode anything sensitive in one.
 
 ## Finding a new topic
 
-When a repository needs a topic that isn't in the glossary yet, vet the candidate
-against how GitHub actually uses it. The signals are all on
-`github.com/topics/<name>` or a `topic:<name>` repository search:
+When a repository needs a topic that isn't in the glossary yet, vet the candidate against how GitHub actually uses it.
+The signals are all on `github.com/topics/<name>` or a `topic:<name>` repository search:
 
 - **Popularity** — the repository count; prefer the form with the most repos.
-- **Variants** — compare singular vs plural and near-synonyms; the popular form is
-  not always the obvious one (`plugin` far outweighs `plugins`; `ci` beats
-  `continuous-integration`).
-- **Curated description** — GitHub's featured-topic blurb, to confirm the meaning
-  matches your intended use.
-- **Related Topics** — the neighbours listed on the topic page, to surface other
-  established topics worth adopting.
-- **Real usage** — the topic sets on the top-starred repos in the space, for the
-  community's working vocabulary.
+- **Variants** — compare singular vs plural and near-synonyms; the popular form is not always the obvious one (`plugin` far outweighs `plugins`; `ci` beats `continuous-integration`).
+- **Curated description** — GitHub's featured-topic blurb, to confirm the meaning matches your intended use.
+- **Related Topics** — the neighbours listed on the topic page, to surface other established topics worth adopting.
+- **Real usage** — the topic sets on the top-starred repos in the space, for the community's working vocabulary.
 
-> **🤖 Agent** — Vet a candidate against those signals, apply the conventions above
-> (prefer a listed topic; prefer widely-used; skip anything too broad or
-> vendor-noise), then add the chosen topic to this glossary in the same change that
-> first applies it.
+> **🤖 Agent** — Vet a candidate against those signals, apply the conventions above (prefer a listed topic; prefer widely-used; skip anything too broad or vendor-noise), then add the chosen topic to this glossary in the same change that first applies it.

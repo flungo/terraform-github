@@ -1,42 +1,26 @@
 # Migrating a repository from classic branch protection to a ruleset
 
-Some repositories carry **classic branch protection** (repo → Settings → Branches,
-the `github_branch_protection` resource) from before they were onboarded to
-Terraform. The [`branch-protection`](../../modules/branch-protection) module
-protects default branches with a **ruleset** instead (see
-[ADR-004](../decisions/004-branch-protection-rulesets.md)), and the two
-**double-enforce** if both are present. The composite's guard therefore fails the plan
-while any classic rule exists, so onboarding a repo means *migrating* it off classic
-protection — not just adding the module call.
+Some repositories carry **classic branch protection** (repo → Settings → Branches, the `github_branch_protection` resource) from before they were onboarded to Terraform.
+The [`branch-protection`](../../modules/branch-protection) module protects default branches with a **ruleset** instead (see [ADR-004](../decisions/004-branch-protection-rulesets.md)), and the two **double-enforce** if both are present.
+The composite's guard therefore fails the plan while any classic rule exists, so onboarding a repo means *migrating* it off classic protection — not just adding the module call.
 
-This runbook is that migration: **compare the classic rule against the ruleset, then
-remove the classic rule.** The comparison is the important part — never remove a
-classic rule before confirming the ruleset is equivalent-or-stronger, or you silently
-weaken the branch's protection.
+This runbook is that migration: **compare the classic rule against the ruleset, then remove the classic rule.** The comparison is the important part — never remove a classic rule before confirming the ruleset is equivalent-or-stronger, or you silently weaken the branch's protection.
 
 ## Procedure
 
-1. **Adopt the repository into Terraform.** A repo carrying a classic rule exists on
-   GitHub but is not yet managed here, so this step is an *adoption*: a
-   `standard-repository` call in the repo's own by-subject file
-   `owners/<owner>/<repo>.tf`, paired with an `import {}` block for the repository
-   resource. Follow [`importing-repositories.md`](importing-repositories.md) for the
-   call, the import block, and the settings to reconcile.
+1. **Adopt the repository into Terraform.** A repo carrying a classic rule exists on GitHub but is not yet managed here, so this step is an *adoption*: a `standard-repository` call in the repo's own by-subject file `owners/<owner>/<repo>.tf`, paired with an `import {}` block for the repository resource.
+   Follow [`importing-repositories.md`](importing-repositories.md) for the call, the import block, and the settings to reconcile.
 
-   Do **not** add a standalone [`branch-protection`](../../modules/branch-protection)
-   call: the composite already creates the ruleset, and a second one would apply
-   alongside it. The primitive is for a genuine partial case only.
+   Do **not** add a standalone [`branch-protection`](../../modules/branch-protection) call: the composite already creates the ruleset, and a second one would apply alongside it.
+   The primitive is for a genuine partial case only.
 
-   Already-managed repo? Then there is nothing to add — skip to step 2, where the
-   guard is already failing every plan.
+   Already-managed repo?
+   Then there is nothing to add — skip to step 2, where the guard is already failing every plan.
 
-2. **Open the PR / run the plan.** The plan fails on the guard with
-   `<repo> has classic branch protection rule(s) matching [<pattern>]`.
+2. **Open the PR / run the plan.** The plan fails on the guard with `<repo> has classic branch protection rule(s) matching [<pattern>]`.
 
-3. **Read the classic rule's settings.** The plan comment surfaces the blocking
-   *pattern*; the full settings come from the **`surface-classic-protection`** CI job,
-   which runs whenever the plan fails on the guard and prints the repo's complete
-   classic settings (GraphQL) to its run summary. Read them there — no manual step.
+3. **Read the classic rule's settings.** The plan comment surfaces the blocking *pattern*; the full settings come from the **`surface-classic-protection`** CI job, which runs whenever the plan fails on the guard and prints the repo's complete classic settings (GraphQL) to its run summary.
+   Read them there — no manual step.
 
    <details><summary>To fetch them yourself outside CI</summary>
 
@@ -61,41 +45,28 @@ weaken the branch's protection.
    Needs a token with admin read on the repo (`FLUNGO_GITHUB_TOKEN` via `GH_TOKEN`).
    </details>
 
-4. **Compare field-by-field** against the ruleset baseline (below). Confirm every
-   protection the classic rule enforces is matched-or-exceeded by the ruleset.
+4. **Compare field-by-field** against the ruleset baseline (below).
+   Confirm every protection the classic rule enforces is matched-or-exceeded by the ruleset.
 
-   > **🤖 Agent** — do not recommend removing the classic rule until the comparison
-   > shows no protection is lost; if the classic rule enforces something the ruleset
-   > doesn't, surface it and ask whether to add it to the module (fleet-wide) or
-   > accept the change.
+   > **🤖 Agent** — do not recommend removing the classic rule until the comparison shows no protection is lost; if the classic rule enforces something the ruleset doesn't, surface it and ask whether to add it to the module (fleet-wide) or accept the change.
 
-   If the classic rule enforces something the module omits, decide deliberately:
-   add it to [`modules/branch-protection`](../../modules/branch-protection) (so the
-   whole fleet gains it) or accept dropping it. If the ruleset already covers
-   everything, continue.
+   If the classic rule enforces something the module omits, decide deliberately: add it to [`modules/branch-protection`](../../modules/branch-protection) (so the whole fleet gains it) or accept dropping it.
+   If the ruleset already covers everything, continue.
 
-5. **Remove the classic rule** in the repo → Settings → Branches. Terraform can't do
-   this — it doesn't manage the classic rule — so it's a manual step. The branch is
-   briefly unprotected between removal and the ruleset applying (step 7); negligible
-   for a solo repo, but sequence it so the window is short.
+5. **Remove the classic rule** in the repo → Settings → Branches.
+   Terraform can't do this — it doesn't manage the classic rule — so it's a manual step.
+   The branch is briefly unprotected between removal and the ruleset applying (step 7); negligible for a solo repo, but sequence it so the window is short.
 
-6. **Re-run the plan.** With the classic rule gone the guard passes. For an
-   already-managed repo the plan shows just the ruleset as `1 to add` (two, where the
-   repo also declares `release_branches`); for an adoption it shows the composite's
-   full set — the imported repository plus the ruleset(s) and shared secret(s) — as
-   [`importing-repositories.md`](importing-repositories.md) describes.
+6. **Re-run the plan.** With the classic rule gone the guard passes.
+   For an already-managed repo the plan shows just the ruleset as `1 to add` (two, where the repo also declares `release_branches`); for an adoption it shows the composite's full set — the imported repository plus the ruleset(s) and shared secret(s) — as [`importing-repositories.md`](importing-repositories.md) describes.
 
 7. **Merge.** The apply on merge creates the ruleset; the branch is protected again.
 
 ## Ruleset baseline (what you're migrating *to*)
 
 The full catalogue is [`docs/reference/branch-protection.md`](../reference/branch-protection.md).
-In brief, the ruleset enforces on the default branch: pull request required
-(0 approvals), conversation resolution, linear history, blocked force-pushes,
-restricted deletion, and any named status checks; admins get a
-`pull_request`-scoped bypass unless `strict`. Creation restriction (`creation`) is
-available but off for default-branch rulesets, where it has no effect —
-see [ADR-008](../decisions/008-restrict-release-branch-creation.md).
+In brief, the ruleset enforces on the default branch: pull request required (0 approvals), conversation resolution, linear history, blocked force-pushes, restricted deletion, and any named status checks; admins get a `pull_request`-scoped bypass unless `strict`.
+Creation restriction (`creation`) is available but off for default-branch rulesets, where it has no effect — see [ADR-008](../decisions/008-restrict-release-branch-creation.md).
 
 ## Classic → ruleset field mapping
 
@@ -119,14 +90,13 @@ Use this to map each classic setting to its ruleset equivalent when comparing:
 | *(no classic equivalent)* | `creation` | Rulesets can restrict who may *create* a matching ref; classic protection has no counterpart, so migration neither gains nor loses it. Off for default-branch rulesets; used for release branches (ADR-008). |
 | `lockBranch` | *(not encoded)* | The module doesn't lock branches. |
 
-A blank "ruleset equivalent" means the module doesn't encode that protection —
-so if the classic rule sets it `true`/non-empty, dropping the classic rule *loses*
-it. Decide whether to extend the module or accept the loss.
+A blank "ruleset equivalent" means the module doesn't encode that protection — so if the classic rule sets it `true`/non-empty, dropping the classic rule *loses* it.
+Decide whether to extend the module or accept the loss.
 
 ## Worked example: authentik.flungo.net
 
-`authentik.flungo.net` was the pilot. Its classic rule on `main`, as fetched with the
-query above:
+`authentik.flungo.net` was the pilot.
+Its classic rule on `main`, as fetched with the query above:
 
 ```json
 {"pattern":"main","requiresApprovingReviews":true,"requiredApprovingReviewCount":0,
@@ -156,7 +126,5 @@ Field-by-field against the ruleset:
 | Deletions | `allowsDeletions = false` | `deletion = true` | **Same** |
 | Lock branch | `false` | not encoded | No loss (classic doesn't set it) |
 
-**Verdict: the ruleset is equivalent-or-stronger on every setting authentik's classic
-rule enforces** — matching PR, conversation-resolution, linear-history, force-push
-and deletion protection, and stronger on admin handling (a PR-scoped bypass rather than a full admin
-exemption). Removing the classic rule is therefore safe — no protection is lost.
+**Verdict: the ruleset is equivalent-or-stronger on every setting authentik's classic rule enforces** — matching PR, conversation-resolution, linear-history, force-push and deletion protection, and stronger on admin handling (a PR-scoped bypass rather than a full admin exemption).
+Removing the classic rule is therefore safe — no protection is lost.

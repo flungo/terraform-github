@@ -4,7 +4,9 @@ Bring a new **owner account** (the personal account, or an organisation) under m
 
 ## Prerequisites
 
-- The HCP **`terraform-github` project** exists with **default execution mode = Local**. This is a one-time setup, established when the first owner was onboarded; assume it is done for subsequent owners. (The `project` argument in the cloud block would create the project on first `init`, but the *execution-mode default* is a project setting configured once in HCP.)
+- The HCP **`terraform-github` project** exists with **default execution mode = Local**.
+  This is a one-time setup, established when the first owner was onboarded; assume it is done for subsequent owners.
+  (The `project` argument in the cloud block would create the project on first `init`, but the *execution-mode default* is a project setting configured once in HCP.)
 
 ## Procedure
 
@@ -30,7 +32,8 @@ Bring a new **owner account** (the personal account, or an organisation) under m
    }
    ```
 
-2. **Create the owner's token and wire it in.** A fine-grained PAT for `<login>`, **all repositories**, with **Administration: Read and write** + **Metadata: Read-only** (add more as scope grows — see [`github-provider-token-rotation.md`](github-provider-token-rotation.md)). Store it as the `<OWNER>_GITHUB_TOKEN` Actions secret and reference it as `TF_VAR_github_token` for this owner in `.github/workflows/terraform.yml`.
+2. **Create the owner's token and wire it in.** A fine-grained PAT for `<login>`, **all repositories**, with **Administration: Read and write** + **Metadata: Read-only** (add more as scope grows — see [`github-provider-token-rotation.md`](github-provider-token-rotation.md)).
+   Store it as the `<OWNER>_GITHUB_TOKEN` Actions secret and reference it as `TF_VAR_github_token` for this owner in `.github/workflows/terraform.yml`.
 
 3. **Open the PR.** CI's plan job runs `terraform init`, which **auto-creates** the `github-<login>` workspace in the `terraform-github` project (inheriting Local execution), then posts the plan on the PR — no manual `init` or workspace creation.
 
@@ -38,6 +41,7 @@ Bring a new **owner account** (the personal account, or an organisation) under m
 
 ## Notes
 
-- **Organisation owners** additionally have org-level resources a user account does not (org Actions secrets, teams/membership). Those are onboarded as the corresponding modules/resources land.
+- **Organisation owners** additionally have org-level resources a user account does not (org Actions secrets, teams/membership).
+  Those are onboarded as the corresponding modules/resources land.
 - **CI** currently targets `owners/flungo` directly; add the new owner to `.github/workflows/terraform.yml` (step 2), and — once there is more than one — generalise it to a matrix over `owners/*` with per-owner secrets (the GitHub Environments follow-up).
 - The **bootstrap** GitHub credential is a PAT; the intended end state is a GitHub App that mints per-owner tokens from one key (its own future ADR).

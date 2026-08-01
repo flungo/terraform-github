@@ -1,6 +1,9 @@
 # Secrets
 
-The credentials CI uses. All are **GitHub Actions secrets** — never HCP workspace variables. The tokens that gate this repo's *own* CI are never Terraform-managed (a broken apply must not be able to lock the repo out of its own credentials; see [Terraform conventions](terraform-conventions.md) → bootstrapping / circularity). Secrets written to *other* repos (below) carry no such circularity and are Terraform-managed.
+The credentials CI uses.
+All are **GitHub Actions secrets** — never HCP workspace variables.
+The tokens that gate this repo's *own* CI are never Terraform-managed (a broken apply must not be able to lock the repo out of its own credentials; see [Terraform conventions](terraform-conventions.md) → bootstrapping / circularity).
+Secrets written to *other* repos (below) carry no such circularity and are Terraform-managed.
 
 | Secret | Purpose | Rotation |
 | --- | --- | --- |
