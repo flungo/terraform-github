@@ -132,6 +132,24 @@ If `init` modified it, that is a real change: review and commit it deliberately 
 Treat any it does emit as caused by your change, not as background noise.
 Local `plan` is not possible: it needs both the HCP backend token and a GitHub token.
 
+### Validating Markdown locally
+
+Both Markdown checks run locally, and both are worth running before pushing — the tools are the same ones CI uses:
+
+```bash
+export NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt   # the agent proxy's CA
+npx markdownlint-cli2@0.23.1 '**/*.md'                # style; must be 0 issues
+lychee --offline --include-fragments --no-progress '**/*.md'   # links + anchors
+```
+
+**Pin markdownlint-cli2 to `0.23.1`** — the version `DavidAnson/markdownlint-cli2-action@v24` ships, which is what the reusable workflow runs.
+A newer local one carries rules that version does not have, so it reports findings CI never will.
+Read the pinned version from the action's own manifest (`https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2-action/<tag>/package.json`) when the action is bumped, and update this line.
+
+**lychee has no npm or pip package**, and its release tarballs are blocked by the egress proxy.
+Install it with `CARGO_HTTP_CAINFO=/root/.ccr/ca-bundle.crt cargo install lychee --locked` — it compiles for a few minutes, so start it in the background at the top of the session.
+Only the offline check is meaningful locally; the external URL sweep is `workflow_dispatch`-only and must be verified in GitHub, never from the sandbox.
+
 ## Branch management
 
 Branch and PR hygiene comes from the **`git-conventions`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`): never commit to `main` — a feature branch per change; at session start pull `main` and branch (confirm before continuing on an existing non-`main` branch); fetch and rebase onto `main` before finishing; [Conventional Commits](https://www.conventionalcommits.org/); linear history — squash a single logical change, rebase (no squash) to preserve several distinct ones; rebase hygiene — amend rather than leaving fix-up commits; force-push feature branches only, never `main`; land via PR and delete the branch after merge; and monitor PRs via activity subscriptions, not `send_later`.
@@ -140,6 +158,10 @@ The plugin complements this file; where this repo differs, this file wins.
 ## Documentation standards
 
 Documentation conventions come from the **`docs-standards`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`): the Diátaxis `docs/` split (`decisions/`, `plans/`, `runbooks/`, `reference/`, each with a `README.md` index kept current in the same commit), the Nygard ADR format, the ephemeral two-PR plan lifecycle, the 🤖 Agent / Verify callouts, semantic line breaks, and the end-of-session staleness scan — for which the plugin ships the `Stop` hook that prints the doc-maintenance checklist.
+The plugin complements this file; where this repo differs, this file wins.
+
+Markdown authoring conventions come from the **`markdown-standards`** plugin (`flungo-plugins`, enabled in `.claude/settings.json`): semantic line breaks (one sentence per source line, `MD013` off), unique names for cross-referenced headings (`MD024` `siblings_only`), compact tables including their delimiter rows (`MD060`), and how to fix an adjacent-blockquote finding rather than suppress it (`MD028`).
+The rules those conventions pair with live in `.markdownlint-cli2.jsonc`, and CI enforces them — see § Validating Markdown locally.
 The plugin complements this file; where this repo differs, this file wins.
 
 This repo's specific doc hooks, on top of the plugin's generic ones:
