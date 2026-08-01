@@ -215,7 +215,7 @@ variation. **This is a proposal — review / adjust; open questions are flagged 
 
 ## 2. Directory-per-owner layout
 
-```
+```text
 .
 ├── modules/                       # shared, opinionated modules (see §1)
 │   ├── repository/

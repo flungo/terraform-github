@@ -20,7 +20,7 @@ always leaves the repository resource pending: the `import` plus the settings
 reconciliation are the entire point. So on the adoption plan every instance
 reported
 
-```
+```text
 will be read during apply (depends on a resource or a module with changes pending)
 ```
 
@@ -71,7 +71,7 @@ until the resource existed. Read at plan time against a repository GitHub has
 never heard of, the data source does not return an empty list — it fails the plan
 outright:
 
-```
+```text
 Error: Could not resolve to a Repository with the name 'flungo/<name>'.
 ```
 

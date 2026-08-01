@@ -32,7 +32,7 @@ Terraform manages these GitHub resources for the `flungo` account (in `owners/fl
 
 Configuration is organised as **one directory per owner** (the personal account and each organisation), each consuming **shared modules** that encode the standard template and preferences:
 
-```
+```text
 modules/            # shared, opinionated modules — repository (the standard repo) today; more to come
 owners/
   flungo/           # the personal (user) account, by login
