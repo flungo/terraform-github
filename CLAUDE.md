@@ -39,7 +39,7 @@ When a sensitive value is needed in docs or config, use a placeholder (e.g. `<gi
 
 ## Repo layout
 
-```
+```text
 modules/                Shared, opinionated modules, consumed by owner directories
                         via a relative source path; more are added as the build-out
                         proceeds.
