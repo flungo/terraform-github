@@ -17,6 +17,12 @@
     // above: a diff should be the size of the change. Under "aligned" cell
     // width is shared state — every cell is padded to its column's widest, so
     // one edit reflows the whole table and one long cell taxes every row.
-    "MD060": { "style": "compact" }
+    "MD060": { "style": "compact" },
+    // Repo-specific, and the only override beyond the three standard ones:
+    // <details>/<summary> is a GitHub rendering affordance with no Markdown
+    // equivalent, used to fold an optional fallback procedure out of a
+    // runbook's main path. Only those two elements are allowed — every other
+    // inline HTML element stays flagged.
+    "MD033": { "allowed_elements": ["details", "summary"] }
   }
 }
