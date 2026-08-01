@@ -5,7 +5,7 @@
 Examples this repo expects to grow: a catalogue of the **standard repository settings** the template applies (and why), the **common shared-secret set** (names and purpose — never values), and the **GitHub provider resource coverage** map (what is managed as code vs still manual).
 
 | Document | Purpose |
-|---|---|
+| --- | --- |
 | [`terraform-conventions.md`](terraform-conventions.md) | The Terraform structure and authoring conventions — directory-per-owner root modules, shared modules encoding the standard, resource naming, import blocks, and the divergence from the sibling repos' single-flat-root pattern |
 | [`standard-repository.md`](standard-repository.md) | The standard-repository composite (`modules/standard-repository`) — the primitives it composes, the settings it encodes vs exposes as inputs, and the rule for growing the input surface |
 | [`branch-protection.md`](branch-protection.md) | The rules the branch-protection module (`modules/branch-protection`) enforces, the inputs it exposes, and the bypass model — the PR-scoped admin bypass and the always-bypass Apps release automation uses — and the fnmatch semantics for targeting refs by pattern |

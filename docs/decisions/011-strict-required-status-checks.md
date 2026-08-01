@@ -24,7 +24,7 @@ The obvious richer answer is GitHub's merge queue — the equivalent of GitLab's
 It is unavailable here, and the constraint is **account type, not plan tier**:
 
 | Owner | Public repository | Private repository |
-|---|---|---|
+| --- | --- | --- |
 | Personal account (this fleet today) | ✗ | ✗ |
 | Organisation, any plan | ✓ | ✗ |
 | Organisation on Enterprise Cloud | ✓ | ✓ |

@@ -11,7 +11,7 @@ apply it — and the conventions for choosing them.
 ### Terraform
 
 | Topic | Signals — and when to apply it |
-|---|---|
+| --- | --- |
 | `terraform` | The repository is a Terraform *configuration* codebase — `.tf` files managing real resources (e.g. `terraform-grafana-cloud`, `terraform-github`). |
 | `terraform-provider` | The repository *implements* a Terraform provider (e.g. `terraform-provider-stalwart`) — provider source code, not configuration that consumes one. |
 | `infrastructure-as-code` | The repository defines infrastructure as code — the canonical companion to `terraform`; apply it alongside on any Terraform configuration repo. |
@@ -19,7 +19,7 @@ apply it — and the conventions for choosing them.
 ### GitHub Actions, CI, and quality
 
 | Topic | Signals — and when to apply it |
-|---|---|
+| --- | --- |
 | `github-actions` | GitHub Actions is a defining feature of the repository — it hosts or centres on Actions workflows, not just an incidental CI job. |
 | `actions` | The widely-used shorthand paired with `github-actions`; part of the ecosystem tags Actions content as `actions` specifically, so carry both for reach. |
 | `reusable-workflows` | The repository publishes reusable workflows (`workflow_call`) that other repositories call. Apply to repos whose purpose is hosting shared, callable workflow definitions. |
@@ -30,7 +30,7 @@ apply it — and the conventions for choosing them.
 ### Claude
 
 | Topic | Signals — and when to apply it |
-|---|---|
+| --- | --- |
 | `claude` | Content built for Anthropic's Claude — agents, skills, plugins, or prompts. Apply where Claude tooling is the repository's subject. |
 | `claude-code` | Content specific to Claude Code (the CLI/agent) as opposed to Claude in general — e.g. plugins, skills, or hooks aimed at Claude Code. |
 | `anthropic` | The vendor tag for Anthropic's tools; the Claude ecosystem pairs it with `claude` / `claude-code` for discoverability. |
@@ -42,7 +42,7 @@ software, not a particular platform. A Claude-specific set is narrowed by pairin
 them with `claude` / `claude-code`, not by redefining these.
 
 | Topic | Signals — and when to apply it |
-|---|---|
+| --- | --- |
 | `plugin` | The repository is, or contains, a plugin — for any software or ecosystem. Use the singular `plugin`: it is the widely-used form, far more common than `plugins`. |
 | `marketplace` | The repository is an installable marketplace or registry others install from, rather than a single artefact. |
 

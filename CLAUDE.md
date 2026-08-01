@@ -9,7 +9,7 @@ Its scope is **the GitHub provider's surface**, not a fixed feature list. It sta
 ## Architecture
 
 | Concern | Implementation |
-|---|---|
+| --- | --- |
 | Terraform provider | `integrations/github ~> 6.0` (one provider configuration per owner) |
 | State backend | HCP Terraform — org `flungo`, **one workspace per owner directory**, **Local execution mode** (inherited from `terraform-grafana-cloud`) |
 | Structure | Directory per owner (`owners/<owner>/`) consuming shared modules (`modules/`) — **not** a single flat root module (see [Terraform conventions](docs/reference/terraform-conventions.md)) |
@@ -19,6 +19,7 @@ Its scope is **the GitHub provider's surface**, not a fixed feature list. It sta
 ## Sensitive information — never commit or expose
 
 **Never include in any file, commit, or output:**
+
 - GitHub tokens — Personal Access Tokens (classic or fine-grained), `GITHUB_TOKEN`, OAuth tokens
 - GitHub App private keys, client secrets, or installation tokens
 - Webhook secrets
@@ -27,6 +28,7 @@ Its scope is **the GitHub provider's surface**, not a fixed feature list. It sta
 - Any other password, private key, or bearer token
 
 **Safe to include** (appears, or would appear, in plain-text Terraform config or public docs):
+
 - GitHub usernames, organisation names, team names and slugs
 - Repository names, topics, descriptions, visibility
 - Actions secret / variable **names** (never their values)
@@ -127,7 +129,7 @@ Some of this repo's contracts are also documented in the repos that have to *mee
 Those copies go stale silently — nothing in this repo's CI reads them — so changing a contract below means opening a PR against the named repo in the same change:
 
 | Contract here | Mirrored in | What goes stale |
-|---|---|---|
+| --- | --- | --- |
 | The `terraform` flag ([ADR-010](docs/decisions/010-terraform-flag-means-terraform-standards.md)) — the `terraform / terraform` context it requires, the `terraform` caller-job name that context depends on, and the conventional secret names | [`flungo/github-workflows`](https://github.com/flungo/github-workflows) → `docs/runbooks/adopting-terraform-workflows.md` § "Adopting in a repository managed by `terraform-github`" | The naming constraints an adopter must follow, the flag-first ordering, and the fact that the flag now also requires an up-to-date branch (ADR-011) |
 | `excluded_status_checks` and the `terraform` flag as they apply to `stalwart.flungo.net` | [`flungo/stalwart.flungo.net`](https://github.com/flungo/stalwart.flungo.net) → `docs/plans/terraform-ci.md` § Phase 3 | What that repo must do to drop its exclusion |
 
@@ -137,7 +139,7 @@ Those copies go stale silently — nothing in this repo's CI reads them — so c
 ## Active work
 
 | Plan | Status |
-|---|---|
+| --- | --- |
 | [Initial build-out](docs/plans/initial-buildout.md) | In progress — owner skeleton, plan/apply CI, the three primitives (`repository`, `branch-protection`, `repository-secrets`), and the `standard-repository` composite have landed; each managed flungo repo is one composite call (§7 steps 1–7 done). Next: step 8 — onboard the rest of the flungo repos, then App auth and the first org |
 
 ## Key decisions

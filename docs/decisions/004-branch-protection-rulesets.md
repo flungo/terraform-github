@@ -72,6 +72,7 @@ Adopt **`github_repository_ruleset`** and encode the standard in a shared
 ## Consequences
 
 **Positive:**
+
 - The modern resource: ref-pattern targeting, `~DEFAULT_BRANCH` (no need to name the
   branch), and room to grow (multiple rulesets, richer rules).
 - The standard is defined once in the module and rolled out by re-applying each owner.
@@ -79,6 +80,7 @@ Adopt **`github_repository_ruleset`** and encode the standard in a shared
   can't quietly carry both a legacy rule and the ruleset.
 
 **Negative / trade-offs:**
+
 - Rulesets and `github_branch_protection` are not interchangeable; if we ever migrate
   to the other resource we must translate each field deliberately and delete the
   legacy resource in the same change (leaving both double-enforces).

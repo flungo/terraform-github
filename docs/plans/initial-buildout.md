@@ -37,7 +37,7 @@ Each wraps one GitHub provider resource type with the user's opinionated default
 so that a caller states *what* they want, not every attribute.
 
 | Module | Wraps | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | `modules/repository` | `github_repository` (+ `github_branch_default`) | A repository created/managed with the standard settings: visibility, feature toggles (issues/wiki/projects), merge strategy (merge commits off, squash + rebase on — rebase preferred; delete-branch-on-merge), default branch, topics, `.gitignore`/license templates. This is the "project template". |
 | `modules/repository-secrets` | `github_actions_secret`, `github_actions_variable`, `github_dependabot_secret` | Apply a set of shared/common Actions secrets + variables to a repository. |
 | `modules/branch-protection` | `github_repository_ruleset` (preferred) **or** `github_branch_protection` | Standard protection for the default branch. **One of the motivators for this repo** — applied *early* (§7), not deferred. Defaults and inputs are specified in [§1.1 Branch protection defaults](#11-branch-protection-defaults) below. |
@@ -47,7 +47,7 @@ so that a caller states *what* they want, not every attribute.
 ### Composite (template) module
 
 | Module | Composes | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | `modules/standard-repository` | `repository` + `branch-protection` + `repository-secrets` | The one-call "my standard repo": creates the repo with standard settings, applies standard branch protection, attaches the shared secrets — sourcing the secret **values** from owner-level variables rather than each caller passing them, so per-repo boilerplate stays minimal (a `manage_secrets`-style opt-out lets a repo skip shared-secret management, e.g. `terraform-github` itself). An owner directory instantiates this once per repository (or over a map of repositories) and gets a fully-standardised repo. Intentional per-repo variation is expressed through **simple module inputs** (e.g. `visibility`, `topics`, and intent flags like `terraform`), scoped as we onboard repositories and discover the variations that actually recur — not by forking the module. |
 
 ### Module inputs & variable naming
@@ -156,23 +156,23 @@ variation. **This is a proposal — review / adjust; open questions are flagged 
 **`modules/repository`**
 
 | Input | Type | Default | Maps to / intent |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `name` | string | — (required) | provider `name` |
 | `description` | string | — (required) | provider `description` — required so every managed repo is described |
 | `visibility` | string | `"private"` | provider `visibility` |
 | `topics` | list(string) | `[]` | provider `topics` |
 | `default_branch` | string | `"main"` | `github_branch_default` |
-| _(baked defaults)_ | — | — | **merge commits disabled; squash + rebase both allowed** (rebase preferred); delete-branch-on-merge; issues on, wiki/projects off — exposed as inputs only if a repo actually needs to differ |
+| *(baked defaults)* | — | — | **merge commits disabled; squash + rebase both allowed** (rebase preferred); delete-branch-on-merge; issues on, wiki/projects off — exposed as inputs only if a repo actually needs to differ |
 
 **`modules/branch-protection`**
 
 | Input | Type | Default | Maps to / intent |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `repository` | string | — (required) | target repo |
 | `pattern` | string | — (required) | protected branch/glob — matches the provider's `pattern` field (the module protects *any* branch; the composite defaults it to the repo's default branch) |
 | `strict` | bool | `false` | drop the admin bypass so the rules bind every human (an App push bypass survives it — [ADR-007](../decisions/007-release-branch-protection.md)) |
 | `required_status_checks` | list(string) | `[]` | check contexts that must pass. **Empty ⇒ enforces nothing** (GitHub has no "require all"; a context is selectable only after it has run on the protected branch) |
-| _(baked defaults)_ | — | — | require PR · conversation resolution · linear history · block force-pushes · restrict deletion · require-status-checks (teeth only via `required_status_checks`) |
+| *(baked defaults)* | — | — | require PR · conversation resolution · linear history · block force-pushes · restrict deletion · require-status-checks (teeth only via `required_status_checks`) |
 
 > This table is the module **as scoped at step 4**. It has since grown a `name`
 > input and release-branch support ([ADR-007](../decisions/007-release-branch-protection.md));
@@ -183,19 +183,19 @@ variation. **This is a proposal — review / adjust; open questions are flagged 
 **`modules/repository-secrets` (per-repo) · `modules/org-secrets` (org-level)**
 
 | Input | Type | Default | Maps to / intent |
-|---|---|---|---|
-| `repository` _(repo)_ / `visibility` + `selected_repository_ids` _(org)_ | — | — | where the secret lands |
+| --- | --- | --- | --- |
+| `repository` *(repo)* / `visibility` + `selected_repository_ids` *(org)* | — | — | where the secret lands |
 | `terraform` | bool | `false` | attach the HCP token secret (the flag's primary effect) |
 | secret values | string (sensitive) | — | passed from owner-dir variables (`TF_VAR_…`), never hard-coded; names e.g. `LYCHEE_GITHUB_TOKEN`, HCP token |
 
 **`modules/standard-repository` (composite — the caller-facing surface)**
 
 | Input | Type | Default | Drives |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `name`, `description`, `visibility`, `topics`, `default_branch` | (as `repository`) | | the repository |
 | `terraform` | bool | `false` | **the HCP token secret** (primary), and adds the Terraform plan check to `required_status_checks`. Branch protection itself applies regardless of this flag. |
 | `strict` | bool | `false` | branch-protection bypass enforcement |
-| _(branch protection)_ | — | — | applied to every repo; `pattern` defaults to the repo's `default_branch` |
+| *(branch protection)* | — | — | applied to every repo; `pattern` defaults to the repo's `default_branch` |
 
 **Resolved in review (2026-07-20):**
 
@@ -311,7 +311,7 @@ it would be with, say, an S3 backend keyed by prefix. The realistic options are:
 ### Trade-off analysis
 
 | Dimension | A: workspace per owner | B: single shared workspace |
-|---|---|---|
+| --- | --- | --- |
 | **Blast radius** | Small — a bad apply touches only that owner's resources/state. | Large — one apply spans every owner; one mistake can affect all. |
 | **Apply isolation** | Full — plan/apply each owner independently; a broken plan in one owner never blocks the others. | None — one plan/apply for everything; a single resource error blocks the whole run. |
 | **State size** | Small per workspace; grows only with that owner. | Single state grows with the sum of all owners; slower plans. |
@@ -439,7 +439,7 @@ Credential options, to decide before writing owner directories:
   one Actions secret to mint and rotate per owner — the overhead the owner flagged.
 - **GitHub App installed per owner — the low-overhead, self-bootstrapping path.**
   The provider authenticates as an App via `app_auth {}` (App ID + installation ID
-  + private key). One App, one **private key** (a single Actions secret), installed
+  - private key). One App, one **private key** (a single Actions secret), installed
   on the personal account and each org; the provider mints a **short-lived,
   per-owner installation token at run time**. This is also the answer to "can the
   repo create the scoped token itself?": GitHub has **no API to mint a user PAT**,
@@ -571,7 +571,7 @@ Terraform jobs under the conventional job and secret names — and therefore car
 Where each repository stands, and what closing the gap needs:
 
 | Repository | State | Needs |
-|---|---|---|
+| --- | --- | --- |
 | `terraform-github` | Follows the standards | — |
 | `terraform-grafana-cloud` | Follows the standards | — |
 | `stalwart.flungo.net` | Follows them, but cannot report the check — its check is excluded via `excluded_status_checks` | A self-hosted runner, and probably support for one in `github-workflows`. Tracked in **that repository's own docs** (`docs/plans/terraform-ci.md` § Phase 3), not here |
@@ -595,7 +595,7 @@ So each repository in the table above gains "branches must be up to date before 
    topology) and, if the credential model is settled, an ADR for it.
 2. **HCP + personal-account skeleton** — create the HCP `terraform-github` project
    (default execution mode **Local**); add `owners/flungo/` with backend + provider
-   + variables and a single imported repository — **`authentik.flungo.net`**, a
+   - variables and a single imported repository — **`authentik.flungo.net`**, a
    fairly fresh repo that exercises most of the features discussed (it has Terraform
    config, so `terraform = true`) — no modules yet. First `terraform init`
    auto-creates the `github-flungo` workspace (§4). Prove init/plan/apply end-to-end

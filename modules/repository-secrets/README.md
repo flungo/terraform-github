@@ -47,7 +47,7 @@ repository — the repo is managed before its secrets are attached.
 ## Inputs
 
 | Name | Type | Default | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `repository` | `string` | — (required) | Repository name to attach the secrets to. |
 | `lychee_github_token` | `string` (sensitive) | — (required) | Value for `LYCHEE_GITHUB_TOKEN`; attached to every repo. |
 | `terraform` | `bool` | `false` | When `true`, also attach the HCP token so the repo can run Terraform in its own CI. |

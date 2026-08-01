@@ -46,6 +46,7 @@ repository** — and route every owner-directory repository through it.
 ## Consequences
 
 **Positive:**
+
 - The standard is defined once; changing the module and re-applying rolls it out to
   every repository.
 - Owner directories stay thin — a module call with a few intent-named inputs.
@@ -53,6 +54,7 @@ repository** — and route every owner-directory repository through it.
   state; the PR-posted plan shows `0 to destroy`.
 
 **Negative / trade-offs:**
+
 - A layer of module indirection between the owner directory and the resource.
 - The encoded baseline cannot vary per repo without adding an input — intended, but
   it means a genuine deviation is a deliberate change to the module's surface, not a

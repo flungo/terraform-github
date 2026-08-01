@@ -79,7 +79,7 @@ That was verified on a throwaway branch, not assumed. So the two cases pull in
 opposite directions, and Terraform cannot tell them apart:
 
 | | Adoption | Creation |
-|---|---|---|
+| --- | --- | --- |
 | name from the repository resource | deferred to apply — too late | works |
 | name from `var.name` | works | plan fails, `NOT_FOUND` |
 

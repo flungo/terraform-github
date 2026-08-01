@@ -51,6 +51,7 @@ This keeps the baseline defined once (in `modules/`) and applied consistently, w
 ## Consequences
 
 **Positive:**
+
 - All GitHub configuration changes are version-controlled, reviewed before apply, and reproducible.
 - A single opinionated baseline (repo settings, shared secrets, project template) is defined once and applied uniformly across owners and repositories.
 - The provider-scoped name and the modular structure both anticipate growth: new GitHub resource types and new owners are additive, requiring no restructuring or rename.
@@ -58,6 +59,7 @@ This keeps the baseline defined once (in `modules/`) and applied consistently, w
 - Conventions, backend, and CI are consistent with the sibling infra repos, so the repo is immediately familiar to work in.
 
 **Negative / trade-offs:**
+
 - Resources that already exist on GitHub must be imported before Terraform can manage them; ad-hoc UI changes will drift and be overwritten on the next apply.
 - A directory-per-owner layout means cross-owner changes (e.g. rolling a new default out to every owner) are N applies rather than one — a deliberate trade of atomicity for isolation (see the build-out plan).
 - The GitHub provider does not yet cover every GitHub feature; some settings will remain manual until provider support exists, and must be recorded as such.
