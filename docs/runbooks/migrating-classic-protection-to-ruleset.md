@@ -103,7 +103,7 @@ Classic protection and rulesets expose overlapping but differently-named setting
 Use this to map each classic setting to its ruleset equivalent when comparing:
 
 | Classic setting (GraphQL field) | Ruleset equivalent | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `requiresApprovingReviews` / `requiredApprovingReviewCount` | `pull_request.required_approving_review_count` | Module default `0` — a solo owner can't approve their own PR. A classic rule requiring ≥1 is *stronger*; decide before dropping. |
 | `requiresConversationResolution` | `pull_request.required_review_thread_resolution` | Both `true` in the module. |
 | `requiresLinearHistory` | `required_linear_history` | Both `true` in the module. |
@@ -141,7 +141,7 @@ query above:
 Field-by-field against the ruleset:
 
 | Classic setting | authentik value | Ruleset | Verdict |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | PR required / approvals | `true` / `0` | PR required, 0 approvals | **Same** |
 | Conversation resolution | `true` | `true` | **Same** |
 | Linear history | `true` | `true` | **Same** |

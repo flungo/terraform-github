@@ -16,7 +16,7 @@ directory — then re-apply each owner to roll the change out.
 The ruleset is `target = "branch"`, `enforcement = "active"`, and applies these rules:
 
 | Rule | Value | Why |
-|---|---|---|
+| --- | --- | --- |
 | Pull request required | yes, `required_approving_review_count = 0` | Changes go through a PR, but no approval is required — the owner works solo, so requiring one would block their own PRs. |
 | Conversation resolution | `required_review_thread_resolution = true` | Review threads must be resolved before merge. |
 | Linear history | `required_linear_history = true` | No merge commits. |
@@ -31,7 +31,7 @@ who may create a matching ref — is off by default and driven by the
 ## Per-repo inputs (configurable)
 
 | Input | Type | Default | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `repository` | `string` | — (required) | Repository name to protect. |
 | `name` | `string` | `"standard"` | The ruleset's name in the repository's rules settings. A second ruleset on the same repository needs a distinct name (the composite's release-branch instance uses `"release"`). |
 | `pattern` | `string` | `"~DEFAULT_BRANCH"` | Ref the ruleset targets; the module protects any branch, so it takes a pattern rather than assuming `main`. **fnmatch, not regex** — see [Pattern syntax](#pattern-syntax). |

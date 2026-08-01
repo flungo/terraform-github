@@ -56,7 +56,7 @@ the protection ruleset and secrets are created (not imported) by the same apply.
 ## Inputs
 
 | Name | Type | Default | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `name` | `string` | — (required) | Repository name. |
 | `description` | `string` | — (required) | One-line repository description. |
 | `visibility` | `string` | `"private"` | `"public"` or `"private"`. Standard is private; go public only where the repo must be readable/callable by others. |
@@ -74,7 +74,7 @@ the protection ruleset and secrets are created (not imported) by the same apply.
 ## Outputs
 
 | Name | Description |
-|---|---|
+| --- | --- |
 | `name` | The repository name. |
 | `full_name` | Full name in `owner/name` form. |
 | `node_id` | GraphQL node ID of the repository. |

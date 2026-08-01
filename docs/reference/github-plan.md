@@ -13,7 +13,7 @@ This page records what rests on each, so that a surprising `403` or a rejected r
 ## What GitHub Pro is load-bearing for
 
 | Capability | On GitHub Free | On GitHub Pro |
-|---|---|---|
+| --- | --- | --- |
 | Rulesets / branch protection on **public** repositories | ✓ | ✓ |
 | Rulesets / branch protection on **private** repositories | ✗ | ✓ |
 
@@ -28,7 +28,7 @@ On Free those `github_repository_ruleset` resources would fail rather than silen
 **Merge queue** is gated on the repository being owned by an *organisation*, not on plan tier — a personal account cannot use it on a public repository either, and upgrading to Team would not change that ([Managing a merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue)).
 
 | Owner | Public repository | Private repository |
-|---|---|---|
+| --- | --- | --- |
 | Personal account (today) | ✗ | ✗ |
 | Organisation, any plan | ✓ | ✗ |
 | Organisation on Enterprise Cloud | ✓ | ✓ |
@@ -51,7 +51,7 @@ The provider cannot express that for a personal account.
 Checking the pinned provider's schema (`integrations/github` 6.13.0) rather than its docs:
 
 | Data source | Exposes the plan? |
-|---|---|
+| --- | --- |
 | `github_organization` | **Yes** — has a `plan` attribute |
 | `github_user` | **No** — `login`, `name`, `public_repos`, `followers`, keys and timestamps only |
 

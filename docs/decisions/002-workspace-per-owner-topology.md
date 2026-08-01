@@ -18,7 +18,7 @@ Three options were weighed:
 Comparing A (the chosen option) against B, the single-workspace alternative:
 
 | Dimension | A: workspace per owner | B: single shared workspace |
-|---|---|---|
+| --- | --- | --- |
 | Blast radius | Small — a bad apply touches only that owner's state. | Large — one apply spans every owner. |
 | Apply isolation | Full — plan/apply each owner independently. | None — one resource error blocks the whole run. |
 | State size | Small per workspace. | Grows with the sum of all owners. |
@@ -40,12 +40,14 @@ Adopt **Option A: one HCP workspace per owner directory**.
 ## Consequences
 
 **Positive:**
+
 - **Credential scoping** — the decisive factor. Each workspace/run carries only that owner's GitHub token, so a mistake or a leak is contained to one owner. (Option B would force every owner's credential into a single run where any resource could use any token.)
 - **Blast radius and apply isolation** — a bad apply touches only that owner's resources and state; a broken plan in one owner never blocks the others.
 - **Smaller per-workspace state** and faster plans than a single combined state.
 - Aligns with the directory-per-owner structure and the HCP one-workspace-per-state reality — the constraint and the preference point the same way.
 
 **Negative / trade-offs:**
+
 - **Cross-owner rollouts are N applies** (one per owner) rather than one atomic apply. This is an accepted cost — for an opinionated baseline that changes infrequently, staging owner-by-owner is a feature, not a burden — and CI runs each owner automatically.
 - **CI is a matrix** over owner directories rather than a single job. It starts as a single-owner job (`owners/flungo`) and generalises to the matrix when a second owner is onboarded.
 - Terraform cannot `for_each` a module over a dynamic set of provider aliases, so Option B would still require an explicit block per owner anyway; the duplication Option A is charged with is exactly what the shared modules eliminate.

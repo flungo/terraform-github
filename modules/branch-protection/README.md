@@ -47,7 +47,7 @@ repository — the repo is created/managed before it is protected.
 ## Inputs
 
 | Name | Type | Default | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `repository` | `string` | — (required) | Repository name to protect. |
 | `name` | `string` | `"standard"` | The ruleset's name. A second ruleset on the same repository needs a distinct one (the composite's release instance uses `"release"`). |
 | `pattern` | `string` | `"~DEFAULT_BRANCH"` | Ref the ruleset targets; defaults to the repo's default branch. **fnmatch, not regex** — `v[0-9]*` also matches `v1x`. Prefer a glob that cannot under-reach and pair it with `restrict_creation`. |
@@ -59,6 +59,6 @@ repository — the repo is created/managed before it is protected.
 ## Outputs
 
 | Name | Description |
-|---|---|
+| --- | --- |
 | `id` | The repository ruleset ID. |
 | `node_id` | GraphQL node ID of the ruleset. |

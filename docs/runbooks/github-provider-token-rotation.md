@@ -7,7 +7,7 @@ This PAT is the **bootstrap** credential. The intended end state is a **GitHub A
 ## Token
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Token name | `terraform-github-flungo` |
 | Type | Fine-grained PAT — `flungo` account, **all repositories** |
 | Permissions | Repository → **Administration: Read and write**, **Secrets: Read and write**, **Metadata: Read-only** |
@@ -15,6 +15,7 @@ This PAT is the **bootstrap** credential. The intended end state is a **GitHub A
 | Expiry | 90 days |
 
 > **Permissions grow with scope.** The current set covers everything managed today: **Administration** for repository settings and rulesets (`github_repository`, `github_repository_ruleset` — branch protection included), **Secrets** for the shared Actions secrets written to managed repos (`github_actions_secret`), and **Metadata**, which is always required. Additional resources need additional fine-grained permissions, added to the token when they land:
+>
 > - **Dependabot secrets:** Repository → **Dependabot secrets** (the `Secrets` permission covers Actions secrets only).
 > - **Webhooks:** Repository → **Webhooks**.
 > - **Teams / membership** (organisation owners): the corresponding **Organization** permissions.
@@ -32,5 +33,5 @@ This PAT is the **bootstrap** credential. The intended end state is a **GitHub A
 ## Rotation record
 
 | Date | Expires | Note |
-|---|---|---|
+| --- | --- | --- |
 | 2026-07-21 | 2026-10-19 | Initial issue (bootstrap) |

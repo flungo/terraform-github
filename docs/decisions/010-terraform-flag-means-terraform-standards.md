@@ -19,7 +19,7 @@ Surveying every `terraform = true` repository showed the exception was in fact t
 majority. Only two of five run the shared workflow:
 
 | Repository | `.github/workflows/terraform.yml` |
-|---|---|
+| --- | --- |
 | `terraform-github` | shared reusable, caller job `terraform` |
 | `terraform-grafana-cloud` | shared reusable, caller job `terraform` |
 | `stalwart.flungo.net` | **bespoke** — not the shared workflow |

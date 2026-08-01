@@ -9,7 +9,7 @@ primitive modules, each of which stays independently usable where a genuine
 partial case appears:
 
 | Primitive | Concern | Catalogue |
-|---|---|---|
+| --- | --- | --- |
 | [`modules/repository`](../../modules/repository) | Repository settings, feature toggles, merge strategy | this page |
 | [`modules/branch-protection`](../../modules/branch-protection) | Branch-protection rulesets — the default branch always; release branches where declared | [`branch-protection.md`](branch-protection.md) |
 | [`modules/repository-secrets`](../../modules/repository-secrets) | Shared Actions secrets | [`secrets.md`](secrets.md) |
@@ -25,7 +25,7 @@ These are set in `modules/repository` and are the same for every repository.
 Changing one here rolls it out to all repositories on the next apply.
 
 | Setting | Value | Why |
-|---|---|---|
+| --- | --- | --- |
 | `has_issues` | `true` | Issues are the default tracker; on everywhere. |
 | `has_wiki` | `false` | Documentation lives in-repo (`docs/`), not a wiki. |
 | `has_projects` | `false` | Project boards are not used at the repo level. |
@@ -60,7 +60,7 @@ deletion; admin bypass unless `strict`) — see [`branch-protection.md`](branch-
 The composite's full input surface:
 
 | Input | Type | Default | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `name` | `string` | — (required) | The repository name. |
 | `description` | `string` | — (required) | One-line description. |
 | `visibility` | `string` | `"private"` | `"public"` only where the repo must be readable/callable by others (e.g. hosting reusable workflows). |
