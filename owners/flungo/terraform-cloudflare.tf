@@ -16,5 +16,11 @@ module "terraform_cloudflare" {
   # jobs.
   # terraform = true
 
+  # Off: still empty, so it has no Markdown and no workflows to validate it
+  # with — the same reason the terraform flag is off, and it clears the same
+  # way. Delete this line alongside the repo's first documentation; the lychee
+  # token it has been carrying unread is removed by this apply.
+  markdown = false
+
   shared_secrets = local.shared_secrets
 }

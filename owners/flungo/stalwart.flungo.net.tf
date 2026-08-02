@@ -19,7 +19,10 @@ module "stalwart_flungo_net" {
   # support for one in flungo/github-workflows — tracked in that repository's
   # own docs (docs/plans/terraform-ci.md § Phase 3). Drop the exclusion once it
   # reports "terraform / terraform".
-  terraform              = true
+  terraform = true
+
+  # Scoped to the Terraform baseline, for the reason above — it does not reach
+  # the Markdown checks, which run on GitHub-hosted runners like anywhere else.
   excluded_status_checks = ["terraform / terraform"]
 
   shared_secrets = local.shared_secrets
