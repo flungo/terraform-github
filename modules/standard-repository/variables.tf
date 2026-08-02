@@ -64,6 +64,12 @@ variable "terraform" {
   default     = false
 }
 
+variable "markdown" {
+  description = "Whether this repository follows Fabrizio's Markdown standards — which means it uses the flungo/github-workflows Markdown workflows, called under the conventional job names (`markdown-lint` and `markdown-links`, per that repo's ADR-010: a caller's job id is the reusable workflow's filename). It is not merely \"contains Markdown\": every repo does, and the flag is about the CI, not the content (see ADR-012). Adopting the standards is what makes both effects follow — the composite attaches the lychee link-checker's token (LYCHEE_GITHUB_TOKEN) the external sweep reads, and requires the \"markdown-lint / lint\" and \"markdown-links / internal\" checks the two workflows report on every pull request. The sweep's own \"markdown-links / external\" is deliberately not required: it self-skips on pull_request and reports through an issue instead. Defaults true because every repo should end up here — set it false, with a comment saying what adopting the standards would need, on a repo that has not adopted them yet."
+  type        = bool
+  default     = true
+}
+
 variable "manage_secrets" {
   description = "Whether the composite manages the repo's shared Actions secrets. Default true — every managed repo carries them. Set false only where Terraform must not manage the repo's secrets: the self-referential case (terraform-github itself, whose CI-gating tokens stay manually managed so a broken apply can't lock the repo out of its own credentials — see ADR-005's circularity note)."
   type        = bool
@@ -71,9 +77,9 @@ variable "manage_secrets" {
 }
 
 variable "shared_secrets" {
-  description = "The owner's shared secret values, composed once at owner level (local.shared_secrets, from the owner directory's sensitive variables) and passed to every composite call as one uniform reference — repo files never wire individual values. lychee_github_token feeds LYCHEE_GITHUB_TOKEN (every repo); hcp_token feeds TF_TOKEN_APP_TERRAFORM_IO (repos with terraform = true). Required unless manage_secrets = false."
+  description = "The owner's shared secret values, composed once at owner level (local.shared_secrets, from the owner directory's sensitive variables) and passed to every composite call as one uniform reference — repo files never wire individual values. lychee_github_token feeds LYCHEE_GITHUB_TOKEN (repos with markdown = true); hcp_token feeds TF_TOKEN_APP_TERRAFORM_IO (repos with terraform = true). Both are optional here because each is gated on its flag; the secrets module raises a precondition where a flag is set without its value. Required unless manage_secrets = false."
   type = object({
-    lychee_github_token = string
+    lychee_github_token = optional(string, "")
     hcp_token           = optional(string, "")
   })
   sensitive = true

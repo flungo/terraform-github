@@ -1,7 +1,7 @@
 # Module: `standard-repository`
 
 The caller-facing composite for the `terraform-github` fleet — the one-call "my standard repo" (see [ADR-006](../../docs/decisions/006-standard-repository-composite.md)).
-One call per managed repository composes the three primitives: [`repository`](../repository) (baseline settings), [`branch-protection`](../branch-protection) (branch-protection rulesets — the default branch always, release branches where declared), and [`repository-secrets`](../repository-secrets) (shared Actions secrets).
+One call per managed repository composes the three primitives: [`repository`](../repository) (baseline settings), [`branch-protection`](../branch-protection) (branch-protection rulesets — the default branch always, release branches where declared), and [`repository-secrets`](../repository-secrets) (shared Actions secrets, each attached where the standard that reads it is followed).
 The composite wires them together and adds no opinion of its own — the baselines stay encoded in the primitives; the full catalogue is in [`docs/reference/standard-repository.md`](../../docs/reference/standard-repository.md).
 
 It does carry one check of its own: a **classic-protection guard** that fails the plan if the repository still has a classic branch protection rule, which would double-enforce against the ruleset.
@@ -18,6 +18,7 @@ module "authentik_flungo_net" {
   description = "Terraform configuration and documentation for Fabrizio's Authentik server."
 
   terraform = true # follows Fabrizio's Terraform standards → HCP token + required check
+  markdown  = true # follows Fabrizio's Markdown standards  → lychee token + required checks
 
   shared_secrets = local.shared_secrets
 }
@@ -42,9 +43,10 @@ Pair the call with an `import {}` block targeting the composite's internal repos
 | `required_status_checks` | `list(string)` | `[]` | **Additional** required check contexts, beyond any implied by the standards flags. No wildcards — GitHub names contexts individually, and one that never runs blocks merges behind a perpetual "Expected" entry. |
 | `excluded_status_checks` | `list(string)` | `[]` | Contexts to **remove** from the required set, applied after the implied and additional ones are combined. For a repo that takes a flag's other effects but cannot report the check it implies. A context listed in `required_status_checks` too is rejected by a validation — adding then removing it is the same as never adding it; comment out the `required_status_checks` entry instead. |
 | `release_branches` | `object` | `null` | Protect release branches with a second, `"release"` ruleset: `{ pattern, push_bypass_app_ids }` — the ref pattern the branches match (fnmatch, e.g. `"refs/heads/v[0-9]*"`) and the numeric IDs of the GitHub Apps allowed to push *and create* them. See [ADR-007](../../docs/decisions/007-release-branch-protection.md) and [ADR-008](../../docs/decisions/008-restrict-release-branch-creation.md). |
+| `markdown` | `bool` | `true` | The repo **follows Fabrizio's Markdown standards** — the `flungo/github-workflows` Markdown workflows, under the conventional job names (`markdown-lint` and `markdown-links`) — not merely "contains Markdown". Attaches the lychee token (`LYCHEE_GITHUB_TOKEN`) the external sweep reads **and** requires the `markdown-lint / lint` and `markdown-links / internal` checks the two workflows report. The sweep's own `markdown-links / external` is not required: it self-skips on `pull_request` by design. Defaults `true` — set it `false`, with a reason, on a repo that has not adopted the standards, including any repo being created. See [ADR-012](../../docs/decisions/012-markdown-flag-means-markdown-standards.md). |
 | `terraform` | `bool` | `false` | The repo **follows Fabrizio's Terraform standards** — the `flungo/github-workflows` Terraform jobs, under the conventional job and secret names — not merely "holds Terraform config". Attaches the HCP token those jobs read **and** requires the `terraform / terraform` check they report. See [ADR-010](../../docs/decisions/010-terraform-flag-means-terraform-standards.md). |
 | `manage_secrets` | `bool` | `true` | Opt-out of shared-secret management; `false` only for the self-referential case (`terraform-github` itself — see [ADR-005](../../docs/decisions/005-shared-secrets-module.md)). |
-| `shared_secrets` | `object` (sensitive) | `null` | The owner-level secret values (`lychee_github_token`, optional `hcp_token`). Required unless `manage_secrets = false`. |
+| `shared_secrets` | `object` (sensitive) | `null` | The owner-level secret values (`lychee_github_token`, `hcp_token`), each optional because each is gated on its flag. Required unless `manage_secrets = false`. |
 | `repository_exists` | `bool` | `true` | Repository already exists on GitHub. Gates the classic-protection guard; **transient** — set `false` only in the change that creates the repository, then remove it (see [ADR-009](../../docs/decisions/009-plan-time-classic-protection-guard.md)). |
 
 ## Outputs
