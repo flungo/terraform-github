@@ -1,6 +1,7 @@
 # ADR-001: Dedicated `terraform-github` repository for GitHub resources
 
-Date: 2026-07-20 Status: Accepted
+- **Date:** 2026-07-20
+- **Status:** Accepted
 
 ## Context
 

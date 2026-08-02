@@ -1,6 +1,7 @@
 # ADR-008: Restrict release-branch creation to the release automation
 
-Date: 2026-07-30 Status: Accepted
+- **Date:** 2026-07-30
+- **Status:** Accepted
 
 Refines [ADR-007](007-release-branch-protection.md), which stands.
 

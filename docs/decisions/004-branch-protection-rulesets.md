@@ -1,6 +1,7 @@
 # ADR-004: Branch protection via repository rulesets
 
-Date: 2026-07-22 Status: Accepted
+- **Date:** 2026-07-22
+- **Status:** Accepted
 
 Extended by [ADR-007](007-release-branch-protection.md) (release-branch rulesets, an App push bypass, and the encoded force-push block) and [ADR-008](008-restrict-release-branch-creation.md) (creation restricted to the release App).
 The rule list below is the contract as decided here.

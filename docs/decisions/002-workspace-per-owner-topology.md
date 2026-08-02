@@ -1,6 +1,7 @@
 # ADR-002: Workspace-per-owner backend topology
 
-Date: 2026-07-21 Status: Accepted
+- **Date:** 2026-07-21
+- **Status:** Accepted
 
 ## Context
 

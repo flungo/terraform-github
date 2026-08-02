@@ -1,6 +1,7 @@
 # ADR-010: The `terraform` flag means "follows Fabrizio's Terraform standards"
 
-Date: 2026-07-31 Status: Accepted
+- **Date:** 2026-07-31
+- **Status:** Accepted
 
 ## Context
 

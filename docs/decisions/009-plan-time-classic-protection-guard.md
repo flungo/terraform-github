@@ -1,6 +1,7 @@
 # ADR-009: Evaluate the classic-protection guard at plan time, in the composite
 
-Date: 2026-07-31 Status: Accepted
+- **Date:** 2026-07-31
+- **Status:** Accepted
 
 ## Context
 
