@@ -428,6 +428,35 @@ So each repository in the table above gains "branches must be up to date before 
 `terraform-github` and `terraform-grafana-cloud` have it now.
 `authentik.flungo.net` and `terraform-cloudflare` get it with the flag; `stalwart.flungo.net` already carries the flag, so it gets it when its `excluded_status_checks` entry comes off.
 
+#### The same alignment, for Markdown
+
+[ADR-012](../decisions/012-markdown-flag-means-markdown-standards.md) applies the same shape to the Markdown standards, so there is a second gap list with the same rule: the flag stays off until the repository runs the workflows, with a comment saying so.
+The aspiration is broader here — the Markdown workflows are not Terraform-specific, and **every repository with documentation** should carry `markdown = true`.
+
+| Repository | State | Needs |
+| --- | --- | --- |
+| `terraform-github` | Follows the standards (adopted in the change immediately before ADR-012) | — |
+| `authentik.flungo.net` | Follows the standards | — |
+| `stalwart.flungo.net` | Follows the standards | — |
+| `terraform-provider-stalwart` | Follows the standards | — |
+| `claude-plugins` | Follows the standards | — |
+| `github-workflows` | Follows the standards — it cannot pin itself `@v1`, so it dogfoods both from `./` in a combined `ci.yml`, under conforming job names | — |
+| `terraform-grafana-cloud` | Has documentation; runs neither workflow | Adopting the two callers, a `.markdownlint-cli2.jsonc`, and a `.lycheeignore` |
+| `claude-code-sandbox` | Has documentation; runs neither workflow | The same |
+| `terraform-cloudflare` | Empty — no documentation, no workflows | Content first, then the same |
+
+✅ **The realignment is done.** The four repositories already following the standards used the pre-convention caller job names (`lint`, `links`), and had to move to the ones [`github-workflows` ADR-010](https://github.com/flungo/github-workflows/blob/main/docs/decisions/010-caller-job-ids-match-the-workflow-filename.md) settles — job id = the reusable workflow's filename — **before** the flag could require those contexts, or their merges would have blocked behind two checks nothing reports.
+It landed as part of each repository's `@v2` migration rather than as a separate pull request each: `github-workflows` cut `v2` for [`github-workflows` ADR-011](https://github.com/flungo/github-workflows/blob/main/docs/decisions/011-reusable-job-ids-are-the-check-name.md) (a reusable job's id is its check name), and every consumer had to edit the same caller jobs to bump the pin anyway.
+Doing both in one pull request per repository also avoided a window where a renamed caller reported a context nothing expected.
+The three still to adopt take the conforming names from the start, so nothing further is owed there.
+
+Adopting is a worked procedure rather than a judgement call: `github-workflows`' [`adopting-markdown-workflows.md`](https://github.com/flungo/github-workflows/blob/main/docs/runbooks/adopting-markdown-workflows.md) for the mechanics, and the `markdown-standards` plugin's `/adopt-markdown-ci` for the automated path including the conventions.
+The ordering is freer than the Terraform case's, and the reason is worth knowing.
+There, the flag has to land first because the workflow cannot run at all until the HCP token it reads exists.
+Here the two *blocking* checks need no secret — only the scheduled external sweep reads the lychee token — so the workflows can land first and the flag follow, which avoids blocking whatever pull requests are open against that repository in the meantime.
+Either order works: a `pull_request` run uses the workflow file from the pull request's own head, so the change that adds the callers reports the contexts and satisfies the requirement itself.
+Each also gains ADR-011's up-to-date-branch requirement at that point, since these will be their first required checks.
+
 1. **Ratify structure** — merge this repo's docs (this PR).
    Confirm the workspace recommendation (§3) and credential model (§5); write **ADR-002** (workspace topology) and, if the credential model is settled, an ADR for it.
 2. **HCP + personal-account skeleton** — create the HCP `terraform-github` project (default execution mode **Local**); add `owners/flungo/` with backend + provider

@@ -27,15 +27,18 @@ Settle these before writing the module call — most map straight onto a module 
 6. **Initialise now?** — `auto_init` (default `true`) seeds an initial commit with a placeholder `README.md` (the repo name and description) so a default branch (`main`) exists up front — suits populating via the usual branch + PR flow.
    Set it `false` for an empty repo whose first bulk push establishes `main`.
 7. **Terraform repo?** — `terraform = true` marks a repo that holds Terraform config, which attaches the HCP token secret so it can plan/apply in its own CI (the value comes from the owner-level `shared_secrets`).
-8. **Required status checks** — check contexts that must pass before merging, if the repo's CI is already known (they can be added later once the checks run; a context that never runs blocks merges behind a perpetual "Expected" entry).
-9. **Release branches?** — `release_branches` protects a repo's release branches with a second ruleset.
+8. **Markdown standards** — `markdown` defaults to **`true`**, because every repo should end up following them, but a repo being *created* has not adopted them yet: it has no caller workflows, so the two checks the flag requires would never report and the first pull request would be unmergeable.
+   **Set `markdown = false` on the create**, with a comment saying adoption is pending, and delete that line in the pull request that adopts the workflows — the same shape as `repository_exists`, and for the same reason.
+   Adoption is a worked procedure: [`adopting-markdown-workflows.md`](https://github.com/flungo/github-workflows/blob/main/docs/runbooks/adopting-markdown-workflows.md) for the mechanics, or the `markdown-standards` plugin's `/adopt-markdown-ci` for the automated path.
+9. **Required status checks** — check contexts that must pass before merging, if the repo's CI is already known (they can be added later once the checks run; a context that never runs blocks merges behind a perpetual "Expected" entry).
+10. **Release branches?** — `release_branches` protects a repo's release branches with a second ruleset.
    Only for repos that publish a moving branch consumers pin (today: `github-workflows` and its `v*` majors); leave it unset otherwise.
    It needs the ref `pattern` (fnmatch, e.g. `"refs/heads/v[0-9]*"`) and `push_bypass_app_ids`, the numeric IDs of the GitHub Apps allowed to push a matching branch **directly** — annotate each with a comment naming the App.
    Those Apps become the only actors that may push directly or **create** one; everyone else still lands changes via a PR, which stays open by design.
    So this suits a repo whose release branches are cut by a workflow rather than by hand.
    Note `required_status_checks` is deliberately *not* applied to the release ruleset — the contexts you list are chosen for PRs into the default branch.
    See [ADR-007](../decisions/007-release-branch-protection.md) and [ADR-008](../decisions/008-restrict-release-branch-creation.md).
-10. **Standard deviations** — the module encodes the baseline (issues on; wiki/projects/downloads off; merge commits off, squash + rebase on, delete-branch-on-merge on; the standard protection rules).
+11. **Standard deviations** — the module encodes the baseline (issues on; wiki/projects/downloads off; merge commits off, squash + rebase on, delete-branch-on-merge on; the standard protection rules).
     You do **not** set these per repo.
     If the repo genuinely needs to deviate, that requires adding a module input and the human's explicit confirmation that the deviation must be supported (see [`../reference/standard-repository.md`](../reference/standard-repository.md)).
 
@@ -68,6 +71,11 @@ Settle these before writing the module call — most map straight onto a module 
      visibility = "<public|private>"
      # auto_init defaults to true (seeds main); add auto_init = false for an empty repo
      # terraform = true for a repo holding Terraform config
+
+     # Transient: markdown defaults to true, but a new repo has not adopted the
+     # workflows yet, so the checks it would require never report. Removed by
+     # the PR that adopts them.
+     markdown = false
      # release_branches = { pattern = "refs/heads/v[0-9]*", push_bypass_app_ids = [<id>] }
      #   ONLY for a repo publishing a moving branch consumers pin (ADR-007/ADR-008)
 
@@ -83,7 +91,7 @@ Settle these before writing the module call — most map straight onto a module 
    It is transient, exactly like the `import {}` block an adoption carries and then drops ([ADR-009](../decisions/009-plan-time-classic-protection-guard.md)).
 
 2. **Let CI post the plan.** The `Terraform` workflow runs `terraform plan` and posts it as a PR comment.
-   Confirm the additions are exactly the composite's resources for this repo — `module.<name>.module.repository.github_repository.this`, the `module.<name>.module.branch_protection` ruleset, the `module.<name>.module.secrets[0]` secret(s) (`LYCHEE_GITHUB_TOKEN`, plus the HCP token when `terraform = true`), and — only when `release_branches` is set — a second ruleset at `module.<name>.module.release_branch_protection[0]` — with **`0 to change, 0 to destroy`**; a create must not touch anything else.
+   Confirm the additions are exactly the composite's resources for this repo — `module.<name>.module.repository.github_repository.this`, the `module.<name>.module.branch_protection` ruleset, the `module.<name>.module.secrets[0]` secret(s) (the HCP token when `terraform = true`; no `LYCHEE_GITHUB_TOKEN` yet, since a create sets `markdown = false`, and none at all when neither applies), and — only when `release_branches` is set — a second ruleset at `module.<name>.module.release_branch_protection[0]` — with **`0 to change, 0 to destroy`**; a create must not touch anything else.
    Check the attributes (`visibility`, `auto_init`, feature toggles, topics) match the answers.
 
 3. **Merge → apply.** Merging runs `terraform apply`, which creates the repository.
