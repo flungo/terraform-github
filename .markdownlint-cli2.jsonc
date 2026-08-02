@@ -24,5 +24,14 @@
     // runbook's main path. Only those two elements are allowed — every other
     // inline HTML element stays flagged.
     "MD033": { "allowed_elements": ["details", "summary"] }
-  }
+  },
+  // A local `terraform init` writes provider source under owners/<owner>/
+  // .terraform/, and some providers ship a README. That directory is
+  // gitignored, but markdownlint does not read .gitignore — so without this a
+  // local run reports findings in vendored files that CI (a fresh checkout,
+  // never inited) cannot see, which is the wrong way round for a check meant
+  // to catch things before CI does.
+  "ignores": [
+    "**/.terraform/**"
+  ]
 }

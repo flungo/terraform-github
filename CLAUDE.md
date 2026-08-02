@@ -104,25 +104,16 @@ Once CI exists, on-demand runs are triggered with `mcp__github__actions_run_trig
 
 CI is the authority — the `terraform.yml` plan on the PR is what proves a change.
 But `fmt`/`validate` locally first catches syntax and type errors without burning a CI round-trip.
-The session has no `terraform` binary, so fetch one; `init` then works normally against the registry:
+
+**How to get a `terraform` binary in a cloud session, the egress allowlist, and why `CHECKPOINT_DISABLE=1` is worth setting come from the `claude-code-web` plugin** (`cloud-sessions` → `references/egress-and-tooling.md`), which carries that recipe for every Terraform repo rather than each repo restating it.
+Only this repo's own arguments belong here:
 
 ```bash
-S=<scratchpad>                     # a writable temp dir, not the repo
-# Subshell so the download and the binary land in $S, leaving the cwd at the repo root
-( cd "$S" \
-  && curl -sSLO https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_linux_amd64.zip \
-  && unzip -q -o terraform_1.9.8_linux_amd64.zip )
-
-export CHECKPOINT_DISABLE=1        # see the egress note below
 $S/terraform fmt -check -recursive          # from the repo root; needs no provider
-cd owners/flungo
+cd owners/flungo                            # the owner directory is the root module
 $S/terraform init -backend=false            # -backend=false: no HCP token needed
 $S/terraform validate
 ```
-
-**Egress.** `registry.terraform.io` and `releases.hashicorp.com` are on the environment's allowlist.
-`checkpoint-api.hashicorp.com` (HashiCorp's optional version-check ping) is **not**, and returns 403 through the agent proxy — harmless, but set `CHECKPOINT_DISABLE=1` to keep it out of the output.
-If a host you genuinely need is blocked, report it and ask for the network policy to be updated (per `/root/.ccr/README.md`); never route around the proxy.
 
 **Afterwards:** delete `owners/<owner>/.terraform/` (gitignored, and large).
 **Keep `.terraform.lock.hcl` — it is committed** (see [Terraform conventions](docs/reference/terraform-conventions.md)).
@@ -134,21 +125,8 @@ Local `plan` is not possible: it needs both the HCP backend token and a GitHub t
 
 ### Validating Markdown locally
 
-Both Markdown checks run locally, and both are worth running before pushing — the tools are the same ones CI uses:
-
-```bash
-export NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt   # the agent proxy's CA
-npx markdownlint-cli2@0.23.1 '**/*.md'                # style; must be 0 issues
-lychee --offline --include-fragments --no-progress '**/*.md'   # links + anchors
-```
-
-**Pin markdownlint-cli2 to `0.23.1`** — the version `DavidAnson/markdownlint-cli2-action@v24` ships, which is what the reusable workflow runs.
-A newer local one carries rules that version does not have, so it reports findings CI never will.
-Read the pinned version from the action's own manifest (`https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2-action/<tag>/package.json`) when the action is bumped, and update this line.
-
-**lychee has no npm or pip package**, and its release tarballs are blocked by the egress proxy.
-Install it with `CARGO_HTTP_CAINFO=/root/.ccr/ca-bundle.crt cargo install lychee --locked` — it compiles for a few minutes, so start it in the background at the top of the session.
-Only the offline check is meaningful locally; the external URL sweep is `workflow_dispatch`-only and must be verified in GitHub, never from the sandbox.
+Both commands, where to read the linter version from (a CI run — never a number written down here), how to install `lychee` in this sandbox, and why the external URL sweep cannot be verified locally all come from the **`markdown-standards`** plugin's `validating-locally.md`.
+There is nothing repo-specific to add: this repo runs the fleet's two checks with the fleet's globs.
 
 ## Branch management
 
