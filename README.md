@@ -58,6 +58,7 @@ Inherited from [`terraform-grafana-cloud`](https://github.com/flungo/terraform-g
   One workspace per owner directory (see the build-out plan).
 - **Secrets:** GitHub Actions secrets, not HCP workspace variables.
 - **CI:** GitHub Actions — plan on PR, apply on merge to `main`, `workflow_dispatch` for on-demand runs.
+  Markdown is validated the same way, by callers of the shared `markdown-lint` and `markdown-links` workflows; the version check runs weekly via `flungo-workflows`.
 
 ## Authentication
 

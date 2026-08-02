@@ -18,7 +18,7 @@ See [ADR-001](docs/decisions/001-dedicated-terraform-github-repo.md).
 | Terraform provider | `integrations/github ~> 6.0` (one provider configuration per owner) |
 | State backend | HCP Terraform — org `flungo`, **one workspace per owner directory**, **Local execution mode** (inherited from `terraform-grafana-cloud`) |
 | Structure | Directory per owner (`owners/<owner>/`) consuming shared modules (`modules/`) — **not** a single flat root module (see [Terraform conventions](docs/reference/terraform-conventions.md)) |
-| CI/CD | GitHub Actions — a thin caller of the reusable [`flungo/github-workflows`](https://github.com/flungo/github-workflows) `terraform.yml` (`@v1`); plan on PR, apply on merge. `working-directory: owners/flungo`, owner-scoped `concurrency-group: terraform-flungo` and `plan-comment-marker` |
+| CI/CD | GitHub Actions — thin callers of the reusable [`flungo/github-workflows`](https://github.com/flungo/github-workflows) workflows (`@v2`): `terraform.yml` (plan on PR, apply on merge; `working-directory: owners/flungo`, owner-scoped `concurrency-group: terraform-flungo` and `plan-comment-marker`), `markdown-lint.yml` and `markdown-links.yml` (see § Validating Markdown locally), and `flungo-workflows.yml` for the version check. Each caller job is named for the workflow it calls, which is what fixes the check context it reports |
 | Secrets | GitHub Actions secrets — not HCP workspace variables |
 
 ## Sensitive information — never commit or expose

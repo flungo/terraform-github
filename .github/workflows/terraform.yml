@@ -1,6 +1,6 @@
 name: Terraform
 
-# Thin caller of the reusable flungo/github-workflows terraform.yml (pinned @v1).
+# Thin caller of the reusable flungo/github-workflows terraform.yml (pinned @v2).
 # Single owner (flungo) for now — generalise to a matrix over owners/* when a
 # second owner is onboarded (with per-owner secrets, likely via GitHub
 # Environments — tracked follow-up).
@@ -24,7 +24,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: flungo/github-workflows/.github/workflows/terraform.yml@v1
+    uses: flungo/github-workflows/.github/workflows/terraform.yml@v2
     with:
       working-directory: owners/flungo
       concurrency-group: terraform-flungo

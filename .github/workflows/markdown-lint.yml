@@ -18,4 +18,4 @@ on:
 
 jobs:
   markdown-lint:
-    uses: flungo/github-workflows/.github/workflows/markdown-lint.yml@v1
+    uses: flungo/github-workflows/.github/workflows/markdown-lint.yml@v2
