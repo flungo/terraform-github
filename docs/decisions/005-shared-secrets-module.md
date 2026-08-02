@@ -1,6 +1,7 @@
 # ADR-005: Shared secrets via the repository-secrets module
 
-Date: 2026-07-27 Status: Accepted
+- **Date:** 2026-07-27
+- **Status:** Accepted
 
 ## Context
 

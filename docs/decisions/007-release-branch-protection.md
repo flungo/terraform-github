@@ -1,6 +1,7 @@
 # ADR-007: Release-branch protection with an App push bypass
 
-Date: 2026-07-29 Status: Accepted
+- **Date:** 2026-07-29
+- **Status:** Accepted
 
 Refined by [ADR-008](008-restrict-release-branch-creation.md), which restricts creation of matching refs to the release App and — on that basis — deliberately keeps the broad fnmatch pattern rather than narrowing it, and by [ADR-009](009-plan-time-classic-protection-guard.md), which moves the classic-protection guard to the composite and so removes the duplicate per-plan read noted in the trade-offs below.
 

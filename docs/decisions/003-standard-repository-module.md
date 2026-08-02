@@ -1,6 +1,7 @@
 # ADR-003: Standard repository module
 
-Date: 2026-07-21 Status: Accepted
+- **Date:** 2026-07-21
+- **Status:** Accepted
 
 ## Context
 
