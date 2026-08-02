@@ -13,5 +13,6 @@ module "claude_plugins" {
   # Public so the marketplace can be installed from Claude Code / claude.ai.
   visibility = "public"
 
+
   shared_secrets = local.shared_secrets
 }

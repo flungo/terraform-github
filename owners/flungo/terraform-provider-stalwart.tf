@@ -18,5 +18,6 @@ module "terraform_provider_stalwart" {
   # *implements* a provider — it holds Go source, not Terraform config with an
   # HCP backend, so the token would be an unused credential on a public repo.
 
+
   shared_secrets = local.shared_secrets
 }
