@@ -25,6 +25,6 @@ jobs:
     permissions:
       contents: read
       issues: write
-    uses: flungo/github-workflows/.github/workflows/markdown-links.yml@v1
+    uses: flungo/github-workflows/.github/workflows/markdown-links.yml@v2
     secrets:
       LYCHEE_GITHUB_TOKEN: ${{ secrets.LYCHEE_GITHUB_TOKEN }}
