@@ -6,11 +6,22 @@
 # catalogue) — the secrets written to OTHER repos carry no such circularity.
 
 # LYCHEE_GITHUB_TOKEN — the GitHub token the lychee Markdown link-checker uses in
-# CI to avoid rate-limiting. Every managed repository carries it.
+# CI to reach other private repos and avoid rate-limiting. Attached only where
+# var.markdown is set: the workflow that reads it is the external URL sweep, so a
+# repo that does not run it carries a credential nothing consumes.
 resource "github_actions_secret" "lychee_github_token" {
+  count = var.markdown ? 1 : 0
+
   repository      = var.repository
   secret_name     = "LYCHEE_GITHUB_TOKEN"
   plaintext_value = var.lychee_github_token
+
+  lifecycle {
+    precondition {
+      condition     = var.lychee_github_token != ""
+      error_message = "lychee_github_token must be set when markdown = true."
+    }
+  }
 }
 
 # TF_TOKEN_APP_TERRAFORM_IO — the org-wide HCP Terraform token, so a repo that holds

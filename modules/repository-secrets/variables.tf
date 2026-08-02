@@ -3,10 +3,17 @@ variable "repository" {
   type        = string
 }
 
+variable "markdown" {
+  description = "Whether this repository follows Fabrizio's Markdown standards. When true, the lychee link-checker's GitHub token (LYCHEE_GITHUB_TOKEN) is attached so the external URL sweep can reach other private repos and avoid rate-limiting. Its only effect here; the required checks the standards imply are the composite's business."
+  type        = bool
+  default     = false
+}
+
 variable "lychee_github_token" {
-  description = "Value for the LYCHEE_GITHUB_TOKEN Actions secret — the GitHub token the lychee Markdown link-checker uses in CI to avoid rate-limiting. Attached to every managed repository. Supplied from the owner directory (via CI); sensitive and never committed."
+  description = "Value for the LYCHEE_GITHUB_TOKEN Actions secret — the GitHub token the lychee Markdown link-checker uses in CI to reach other private repos and avoid rate-limiting. Required only when markdown = true. Supplied from the owner directory (via CI); sensitive and never committed."
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "terraform" {

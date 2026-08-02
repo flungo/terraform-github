@@ -7,7 +7,7 @@ This is the per-repository case; org-level shared secrets (`github_actions_organ
 
 The common set today:
 
-- **`LYCHEE_GITHUB_TOKEN`** — attached to **every** managed repository; the token the lychee Markdown link-checker uses in CI to avoid rate-limiting.
+- **`LYCHEE_GITHUB_TOKEN`** — attached only where `markdown = true`; the token the lychee Markdown link-checker's external URL sweep uses to reach other private repos and avoid rate-limiting.
 - **`TF_TOKEN_APP_TERRAFORM_IO`** — attached only where `terraform = true`; the org-wide HCP Terraform token, so a repo that holds Terraform config can plan/apply in its own CI.
 
 Values are supplied by the owner directory and never hard-coded.
@@ -21,6 +21,7 @@ module "authentik_flungo_net_secrets" {
   source     = "../../modules/repository-secrets"
   repository = module.authentik_flungo_net.name
 
+  markdown            = true
   lychee_github_token = var.lychee_github_token
   terraform           = true
   hcp_token           = var.hcp_token
@@ -34,6 +35,7 @@ Referencing the repository module's `name` output makes the secrets depend on th
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `repository` | `string` | — (required) | Repository name to attach the secrets to. |
-| `lychee_github_token` | `string` (sensitive) | — (required) | Value for `LYCHEE_GITHUB_TOKEN`; attached to every repo. |
+| `markdown` | `bool` | `false` | When `true`, attach the lychee link-checker's token so the repo's external URL sweep can reach other private repos. |
+| `lychee_github_token` | `string` (sensitive) | `""` | Value for `LYCHEE_GITHUB_TOKEN`; required when `markdown = true`. |
 | `terraform` | `bool` | `false` | When `true`, also attach the HCP token so the repo can run Terraform in its own CI. |
 | `hcp_token` | `string` (sensitive) | `""` | Value for `TF_TOKEN_APP_TERRAFORM_IO`; required when `terraform = true`. |
