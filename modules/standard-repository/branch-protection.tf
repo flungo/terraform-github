@@ -17,11 +17,28 @@
 # in required_status_checks, since adding and then removing a context is the
 # same as never adding it.
 #
-# "terraform / terraform" is <caller job id> / <reusable job id>. The reusable
-# half is fixed by flungo/github-workflows; the caller half is whatever the repo
-# names its job — which is why the standards require that name. A repo that
-# adopts the workflow under a different job name reports a different context and
-# would block its own merges behind a perpetual "Expected" entry.
+# A context is "<caller job id> / <reusable job id>", and both halves are fixed
+# by convention in flungo/github-workflows, which is what makes them safe to
+# hardcode here rather than transcribe from a check run:
+#
+#   - the caller half is the reusable workflow's filename without .yml
+#     (its ADR-010), so it is whatever the adopting repo names its job — which
+#     is why each standard requires particular names. A repo that adopts a
+#     workflow under a different job name reports a different context and would
+#     block its own merges behind a perpetual "Expected" entry.
+#   - the reusable half is the job's id, because those jobs set no display
+#     name (its ADR-011, which cut @v2 for exactly this).
+#
+# Every context is therefore derivable from a filename plus a job id: lowercase,
+# space-free, punctuation-free. Before @v2 the reusable half was a display name
+# — "markdownlint", and "Internal links & anchors" with its spaces and ampersand
+# — which had to be copied exactly from a real run and never typed from memory.
+#
+# Markdown implies two checks rather than one, because the standard is two
+# workflows. The sweep's sibling job, "markdown-links / external", is
+# deliberately absent — it self-skips on pull_request and reports through an
+# auto-updated issue rather than a check, so requiring it would name a context
+# that never runs for the reason it exists.
 module "branch_protection" {
   source = "../branch-protection"
 
@@ -31,6 +48,7 @@ module "branch_protection" {
   required_status_checks = tolist(setsubtract(
     concat(
       var.terraform ? ["terraform / terraform"] : [],
+      var.markdown ? ["markdown-lint / lint", "markdown-links / internal"] : [],
       var.required_status_checks,
     ),
     var.excluded_status_checks,
