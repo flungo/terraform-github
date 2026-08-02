@@ -29,7 +29,7 @@ Terraform manages these GitHub resources for the `flungo` account (in `owners/fl
   Where a repo requires status checks, its branches must also be up to date before merging ([ADR-011](docs/decisions/011-strict-required-status-checks.md)).
   Repos with release branches declare them for a second, `"release"` ruleset whose only direct-push exemption is the release automation's GitHub App — which is also the only actor that may create or delete a matching branch.
   First case: `github-workflows`' moving-major `v*` branches and its `flungo-release` App.
-- **Shared secrets** — the fleet's common Actions secrets are attached to each managed repo via `modules/repository-secrets`: `LYCHEE_GITHUB_TOKEN` on every repo, plus the HCP token (`TF_TOKEN_APP_TERRAFORM_IO`) where the repo follows Fabrizio's Terraform standards (`terraform = true`, which also requires the check those shared jobs report — see [ADR-010](docs/decisions/010-terraform-flag-means-terraform-standards.md)).
+- **Shared secrets** — the fleet's common Actions secrets are attached via `modules/repository-secrets`, each to the repos that follow the standard reading it: `LYCHEE_GITHUB_TOKEN` where the repo follows Fabrizio's Markdown standards (`markdown = true` — [ADR-012](docs/decisions/012-markdown-flag-means-markdown-standards.md)), and the HCP token (`TF_TOKEN_APP_TERRAFORM_IO`) where it follows his Terraform standards (`terraform = true` — [ADR-010](docs/decisions/010-terraform-flag-means-terraform-standards.md)). Each flag also requires the checks the workflows it names report.
 - **Growth** — webhooks, teams and membership, org-level shared secrets, and other `integrations/github` resources
 
 ## Structure

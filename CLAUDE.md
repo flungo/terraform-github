@@ -56,8 +56,9 @@ modules/                Shared, opinionated modules, consumed by owner directori
                         (feature toggles, merge strategy).
   branch-protection/    Branch protection as a repository ruleset — the default
                         branch, plus release branches where a repo declares them.
-  repository-secrets/   Shared Actions secrets — LYCHEE_GITHUB_TOKEN on every repo,
-                        plus the HCP token where the repo holds Terraform config.
+  repository-secrets/   Shared Actions secrets, each attached where the standard
+                        reading it is followed — LYCHEE_GITHUB_TOKEN where markdown
+                        is set, the HCP token where terraform is.
 owners/
   flungo/               The personal (user) account, by login — its own HCP workspace,
                         provider, and state. The only user account; named by login.
@@ -156,6 +157,7 @@ Those copies go stale silently — nothing in this repo's CI reads them — so c
 | Contract here | Mirrored in | What goes stale |
 | --- | --- | --- |
 | The `terraform` flag ([ADR-010](docs/decisions/010-terraform-flag-means-terraform-standards.md)) — the `terraform / terraform` context it requires, the `terraform` caller-job name that context depends on, and the conventional secret names | [`flungo/github-workflows`](https://github.com/flungo/github-workflows) → `docs/runbooks/adopting-terraform-workflows.md` § "Adopting in a repository managed by `terraform-github`" | The naming constraints an adopter must follow, the flag-first ordering, and the fact that the flag now also requires an up-to-date branch (ADR-011) |
+| The `markdown` flag ([ADR-012](docs/decisions/012-markdown-flag-means-markdown-standards.md)) — the `markdown-lint / lint` and `markdown-links / internal` contexts it requires, and the caller-job names those contexts depend on (that repo's own ADR-010: a caller's job id is the reusable workflow's filename) | [`flungo/github-workflows`](https://github.com/flungo/github-workflows) → `docs/runbooks/adopting-markdown-workflows.md` and `docs/decisions/010-caller-job-ids-match-the-workflow-filename.md` | That the runbook's caller job names are a naming *constraint* for a repo managed here, not just an example; the ordering; and that adopting brings an up-to-date-branch requirement with it (ADR-011) |
 | `excluded_status_checks` and the `terraform` flag as they apply to `stalwart.flungo.net` | [`flungo/stalwart.flungo.net`](https://github.com/flungo/stalwart.flungo.net) → `docs/plans/terraform-ci.md` § Phase 3 | What that repo must do to drop its exclusion |
 
 > **🤖 Agent** — Treat the mirrored docs as part of the change, not follow-up work.
@@ -194,3 +196,7 @@ Short version:
 - **Branches must be up to date before merging** — `strict_required_status_checks_policy` is encoded in the branch-protection module, not exposed: there is no coherent position that wants a required check but not its strictness, and a second "strict" input beside the existing `strict` (which removes the admin bypass) would misread both.
   The module emits the block it lives in only where contexts are supplied, so it is inert where none are required and arrives with each repository's CI adoption.
   Merge queue — the richer answer — is gated on **organisation** ownership, not plan tier, so no upgrade reaches a personal account (ADR-011)
+- **The `markdown` flag means "follows Fabrizio's Markdown standards"** — the same shape as ADR-010, applied to a second standard, which is what that framing was for: the flag names the `flungo/github-workflows` Markdown workflows under the conventional caller job names `markdown-lint` and `markdown-links`, and both effects follow — the lychee token the external sweep reads is attached, and the two checks the workflows report are required.
+  `LYCHEE_GITHUB_TOKEN` stops being universal: four of nine repos ran neither workflow, so it sat unread on nearly half the fleet.
+  Two contexts rather than one, both derivable from a workflow filename plus a job id — nothing to read off a check run (github-workflows' ADR-011).
+  The sweep's own `markdown-links / external` is never required — it self-skips on `pull_request` by design (ADR-012)
