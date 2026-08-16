@@ -7,7 +7,7 @@ module "github_workflows" {
   source = "../../modules/standard-repository"
 
   name        = "github-workflows"
-  description = "Reusable GitHub Actions workflows and shared CI standards for the flungo Terraform repositories (Terraform plan/apply, drift remediation, Markdown validation)."
+  description = "Reusable GitHub Actions workflows and composite actions for linting, testing, compilation, packaging and release, with the shared CI standards behind them."
   topics      = ["terraform", "github-actions", "actions", "reusable-workflows", "ci", "cicd", "code-quality"]
 
   # Public so the private consumer repos can call its reusable workflows without
