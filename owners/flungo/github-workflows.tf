@@ -2,6 +2,11 @@
 # (public so the private consumer repos can call it). Managed through the
 # standard-repository composite: standard repository settings, default-branch
 # and release-branch protection, and the shared Actions secrets.
+#
+# The `terraform` topic is deliberate even though this repo holds no .tf of its
+# own: it provides CI *for* Terraform repos, and being findable by people
+# looking for that beats conforming to topics.md's "configuration codebase"
+# definition. Not a mis-tag to tidy away.
 
 module "github_workflows" {
   source = "../../modules/standard-repository"
