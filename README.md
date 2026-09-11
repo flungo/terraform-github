@@ -21,6 +21,7 @@ Terraform manages these GitHub resources for the `flungo` account (in `owners/fl
   - `claude-code-sandbox` — adopted; the personal Claude Code container image
   - `terraform-grafana-cloud` — adopted; Terraform config for Grafana Cloud
   - `terraform-provider-stalwart` — adopted; the Terraform provider for Stalwart
+  - `mdformat-markdownlint` — created by this config; an mdformat plugin and markdownlint preset that keep the two tools in agreement
   - `terraform-cloudflare` — adopted; Terraform config for Cloudflare
   - `terraform-github` — adopted; **this repository**, managing itself.
     Its shared secrets stay manually managed (`manage_secrets = false`), since they gate its own CI
