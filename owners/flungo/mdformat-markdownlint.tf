@@ -21,8 +21,5 @@ module "mdformat_markdownlint" {
   # the PR that adopts them.
   markdown = false
 
-  # Transient: removed in a follow-up PR once the creating apply has run.
-  repository_exists = false
-
   shared_secrets = local.shared_secrets
 }
