@@ -24,6 +24,14 @@ Topics are set through the `topics` input on the standard repository module (see
 | `cicd` | The repository spans CI *and* delivery — it builds/tests *and* deploys/applies (e.g. Terraform plan on PR, apply on merge). |
 | `code-quality` | The repository provides code-quality tooling or standards — linting, formatting, validation, static analysis — for itself or the wider fleet. |
 
+### Markdown
+
+| Topic | Signals — and when to apply it |
+| --- | --- |
+| `markdown` | Markdown is the repository's *subject* — tooling, conventions or standards for Markdown — not merely its documentation format, which every repo shares. |
+| `mdformat` | The repository is, or extends, the [mdformat](https://github.com/hukkin/mdformat) formatter — a plugin, a preset, or tooling built on it. Pair with `plugin` for a plugin. |
+| `markdownlint` | The repository is, or targets, [markdownlint](https://github.com/DavidAnson/markdownlint) — a rule set, a preset, a custom rule, or tooling built to agree with it. Use this form, not `markdown-lint`: the tool's own name is the one the ecosystem tags by, several times over. |
+
 ### Claude
 
 | Topic | Signals — and when to apply it |
