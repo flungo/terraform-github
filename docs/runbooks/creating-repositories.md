@@ -28,8 +28,8 @@ Settle these before writing the module call — most map straight onto a module 
    Set it `false` for an empty repo whose first bulk push establishes `main`.
 7. **Terraform repo?** — `terraform = true` marks a repo that holds Terraform config, which attaches the HCP token secret so it can plan/apply in its own CI (the value comes from the owner-level `shared_secrets`).
 8. **Markdown standards** — `markdown` defaults to **`true`**, because every repo should end up following them, but a repo being *created* has not adopted them yet: it has no caller workflows, so the two checks the flag requires would never report and the first pull request would be unmergeable.
-   **Set `markdown = false` on the create**, with a comment saying adoption is pending, and delete that line in the pull request that adopts the workflows — the same shape as `repository_exists`, and for the same reason.
-   Adoption is a worked procedure: [`adopting-markdown-workflows.md`](https://github.com/flungo/github-workflows/blob/main/docs/runbooks/adopting-markdown-workflows.md) for the mechanics, or the `markdown-standards` plugin's `/adopt-markdown-ci` for the automated path.
+   **Set `markdown = false` on the create**, with a comment saying adoption is pending, and delete it in the same follow-up as `repository_exists` (step 5) — the same shape, and for the same reason.
+   The callers land in the repository's first pull request (step 4), the docs scaffolding and CI: [`adopting-markdown-workflows.md`](https://github.com/flungo/github-workflows/blob/main/docs/runbooks/adopting-markdown-workflows.md) for the mechanics, or the `markdown-standards` plugin's `/adopt-markdown-ci` for the automated path.
 9. **Required status checks** — check contexts that must pass before merging, if the repo's CI is already known (they can be added later once the checks run; a context that never runs blocks merges behind a perpetual "Expected" entry).
 10. **Release branches?** — `release_branches` protects a repo's release branches with a second ruleset.
    Only for repos that publish a moving branch consumers pin (today: `github-workflows` and its `v*` majors); leave it unset otherwise.
@@ -73,13 +73,14 @@ Settle these before writing the module call — most map straight onto a module 
      # terraform = true for a repo holding Terraform config
 
      # Transient: markdown defaults to true, but a new repo has not adopted the
-     # workflows yet, so the checks it would require never report. Removed by
-     # the PR that adopts them.
+     # workflows yet, so the checks it would require never report. Removed in
+     # step 5, with repository_exists, once the repo's first PR has landed the
+     # callers.
      markdown = false
      # release_branches = { pattern = "refs/heads/v[0-9]*", push_bypass_app_ids = [<id>] }
      #   ONLY for a repo publishing a moving branch consumers pin (ADR-007/ADR-008)
 
-     # Transient: removed in step 4, once the creating apply has run.
+     # Transient: removed in step 5, once the creating apply has run.
      repository_exists = false
 
      shared_secrets = local.shared_secrets
@@ -96,13 +97,15 @@ Settle these before writing the module call — most map straight onto a module 
 
 3. **Merge → apply.** Merging runs `terraform apply`, which creates the repository.
 
-4. **Remove `repository_exists = false`.** In a follow-up PR, once the creating apply has run — the repository now exists, so the guard can and should run against it.
-   Its plan should be **no changes**, which also confirms the create landed cleanly.
-   Leaving the flag in place silently disables the classic-protection guard for that repository from then on, so this step is not optional.
-   (This mirrors the adoption runbook's removal of the applied `import {}` block.)
-
-5. **Populate the repository.** Add its content (workflows, docs, code) via the usual branch + PR flow.
+4. **Populate the repository, scaffolding first.** Its first pull request is the docs scaffolding and the CI callers — the `scaffolding` plugin's build-out order — before any other content.
    With `auto_init = true` the default branch already exists to branch from (replace the seeded placeholder README in that first change); with an empty repo, the first push establishes `main`.
+   That first pull request carries the Markdown callers, so the checks the `markdown` flag requires are reporting before step 5 requires them.
+
+5. **Remove the transients.** In one follow-up PR, once the creating apply has run and the first pull request is on the default branch, delete both `repository_exists = false` and `markdown = false`.
+   The repository now exists, so the guard can and should run against it; the callers now report, so the flag can require them.
+   The plan should touch nothing on the repository resource itself — its only changes are the `LYCHEE_GITHUB_TOKEN` secret added and the ruleset's required checks — which also confirms the create landed cleanly.
+   Leaving `repository_exists` in place silently disables the classic-protection guard for that repository from then on, and leaving `markdown = false` leaves its checks unrequired, so this step is not optional.
+   (This mirrors the adoption runbook's removal of the applied `import {}` block.)
 
 ## Why a create is safe without a plan-reconcile loop
 
