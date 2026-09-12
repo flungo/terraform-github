@@ -16,10 +16,5 @@ module "mdformat_markdownlint" {
   # preset extended by other repositories.
   visibility = "public"
 
-  # Transient: markdown defaults to true, but a new repo has not adopted the
-  # workflows yet, so the checks it would require never report. Removed by
-  # the PR that adopts them.
-  markdown = false
-
   shared_secrets = local.shared_secrets
 }
