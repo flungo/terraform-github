@@ -15,9 +15,11 @@ So "share one workspace across owner directories" is not actually available the 
 
 Three options were weighed:
 
-- **Option A — workspace per owner directory.** Each `owners/<owner>/` has its own `cloud{}` block → its own HCP workspace → its own state.
+- **Option A — workspace per owner directory.**
+  Each `owners/<owner>/` has its own `cloud{}` block → its own HCP workspace → its own state.
 - **Option B — single root module, all owners in one workspace** via an aliased provider per owner.
-- **Option C — one config, many workspaces via `tags`/CLI workspaces.** Still one state per owner, so it inherits A's isolation but loses the per-owner directory.
+- **Option C — one config, many workspaces via `tags`/CLI workspaces.**
+  Still one state per owner, so it inherits A's isolation but loses the per-owner directory.
 
 Comparing A (the chosen option) against B, the single-workspace alternative:
 
@@ -42,7 +44,8 @@ Adopt **Option A: one HCP workspace per owner directory**.
 - **Workspaces:** one per owner directory, named `github-<login>` — `github-flungo` for the personal account, `github-<organisation>` per organisation.
   Each owner directory's `terraform.tf` `cloud` block pins both the workspace `name` and the `project`; the workspace is auto-created in that project on first `terraform init`.
 
-**Why the `github-` prefix.** HCP workspace names are unique per *organisation*, not per project ([HCP docs](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create) — "must be unique within the organization").
+**Why the `github-` prefix.**
+HCP workspace names are unique per *organisation*, not per project ([HCP docs](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create) — "must be unique within the organization").
 These workspaces therefore share the `flungo` org's namespace with `grafana-cloud`, `stalwart-flungo-net`, and any future workspaces.
 The prefix keeps the GitHub-management workspaces recognisable and grouped in the org-wide contexts that do *not* surface the project — the CLI workspace selector, the API, and the flat workspace list — and avoids a bare `flungo` workspace that would be ambiguous next to the org of the same name.
 (The dedicated `terraform-github` project groups them in the UI, but the prefix is what disambiguates everywhere else.)

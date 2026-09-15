@@ -52,15 +52,19 @@ A Claude-specific set is narrowed by pairing them with `claude` / `claude-code`,
 
 ## Conventions for choosing topics
 
-- **Keep a repo's existing topics by default.** Adoption imports the live topics (see [`../runbooks/importing-repositories.md`](../runbooks/importing-repositories.md)); don't churn them without reason.
+- **Keep a repo's existing topics by default.**
+  Adoption imports the live topics (see [`../runbooks/importing-repositories.md`](../runbooks/importing-repositories.md)); don't churn them without reason.
 - **Prefer a topic already in this glossary** over coining a near-synonym, so one concept is tagged identically fleet-wide.
-- **Prefer a widely-used topic over a niche one.** When a concept isn't in the glossary yet, reach for an established topic already common across GitHub — weigh its repo count and follow the **Related Topics** on `github.com/topics/<name>` to find the established neighbours — rather than a bespoke tag.
+- **Prefer a widely-used topic over a niche one.**
+  When a concept isn't in the glossary yet, reach for an established topic already common across GitHub — weigh its repo count and follow the **Related Topics** on `github.com/topics/<name>` to find the established neighbours — rather than a bespoke tag.
   Widely-used topics aid discoverability for people, search engines, and bots, and keep the fleet aligned with each ecosystem's conventions.
   Then record it here.
-- **Skip topics that don't narrow anything.** Avoid tags too broad to be meaningful (e.g. `ai`, `devops`) and vendor tags that merely restate a more specific one (e.g. `hashicorp` on a `terraform` repo).
+- **Skip topics that don't narrow anything.**
+  Avoid tags too broad to be meaningful (e.g. `ai`, `devops`) and vendor tags that merely restate a more specific one (e.g. `hashicorp` on a `terraform` repo).
   A vendor tag earns its place only where the ecosystem actively uses it for discovery (e.g. `anthropic` in the Claude ecosystem).
 - **Add a new topic to this glossary only when a genuinely new category is needed** that no existing entry covers — in the *same* change that first applies it, never speculatively.
-- **Follow GitHub's topic rules.** Topics are lowercase; words are separated by hyphens (no spaces or underscores); digits are allowed and a topic may start with one.
+- **Follow GitHub's topic rules.**
+  Topics are lowercase; words are separated by hyphens (no spaces or underscores); digits are allowed and a topic may start with one.
   A topic is at most 50 characters, and a repository may carry up to 20.
 - **Topics are always public** — a topic set on a private repository is still visible publicly, so never encode anything sensitive in one.
 

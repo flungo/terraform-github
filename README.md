@@ -5,7 +5,8 @@ Terraform configuration for managing GitHub resources across the personal accoun
 The repository is named for the **provider**, not its initial use case: scope is expected to grow to the full GitHub-manageable surface without a rename.
 See [ADR-001](docs/decisions/001-dedicated-terraform-github-repo.md) for the founding rationale.
 
-> **Status: build-out under way.** The first owner directory (`owners/flungo/`), the plan-on-PR / apply-on-merge CI workflow, the primitive modules (`repository`, `branch-protection`, `repository-secrets`), and the `standard-repository` composite have landed; each of the `flungo` account's managed repositories is a single composite call.
+> **Status: build-out under way.**
+> The first owner directory (`owners/flungo/`), the plan-on-PR / apply-on-merge CI workflow, the primitive modules (`repository`, `branch-protection`, `repository-secrets`), and the `standard-repository` composite have landed; each of the `flungo` account's managed repositories is a single composite call.
 > The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md).
 
 ## What this manages
@@ -30,7 +31,8 @@ Terraform manages these GitHub resources for the `flungo` account (in `owners/fl
   Where a repo requires status checks, its branches must also be up to date before merging ([ADR-011](docs/decisions/011-strict-required-status-checks.md)).
   Repos with release branches declare them for a second, `"release"` ruleset whose only direct-push exemption is the release automation's GitHub App — which is also the only actor that may create or delete a matching branch.
   First case: `github-workflows`' moving-major `v*` branches and its `flungo-release` App.
-- **Shared secrets** — the fleet's common Actions secrets are attached via `modules/repository-secrets`, each to the repos that follow the standard reading it: `LYCHEE_GITHUB_TOKEN` where the repo follows Fabrizio's Markdown standards (`markdown = true` — [ADR-012](docs/decisions/012-markdown-flag-means-markdown-standards.md)), and the HCP token (`TF_TOKEN_APP_TERRAFORM_IO`) where it follows his Terraform standards (`terraform = true` — [ADR-010](docs/decisions/010-terraform-flag-means-terraform-standards.md)). Each flag also requires the checks the workflows it names report.
+- **Shared secrets** — the fleet's common Actions secrets are attached via `modules/repository-secrets`, each to the repos that follow the standard reading it: `LYCHEE_GITHUB_TOKEN` where the repo follows Fabrizio's Markdown standards (`markdown = true` — [ADR-012](docs/decisions/012-markdown-flag-means-markdown-standards.md)), and the HCP token (`TF_TOKEN_APP_TERRAFORM_IO`) where it follows his Terraform standards (`terraform = true` — [ADR-010](docs/decisions/010-terraform-flag-means-terraform-standards.md)).
+  Each flag also requires the checks the workflows it names report.
 - **Growth** — webhooks, teams and membership, org-level shared secrets, and other `integrations/github` resources
 
 ## Structure
