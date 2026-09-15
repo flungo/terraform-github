@@ -76,10 +76,12 @@ The guard is read-only — Terraform cannot delete a rule it does not manage —
 
 Two details are deliberate and load-bearing ([ADR-009](../decisions/009-plan-time-classic-protection-guard.md)):
 
-- **It reads `var.name`, not the repository resource's name.** Terraform defers a data source whose configuration depends on a resource with pending changes, and an adoption always leaves the repository pending — so reading the resource's name deferred the guard to apply, where a postcondition runs *after* the resources it depends on and the ruleset it should have blocked already exists.
+- **It reads `var.name`, not the repository resource's name.**
+  Terraform defers a data source whose configuration depends on a resource with pending changes, and an adoption always leaves the repository pending — so reading the resource's name deferred the guard to apply, where a postcondition runs *after* the resources it depends on and the ruleset it should have blocked already exists.
   A literal name keeps the check at plan time.
 - **It lives in the composite, not the branch-protection primitive**, so it runs once per repository rather than once per ruleset.
-- **It is skipped while `repository_exists = false`.** Reading a literal name is what fixes adoption, but it breaks creation: asked about a repository GitHub has never heard of, the data source fails the plan with `Could not resolve to a Repository` rather than returning nothing.
+- **It is skipped while `repository_exists = false`.**
+  Reading a literal name is what fixes adoption, but it breaks creation: asked about a repository GitHub has never heard of, the data source fails the plan with `Could not resolve to a Repository` rather than returning nothing.
   The flag is how the caller says which case it is, and it is transient — see [creating a repository](../runbooks/creating-repositories.md).
   Nothing is lost by skipping it: a repository that does not exist cannot carry classic protection.
 

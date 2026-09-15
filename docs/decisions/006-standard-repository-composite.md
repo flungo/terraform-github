@@ -23,21 +23,26 @@ Four design points needed settling at implementation:
 
 Add [`modules/standard-repository`](../../modules/standard-repository), a composite of the three primitives, and route every owner-directory repository through it as a single module call per repo (one per by-subject file).
 
-- **Thin composition, no resources of its own.** The composite only wires the primitives together: `repository` feeds its `name` output to `branch_protection` and `secrets`.
+- **Thin composition, no resources of its own.**
+  The composite only wires the primitives together: `repository` feeds its `name` output to `branch_protection` and `secrets`.
   Baselines stay encoded in the primitives; the composite adds no new opinion.
 - **Input surface**: the repository inputs (`name`, `description`, `visibility`, `topics`, `auto_init`), the protection inputs (`strict`, `required_status_checks`), and the secrets inputs (`terraform`, `manage_secrets`, `shared_secrets`).
   The branch-protection `pattern` is *not* exposed — it stays at the primitive's `~DEFAULT_BRANCH` default, so the composite protects the default branch without knowing its name.
   The catalogue lives in [`docs/reference/standard-repository.md`](../reference/standard-repository.md).
-- **Shared secret values are sourced once at owner level.** Instead of individual per-call value inputs, the composite takes a single sensitive `shared_secrets` object (`lychee_github_token`, optional `hcp_token`).
+- **Shared secret values are sourced once at owner level.**
+  Instead of individual per-call value inputs, the composite takes a single sensitive `shared_secrets` object (`lychee_github_token`, optional `hcp_token`).
   The owner directory composes it **once** in a `locals` block from its sensitive variables, and every call passes the same `local.shared_secrets` reference.
   Terraform has no implicit variable inheritance into child modules, so one uniform reference is the closest available expression of "define once": adding a shared secret touches the owner's variables/local and the modules — never the repo files.
-- **A `manage_secrets` opt-out, default `true`.** When `false`, the composite skips the `repository-secrets` primitive entirely (`shared_secrets` may then be omitted — validated).
+- **A `manage_secrets` opt-out, default `true`.**
+  When `false`, the composite skips the `repository-secrets` primitive entirely (`shared_secrets` may then be omitted — validated).
   This exists for the self-referential case: `terraform-github`'s own CI-gating tokens stay manually managed ([ADR-005](005-shared-secrets-module.md)), so its onboarding can take the standard settings and protection without Terraform managing its secrets.
-- **The `terraform` flag does not (yet) add a plan check context.** The settled intent was for `terraform = true` to append the Terraform plan check to `required_status_checks` by convention.
+- **The `terraform` flag does not (yet) add a plan check context.**
+  The settled intent was for `terraform = true` to append the Terraform plan check to `required_status_checks` by convention.
   Implementation showed the fleet is not ready: a ruleset's required context that a repo's CI never reports blocks its merges behind a perpetual "Expected" entry, the context string is caller-job-dependent (`terraform / terraform` on this repo), and `authentik.flungo.net` — the pilot, `terraform = true` — has **no Terraform workflow at all** yet.
   So the flag's effect remains the HCP token secret only; callers list contexts their CI actually reports via `required_status_checks`.
   Wiring the flag to append the conventional context is revisited once Terraform CI is standardised across the fleet.
-- **Migrate with `moved {}` blocks; the standard applies in full.** Each repo's three (or two) module calls collapse to one composite call, with `moved` blocks relocating the existing state (resource-level for the repository, which keeps its module-call name; module-level for the protection and secrets calls) — removed in a follow-up once the migrating apply has run, per [Terraform conventions](../reference/terraform-conventions.md).
+- **Migrate with `moved {}` blocks; the standard applies in full.**
+  Each repo's three (or two) module calls collapse to one composite call, with `moved` blocks relocating the existing state (resource-level for the repository, which keeps its module-call name; module-level for the protection and secrets calls) — removed in a follow-up once the migrating apply has run, per [Terraform conventions](../reference/terraform-conventions.md).
   Because the composite always attaches the shared secrets, migrating `github-workflows` and `claude-plugins` — which had none — *adds* their `LYCHEE_GITHUB_TOKEN` secret: the intended fleet-wide standard, landing as a side effect of the migration rather than a separate rollout.
 
 ## Consequences

@@ -105,12 +105,16 @@ A per-repo input would reintroduce exactly the boilerplate the flag exists to re
 
 - **Two repositories lose their HCP token** — `authentik.flungo.net` and `terraform-cloudflare`.
   Neither runs a workflow that consumes it, so the credential was unused, but this is the fleet's first apply with a non-zero destroy count.
-- **The naming requirement is implicit at the call site.** A repository that runs the shared workflow from a differently-named job, and sets the flag, blocks its own merges.
+- **The naming requirement is implicit at the call site.**
+  A repository that runs the shared workflow from a differently-named job, and sets the flag, blocks its own merges.
   Mitigated by documenting it on the input and here, but nothing enforces it.
-- **The contract is now documented in two repositories.** The naming constraints the flag depends on — the caller job named `terraform`, the conventional secret names — bind a repository *adopting* the standards, so they are also written in `flungo/github-workflows`' adoption runbook, where that reader is looking.
+- **The contract is now documented in two repositories.**
+  The naming constraints the flag depends on — the caller job named `terraform`, the conventional secret names — bind a repository *adopting* the standards, so they are also written in `flungo/github-workflows`' adoption runbook, where that reader is looking.
   Nothing in this repo's CI reads that copy, so it goes stale silently.
   Mitigated by the cross-repo table in CLAUDE.md § "Docs in other repos that mirror this one", which names it as part of any change to this contract.
-- **An exclusion can outlive its reason.** `excluded_status_checks` is not transient in the sense `import {}` blocks are — it stays for as long as the conflict does — so nothing prompts its removal once the repository can report the check.
+- **An exclusion can outlive its reason.**
+  `excluded_status_checks` is not transient in the sense `import {}` blocks are — it stays for as long as the conflict does — so nothing prompts its removal once the repository can report the check.
   Mitigated only by the call-site comment naming what would clear it.
-- **The flag now says less than it used to.** "Holds Terraform config" is still a useful fact and is no longer recorded anywhere in this repo's config.
+- **The flag now says less than it used to.**
+  "Holds Terraform config" is still a useful fact and is no longer recorded anywhere in this repo's config.
   Accepted: it drove nothing, and the comment left on each opted-out repository carries it.

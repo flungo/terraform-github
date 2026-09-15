@@ -1,7 +1,7 @@
 # ADR-012: The `markdown` flag means "follows Fabrizio's Markdown standards"
 
-Date: 2026-08-01
-Status: Accepted
+- **Date:** 2026-08-01
+- **Status:** Accepted
 
 ## Context
 
@@ -74,15 +74,24 @@ So the contexts here are `markdown-lint / lint` and `markdown-links / internal`,
 
 ### The flag defaults to `true`
 
-`terraform` defaults to `false`, and the obvious move was to mirror it. That is wrong here, and the asymmetry is the point rather than an inconsistency.
+`terraform` defaults to `false`, and the obvious move was to mirror it.
+That is wrong here, and the asymmetry is the point rather than an inconsistency.
 
-The two flags describe different base rates. Holding Terraform config is a property of a minority of repositories and always will be; following the Markdown standards is something **every** repository should end up doing — every repository has documentation, and the aspiration is fleet-wide adoption. A default should be the case you expect, so that the configuration records deviations rather than restating the norm nine times.
+The two flags describe different base rates.
+Holding Terraform config is a property of a minority of repositories and always will be; following the Markdown standards is something **every** repository should end up doing — every repository has documentation, and the aspiration is fleet-wide adoption.
+A default should be the case you expect, so that the configuration records deviations rather than restating the norm nine times.
 
-It also matches [ADR-003](003-standard-repository-module.md)'s standard-first principle: the composite encodes the standard, and a repository states where it *differs*. Under a `false` default, six of nine repositories had to assert conformance, and the three that did not were silent — indistinguishable from an oversight. Inverted, silence means conforming and every exception carries a written reason.
+It also matches [ADR-003](003-standard-repository-module.md)'s standard-first principle: the composite encodes the standard, and a repository states where it *differs*.
+Under a `false` default, six of nine repositories had to assert conformance, and the three that did not were silent — indistinguishable from an oversight.
+Inverted, silence means conforming and every exception carries a written reason.
 
-**A repository being created is the one case that needs care.** It has no caller workflows yet, so the two checks the flag requires would never report and its first pull request would be unmergeable. The [creation runbook](../runbooks/creating-repositories.md) therefore sets `markdown = false` on the create, with the line deleted alongside `repository_exists` by the follow-up that lands once the repository's first pull request has brought in the callers — the same shape, and for the same reason: a value that is only correct during a transition.
+**A repository being created is the one case that needs care.**
+It has no caller workflows yet, so the two checks the flag requires would never report and its first pull request would be unmergeable.
+The [creation runbook](../runbooks/creating-repositories.md) therefore sets `markdown = false` on the create, with the line deleted alongside `repository_exists` by the follow-up that lands once the repository's first pull request has brought in the callers — the same shape, and for the same reason: a value that is only correct during a transition.
 
-This is not free. A `false` default fails safe (a repository never acquires a required check it cannot report), while a `true` default fails *closed* (a repository that has not adopted the workflows blocks its own merges until someone sets the flag). That trade is accepted because the failure is loud, immediate, and fixed by one line — whereas the failure the old default produced was silent: a repository quietly gating nothing, which is what this ADR exists to correct.
+This is not free.
+A `false` default fails safe (a repository never acquires a required check it cannot report), while a `true` default fails *closed* (a repository that has not adopted the workflows blocks its own merges until someone sets the flag).
+That trade is accepted because the failure is loud, immediate, and fixed by one line — whereas the failure the old default produced was silent: a repository quietly gating nothing, which is what this ADR exists to correct.
 
 ### No repository is exempt, and `github-workflows` least of all
 
@@ -106,16 +115,28 @@ Requiring the new contexts before they are renamed would block their merges behi
 
 **Positive:**
 
-- The token stops being attached where nothing reads it. Three repositories shed an unused credential.
+- The token stops being attached where nothing reads it.
+  Three repositories shed an unused credential.
 - Four repositories gain merge gating on their Markdown checks — a gap that, like [ADR-010](010-terraform-flag-means-terraform-standards.md)'s, existed silently.
 - [ADR-010](010-terraform-flag-means-terraform-standards.md)'s framing is validated: a second standard extended the same flag pattern with no new mechanism, and the absence of a flag is again informative rather than an oversight.
-- The `terraform` and `markdown` flags now compose. `authentik.flungo.net` shows why keeping them separate matters — it follows the Markdown standards and not the Terraform ones, so one flag on and one off is the accurate description.
+- The `terraform` and `markdown` flags now compose.
+  `authentik.flungo.net` shows why keeping them separate matters — it follows the Markdown standards and not the Terraform ones, so one flag on and one off is the accurate description.
 
 **Negative / trade-offs:**
 
-- **Three repositories lose `LYCHEE_GITHUB_TOKEN`** — `terraform-grafana-cloud`, `claude-code-sandbox` and `terraform-cloudflare`. None runs a workflow that reads it, so nothing breaks, but this is a destroy in the plan and it is worth reading rather than waving through.
-- **Repositories gaining their first required check also gain strictness.** [ADR-011](011-strict-required-status-checks.md) encodes `strict_required_status_checks_policy` in the block the module emits only where a context is required, so `claude-plugins`, `terraform-provider-stalwart` and `authentik.flungo.net` acquire "branches must be up to date before merging" as a side effect of this flag rather than of a decision about strictness. That is the intended coupling, but it arrives here rather than being chosen here.
-- **A repository whose Markdown CI is currently red will find its merges blocked.** That is the flag working as intended, and there is no way to require a check conditionally, but it is a behaviour change landing on four repositories at once.
-- **The naming requirement is implicit at the call site**, as with `terraform`, and nothing validates it. A repository that adopts the workflows under other job names and sets the flag blocks its own merges. [`github-workflows` ADR-010](https://github.com/flungo/github-workflows/blob/main/docs/decisions/010-caller-job-ids-match-the-workflow-filename.md) makes the rule mechanical rather than remembered, which is the mitigation, but it is still a convention.
-- **Four repositories needed a rename before this could apply**, and each rename momentarily changed the context that repository reported. That is done: it landed with each repository's `@v2` migration, since [`github-workflows` ADR-011](https://github.com/flungo/github-workflows/blob/main/docs/decisions/011-reusable-job-ids-are-the-check-name.md) renamed the reusable halves at the same time and one pull request per repository avoided a window where a caller reported a context nothing expected. It was the cost of having published poor example names in the first place.
-- **The contract is now documented in two repositories.** The caller job names the flag depends on bind a repository *adopting* the standards, so they are also written in [`github-workflows`' `adopting-markdown-workflows.md`](https://github.com/flungo/github-workflows/blob/main/docs/runbooks/adopting-markdown-workflows.md), where that reader is looking. Nothing here reads that copy, so it is named in [`CLAUDE.md` § Docs in other repos that mirror this one](../../CLAUDE.md#docs-in-other-repos-that-mirror-this-one).
+- **Three repositories lose `LYCHEE_GITHUB_TOKEN`** — `terraform-grafana-cloud`, `claude-code-sandbox` and `terraform-cloudflare`.
+  None runs a workflow that reads it, so nothing breaks, but this is a destroy in the plan and it is worth reading rather than waving through.
+- **Repositories gaining their first required check also gain strictness.**
+  [ADR-011](011-strict-required-status-checks.md) encodes `strict_required_status_checks_policy` in the block the module emits only where a context is required, so `claude-plugins`, `terraform-provider-stalwart` and `authentik.flungo.net` acquire "branches must be up to date before merging" as a side effect of this flag rather than of a decision about strictness.
+  That is the intended coupling, but it arrives here rather than being chosen here.
+- **A repository whose Markdown CI is currently red will find its merges blocked.**
+  That is the flag working as intended, and there is no way to require a check conditionally, but it is a behaviour change landing on four repositories at once.
+- **The naming requirement is implicit at the call site**, as with `terraform`, and nothing validates it.
+  A repository that adopts the workflows under other job names and sets the flag blocks its own merges.
+  [`github-workflows` ADR-010](https://github.com/flungo/github-workflows/blob/main/docs/decisions/010-caller-job-ids-match-the-workflow-filename.md) makes the rule mechanical rather than remembered, which is the mitigation, but it is still a convention.
+- **Four repositories needed a rename before this could apply**, and each rename momentarily changed the context that repository reported.
+  That is done: it landed with each repository's `@v2` migration, since [`github-workflows` ADR-011](https://github.com/flungo/github-workflows/blob/main/docs/decisions/011-reusable-job-ids-are-the-check-name.md) renamed the reusable halves at the same time and one pull request per repository avoided a window where a caller reported a context nothing expected.
+  It was the cost of having published poor example names in the first place.
+- **The contract is now documented in two repositories.**
+  The caller job names the flag depends on bind a repository *adopting* the standards, so they are also written in [`github-workflows`' `adopting-markdown-workflows.md`](https://github.com/flungo/github-workflows/blob/main/docs/runbooks/adopting-markdown-workflows.md), where that reader is looking.
+  Nothing here reads that copy, so it is named in [`CLAUDE.md` § Docs in other repos that mirror this one](../../CLAUDE.md#docs-in-other-repos-that-mirror-this-one).
