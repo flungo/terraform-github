@@ -1,7 +1,7 @@
 # ADR-012: The `markdown` flag means "follows Fabrizio's Markdown standards"
 
-Date: 2026-08-01
-Status: Accepted
+- **Date:** 2026-08-01
+- **Status:** Accepted
 
 ## Context
 
