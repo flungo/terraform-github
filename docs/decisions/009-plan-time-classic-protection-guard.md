@@ -43,7 +43,8 @@ The adoption path was never tested.
 Placing it in the composite rather than adding a second input to the primitive was chosen over two alternatives — splitting the primitive's input into a static name plus a resource-derived one, and extracting a dedicated `branch-protection-guard` module.
 The composite already has `var.name` to hand, so the primitive's input surface is untouched.
 
-**One new composite input is unavoidable: `repository_exists` (default `true`).** Removing the dependency on the repository resource is what fixes adoption, but that dependency was also doing real work for *creation*: it deferred the read until the resource existed.
+**One new composite input is unavoidable: `repository_exists` (default `true`).**
+Removing the dependency on the repository resource is what fixes adoption, but that dependency was also doing real work for *creation*: it deferred the read until the resource existed.
 Read at plan time against a repository GitHub has never heard of, the data source does not return an empty list — it fails the plan outright:
 
 ```text
@@ -68,7 +69,8 @@ Someone who wrongly follows the *creation* runbook for a repository that already
 It cannot silently adopt or overwrite an existing repository — taking over an existing resource always requires an explicit import.)
 
 It also fixes a duplication [ADR-007](007-release-branch-protection.md) recorded as harmless: the guard ran once per *module instance*, so a repository declaring release branches read its classic rules twice per plan.
-The repository is the correct scope because that is what the guard actually asks about — *does this repository carry classic protection at all?* — rather than anything about a particular ruleset.
+The repository is the correct scope because that is what the guard actually asks about — *does this repository carry classic protection at all?*
+— rather than anything about a particular ruleset.
 A repository may well have many classic rules, just as it may have many rulesets; the point is that the data source returns all of them in one read, so a second instance issues an identical query and gets an identical answer.
 Per-ruleset evaluation bought no extra cover.
 

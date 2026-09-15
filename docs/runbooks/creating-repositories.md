@@ -24,30 +24,35 @@ Settle these before writing the module call — most map straight onto a module 
 4. **Description** — the one-line repository description.
 5. **Topics** — any topics to set (optional; safe to include).
    Prefer topics from the [topics glossary](../reference/topics.md) so they stay consistent across the fleet.
-6. **Initialise now?** — `auto_init` (default `true`) seeds an initial commit with a placeholder `README.md` (the repo name and description) so a default branch (`main`) exists up front — suits populating via the usual branch + PR flow.
+6. **Initialise now?**
+   — `auto_init` (default `true`) seeds an initial commit with a placeholder `README.md` (the repo name and description) so a default branch (`main`) exists up front — suits populating via the usual branch + PR flow.
    Set it `false` for an empty repo whose first bulk push establishes `main`.
-7. **Terraform repo?** — `terraform = true` marks a repo that holds Terraform config, which attaches the HCP token secret so it can plan/apply in its own CI (the value comes from the owner-level `shared_secrets`).
+7. **Terraform repo?**
+   — `terraform = true` marks a repo that holds Terraform config, which attaches the HCP token secret so it can plan/apply in its own CI (the value comes from the owner-level `shared_secrets`).
 8. **Markdown standards** — `markdown` defaults to **`true`**, because every repo should end up following them, but a repo being *created* has not adopted them yet: it has no caller workflows, so the two checks the flag requires would never report and the first pull request would be unmergeable.
    **Set `markdown = false` on the create**, with a comment saying adoption is pending, and delete it in the same follow-up as `repository_exists` (step 5) — the same shape, and for the same reason.
    The callers land in the repository's first pull request (step 4), the docs scaffolding and CI: [`adopting-markdown-workflows.md`](https://github.com/flungo/github-workflows/blob/main/docs/runbooks/adopting-markdown-workflows.md) for the mechanics, or the `markdown-standards` plugin's `/adopt-markdown-ci` for the automated path.
 9. **Required status checks** — check contexts that must pass before merging, if the repo's CI is already known (they can be added later once the checks run; a context that never runs blocks merges behind a perpetual "Expected" entry).
-10. **Release branches?** — `release_branches` protects a repo's release branches with a second ruleset.
-   Only for repos that publish a moving branch consumers pin (today: `github-workflows` and its `v*` majors); leave it unset otherwise.
-   It needs the ref `pattern` (fnmatch, e.g. `"refs/heads/v[0-9]*"`) and `push_bypass_app_ids`, the numeric IDs of the GitHub Apps allowed to push a matching branch **directly** — annotate each with a comment naming the App.
-   Those Apps become the only actors that may push directly or **create** one; everyone else still lands changes via a PR, which stays open by design.
-   So this suits a repo whose release branches are cut by a workflow rather than by hand.
-   Note `required_status_checks` is deliberately *not* applied to the release ruleset — the contexts you list are chosen for PRs into the default branch.
-   See [ADR-007](../decisions/007-release-branch-protection.md) and [ADR-008](../decisions/008-restrict-release-branch-creation.md).
+10. **Release branches?**
+    — `release_branches` protects a repo's release branches with a second ruleset.
+    Only for repos that publish a moving branch consumers pin (today: `github-workflows` and its `v*` majors); leave it unset otherwise.
+    It needs the ref `pattern` (fnmatch, e.g. `"refs/heads/v[0-9]*"`) and `push_bypass_app_ids`, the numeric IDs of the GitHub Apps allowed to push a matching branch **directly** — annotate each with a comment naming the App.
+    Those Apps become the only actors that may push directly or **create** one; everyone else still lands changes via a PR, which stays open by design.
+    So this suits a repo whose release branches are cut by a workflow rather than by hand.
+    Note `required_status_checks` is deliberately *not* applied to the release ruleset — the contexts you list are chosen for PRs into the default branch.
+    See [ADR-007](../decisions/007-release-branch-protection.md) and [ADR-008](../decisions/008-restrict-release-branch-creation.md).
 11. **Standard deviations** — the module encodes the baseline (issues on; wiki/projects/downloads off; merge commits off, squash + rebase on, delete-branch-on-merge on; the standard protection rules).
     You do **not** set these per repo.
     If the repo genuinely needs to deviate, that requires adding a module input and the human's explicit confirmation that the deviation must be supported (see [`../reference/standard-repository.md`](../reference/standard-repository.md)).
 
 ## Prerequisites
 
-- **The repository does not already exist on GitHub.** Check before you start (`https://github.com/<owner>/<repo>`).
+- **The repository does not already exist on GitHub.**
+  Check before you start (`https://github.com/<owner>/<repo>`).
   If it does, stop — this is an *adoption*, and the procedure is [`importing-repositories.md`](importing-repositories.md), which pairs the module call with an `import {}` block so Terraform takes over the live repository instead of trying to make a new one.
 
-  > **What happens if you get this wrong?** It fails, and fails safely.
+  > **What happens if you get this wrong?**
+  > It fails, and fails safely.
   > With no state entry and no `import {}` block Terraform plans a **create**, and GitHub rejects a duplicate name when the apply runs — so the apply errors having changed nothing.
   > Terraform cannot silently adopt or overwrite an existing repository: taking over an existing resource always requires an explicit import.
   > The cost is a wasted merge-and-apply cycle, not damage.
@@ -58,7 +63,8 @@ Settle these before writing the module call — most map straight onto a module 
 
 ## Procedure
 
-1. **Add config in a PR.** In a new file `owners/<login>/<repo>.tf` (each repo's config lives in one by-subject file named for it), add a module call with the answers above — and **no `import {}` block**:
+1. **Add config in a PR.**
+   In a new file `owners/<login>/<repo>.tf` (each repo's config lives in one by-subject file named for it), add a module call with the answers above — and **no `import {}` block**:
 
    ```hcl
    module "<name>" {
@@ -91,17 +97,21 @@ Settle these before writing the module call — most map straight onto a module 
    Nothing is lost: a repository that does not exist cannot carry classic protection.
    It is transient, exactly like the `import {}` block an adoption carries and then drops ([ADR-009](../decisions/009-plan-time-classic-protection-guard.md)).
 
-2. **Let CI post the plan.** The `Terraform` workflow runs `terraform plan` and posts it as a PR comment.
+2. **Let CI post the plan.**
+   The `Terraform` workflow runs `terraform plan` and posts it as a PR comment.
    Confirm the additions are exactly the composite's resources for this repo — `module.<name>.module.repository.github_repository.this`, the `module.<name>.module.branch_protection` ruleset, the `module.<name>.module.secrets[0]` secret(s) (the HCP token when `terraform = true`; no `LYCHEE_GITHUB_TOKEN` yet, since a create sets `markdown = false`, and none at all when neither applies), and — only when `release_branches` is set — a second ruleset at `module.<name>.module.release_branch_protection[0]` — with **`0 to change, 0 to destroy`**; a create must not touch anything else.
    Check the attributes (`visibility`, `auto_init`, feature toggles, topics) match the answers.
 
-3. **Merge → apply.** Merging runs `terraform apply`, which creates the repository.
+3. **Merge → apply.**
+   Merging runs `terraform apply`, which creates the repository.
 
-4. **Populate the repository, scaffolding first.** Its first pull request is the docs scaffolding and the CI callers — the `scaffolding` plugin's build-out order — before any other content.
+4. **Populate the repository, scaffolding first.**
+   Its first pull request is the docs scaffolding and the CI callers — the `scaffolding` plugin's build-out order — before any other content.
    With `auto_init = true` the default branch already exists to branch from (replace the seeded placeholder README in that first change); with an empty repo, the first push establishes `main`.
    That first pull request carries the Markdown callers, so the checks the `markdown` flag requires are reporting before step 5 requires them.
 
-5. **Remove the transients.** In one follow-up PR, once the creating apply has run and the first pull request is on the default branch, delete both `repository_exists = false` and `markdown = false`.
+5. **Remove the transients.**
+   In one follow-up PR, once the creating apply has run and the first pull request is on the default branch, delete both `repository_exists = false` and `markdown = false`.
    The repository now exists, so the guard can and should run against it; the callers now report, so the flag can require them.
    The plan should touch nothing on the repository resource itself — its only changes are the `LYCHEE_GITHUB_TOKEN` secret added and the ruleset's required checks — which also confirms the create landed cleanly.
    Leaving `repository_exists` in place silently disables the classic-protection guard for that repository from then on, and leaving `markdown = false` leaves its checks unrequired, so this step is not optional.

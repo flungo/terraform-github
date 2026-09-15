@@ -98,6 +98,7 @@ That is the meaningful guarantee, and it is the same one a GitLab semi-linear me
   Reach for that first, use stacked pull requests where the work is genuinely dependent, and treat merge queue as the escalation.
 - **Redundant on a repository with a single active contributor and no concurrent pull requests** — which is most of the fleet, most of the time.
   Accepted: the cost is zero in exactly the case where the benefit is zero, and it is the concurrent case that this exists for.
-- **It binds nobody while `strict = false`.** The module grants repository admins a pull-request-scoped bypass unless `strict` is set, and no repository sets it — so for the sole admin the requirement is advisory, overridable at the point of merge.
+- **It binds nobody while `strict = false`.**
+  The module grants repository admins a pull-request-scoped bypass unless `strict` is set, and no repository sets it — so for the sole admin the requirement is advisory, overridable at the point of merge.
   That is the same trade-off ADR-004 accepted for every other rule in the ruleset and is not made worse here, but it means the guarantee is "the branch was up to date, or someone chose otherwise deliberately" rather than an invariant.
   `strict = true` is what would make it binding.

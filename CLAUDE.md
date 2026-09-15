@@ -7,7 +7,8 @@ It starts with a standard repository template and shared/common secrets, and gro
 It is named for the provider, not the initial use case, so that growth needs no rename.
 See [ADR-001](docs/decisions/001-dedicated-terraform-github-repo.md).
 
-> **Status: build-out under way.** The `owners/flungo/` skeleton, the plan/apply CI, the primitive modules (`repository`, `branch-protection`, `repository-secrets`), and the `standard-repository` composite have landed; each managed flungo repository is a single composite call.
+> **Status: build-out under way.**
+> The `owners/flungo/` skeleton, the plan/apply CI, the primitive modules (`repository`, `branch-protection`, `repository-secrets`), and the `standard-repository` composite have landed; each managed flungo repository is a single composite call.
 > The remaining build-out is scoped in [`docs/plans/initial-buildout.md`](docs/plans/initial-buildout.md).
 > Keep this file, the README, and the ADR index current as resources land.
 
@@ -86,7 +87,8 @@ Generic HCL authoring conventions (resource naming, sensitive values, durations,
 This repo's structure-specific conventions — directory-per-owner root modules, shared modules encoding the standard, intent-named inputs, by-subject `.tf` grouping, and the key divergence from the sibling repos' single-flat-root pattern — are catalogued in [`docs/reference/terraform-conventions.md`](docs/reference/terraform-conventions.md).
 That reference doc is canonical for this repo; consult it, and the plugin, before adding or changing Terraform config here.
 
-**Transient config — things that should never be found at rest.** `import {}` and `moved {}` blocks come out in a follow-up PR once their apply has run (the plugin's convention), and `repository_exists = false` and `markdown = false` on a `standard-repository` call are the same shape: they exist only for the change that *creates* a repository, and the [creation runbook](docs/runbooks/creating-repositories.md) removes both in one follow-up PR once the repository's first pull request has landed its CI callers.
+**Transient config — things that should never be found at rest.**
+`import {}` and `moved {}` blocks come out in a follow-up PR once their apply has run (the plugin's convention), and `repository_exists = false` and `markdown = false` on a `standard-repository` call are the same shape: they exist only for the change that *creates* a repository, and the [creation runbook](docs/runbooks/creating-repositories.md) removes both in one follow-up PR once the repository's first pull request has landed its CI callers.
 Finding any of them on `main` means a runbook was left half-finished — and for `repository_exists` that is not cosmetic, it silently disables the classic-protection guard on that repository ([ADR-009](docs/decisions/009-plan-time-classic-protection-guard.md)).
 
 > **🤖 Agent** — Treat `repository_exists` in an owner directory as a defect, not configuration.

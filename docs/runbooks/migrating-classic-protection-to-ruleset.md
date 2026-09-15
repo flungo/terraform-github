@@ -4,11 +4,13 @@ Some repositories carry **classic branch protection** (repo → Settings → Bra
 The [`branch-protection`](../../modules/branch-protection) module protects default branches with a **ruleset** instead (see [ADR-004](../decisions/004-branch-protection-rulesets.md)), and the two **double-enforce** if both are present.
 The composite's guard therefore fails the plan while any classic rule exists, so onboarding a repo means *migrating* it off classic protection — not just adding the module call.
 
-This runbook is that migration: **compare the classic rule against the ruleset, then remove the classic rule.** The comparison is the important part — never remove a classic rule before confirming the ruleset is equivalent-or-stronger, or you silently weaken the branch's protection.
+This runbook is that migration: **compare the classic rule against the ruleset, then remove the classic rule.**
+The comparison is the important part — never remove a classic rule before confirming the ruleset is equivalent-or-stronger, or you silently weaken the branch's protection.
 
 ## Procedure
 
-1. **Adopt the repository into Terraform.** A repo carrying a classic rule exists on GitHub but is not yet managed here, so this step is an *adoption*: a `standard-repository` call in the repo's own by-subject file `owners/<owner>/<repo>.tf`, paired with an `import {}` block for the repository resource.
+1. **Adopt the repository into Terraform.**
+   A repo carrying a classic rule exists on GitHub but is not yet managed here, so this step is an *adoption*: a `standard-repository` call in the repo's own by-subject file `owners/<owner>/<repo>.tf`, paired with an `import {}` block for the repository resource.
    Follow [`importing-repositories.md`](importing-repositories.md) for the call, the import block, and the settings to reconcile.
 
    Do **not** add a standalone [`branch-protection`](../../modules/branch-protection) call: the composite already creates the ruleset, and a second one would apply alongside it.
@@ -17,9 +19,11 @@ This runbook is that migration: **compare the classic rule against the ruleset, 
    Already-managed repo?
    Then there is nothing to add — skip to step 2, where the guard is already failing every plan.
 
-2. **Open the PR / run the plan.** The plan fails on the guard with `<repo> has classic branch protection rule(s) matching [<pattern>]`.
+2. **Open the PR / run the plan.**
+   The plan fails on the guard with `<repo> has classic branch protection rule(s) matching [<pattern>]`.
 
-3. **Read the classic rule's settings.** The plan comment surfaces the blocking *pattern*; the full settings come from the **`surface-classic-protection`** CI job, which runs whenever the plan fails on the guard and prints the repo's complete classic settings (GraphQL) to its run summary.
+3. **Read the classic rule's settings.**
+   The plan comment surfaces the blocking *pattern*; the full settings come from the **`surface-classic-protection`** CI job, which runs whenever the plan fails on the guard and prints the repo's complete classic settings (GraphQL) to its run summary.
    Read them there — no manual step.
 
    <details><summary>To fetch them yourself outside CI</summary>
@@ -57,10 +61,12 @@ This runbook is that migration: **compare the classic rule against the ruleset, 
    Terraform can't do this — it doesn't manage the classic rule — so it's a manual step.
    The branch is briefly unprotected between removal and the ruleset applying (step 7); negligible for a solo repo, but sequence it so the window is short.
 
-6. **Re-run the plan.** With the classic rule gone the guard passes.
+6. **Re-run the plan.**
+   With the classic rule gone the guard passes.
    For an already-managed repo the plan shows just the ruleset as `1 to add` (two, where the repo also declares `release_branches`); for an adoption it shows the composite's full set — the imported repository plus the ruleset(s) and shared secret(s) — as [`importing-repositories.md`](importing-repositories.md) describes.
 
-7. **Merge.** The apply on merge creates the ruleset; the branch is protected again.
+7. **Merge.**
+   The apply on merge creates the ruleset; the branch is protected again.
 
 ## Ruleset baseline (what you're migrating *to*)
 

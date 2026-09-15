@@ -16,7 +16,8 @@ Until the App is in place, rotate the PAT on or before expiry.
 | Actions secret | `FLUNGO_GITHUB_TOKEN` (repo secret) → env `TF_VAR_github_token` |
 | Expiry | 90 days |
 
-> **Permissions grow with scope.** The current set covers everything managed today: **Administration** for repository settings and rulesets (`github_repository`, `github_repository_ruleset` — branch protection included), **Secrets** for the shared Actions secrets written to managed repos (`github_actions_secret`), and **Metadata**, which is always required.
+> **Permissions grow with scope.**
+> The current set covers everything managed today: **Administration** for repository settings and rulesets (`github_repository`, `github_repository_ruleset` — branch protection included), **Secrets** for the shared Actions secrets written to managed repos (`github_actions_secret`), and **Metadata**, which is always required.
 > Additional resources need additional fine-grained permissions, added to the token when they land:
 >
 > - **Dependabot secrets:** Repository → **Dependabot secrets** (the `Secrets` permission covers Actions secrets only).

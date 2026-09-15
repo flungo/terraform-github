@@ -14,14 +14,19 @@ Two things had to be decided: the module's shape (what it encodes vs exposes), a
 
 Extract [`modules/repository`](../../modules/repository) — the **standard repository** — and route every owner-directory repository through it.
 
-- **One `github_repository "this"` per module call.** The module's local resource name is the idiomatic `this`; the *module call's* local name mirrors the repository name (`module "authentik_flungo_net"`), keeping the naming convention at the owner-directory level.
-- **Encode the baseline; expose only per-repo variation.** Feature toggles (issues on; wiki/projects/downloads off) and merge strategy (merge off; squash + rebase on; delete-branch-on-merge on) are hard-coded.
+- **One `github_repository "this"` per module call.**
+  The module's local resource name is the idiomatic `this`; the *module call's* local name mirrors the repository name (`module "authentik_flungo_net"`), keeping the naming convention at the owner-directory level.
+- **Encode the baseline; expose only per-repo variation.**
+  Feature toggles (issues on; wiki/projects/downloads off) and merge strategy (merge off; squash + rebase on; delete-branch-on-merge on) are hard-coded.
   Inputs are `name`, `description`, `visibility` (default `private`), `topics`, and `auto_init`.
   The catalogue lives in [`docs/reference/standard-repository.md`](../reference/standard-repository.md).
-- **Standard first; grow inputs deliberately.** A repository is brought to the baseline by default; an input to preserve a deviation is added only on explicit user confirmation (per [Terraform conventions](../reference/terraform-conventions.md)).
-- **Migrate with `moved {}` blocks.** Each existing resource is relocated from its top-level address to `module.<name>.github_repository.this` via a `moved` block, so the refactor is a state move — not a destroy/recreate.
+- **Standard first; grow inputs deliberately.**
+  A repository is brought to the baseline by default; an input to preserve a deviation is added only on explicit user confirmation (per [Terraform conventions](../reference/terraform-conventions.md)).
+- **Migrate with `moved {}` blocks.**
+  Each existing resource is relocated from its top-level address to `module.<name>.github_repository.this` via a `moved` block, so the refactor is a state move — not a destroy/recreate.
   The blocks are removed in a follow-up once the migrating apply has run (mirroring the import-block adopt-then-remove pattern).
-- **`authentik.flungo.net` is standardised.** Its previously-enabled Projects (a deviation kept at adoption) is turned off to match the baseline rather than adding a `has_projects` input — the single behavioural change in the migration.
+- **`authentik.flungo.net` is standardised.**
+  Its previously-enabled Projects (a deviation kept at adoption) is turned off to match the baseline rather than adding a `has_projects` input — the single behavioural change in the migration.
 
 ## Consequences
 

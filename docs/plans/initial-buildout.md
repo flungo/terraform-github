@@ -45,12 +45,15 @@ Each wraps one GitHub provider resource type with the user's opinionated default
 
 ### Module inputs & variable naming
 
-- **Customise through simple inputs, not forks.** A caller expresses common variations via a small set of inputs.
+- **Customise through simple inputs, not forks.**
+  A caller expresses common variations via a small set of inputs.
   The set is grown deliberately as onboarding surfaces genuine, recurring variation — start minimal.
-- **Prefer intent flags over micromanagement.** A flag should describe *why*, not restate what the module does, so one input can drive several control-flow decisions from a single declaration.
+- **Prefer intent flags over micromanagement.**
+  A flag should describe *why*, not restate what the module does, so one input can drive several control-flow decisions from a single declaration.
   Example: a `terraform = true` flag on a repo's module call means "this repo holds Terraform config" and — at this stage — primarily gates whether the **HCP token secret** is attached (and can add the Terraform plan check to the required status checks).
   Branch protection itself is *not* gated on this flag; it applies to every repo regardless (see below).
-- **Variable naming convention.** Where an input corresponds to a GitHub provider argument, **match the provider's variable name** (e.g. `visibility`, `default_branch`).
+- **Variable naming convention.**
+  Where an input corresponds to a GitHub provider argument, **match the provider's variable name** (e.g. `visibility`, `default_branch`).
   Where there is no direct correspondent, use best judgement and name for the *intent* of the flag (e.g. `terraform`, `strict`).
 
 ### 1.1 Branch protection defaults
@@ -59,7 +62,8 @@ Protecting `main` is one of the repo's motivators, so `modules/branch-protection
 Preferred implementation is a **`github_repository_ruleset`** (the modern, more expressive resource) over the older `github_branch_protection`.
 The module presents a stable input surface, but the two resources are **not semantically identical**, so pick one and commit to it.
 
-> **Migration caveat (ruleset ⇄ branch_protection).** The two enforce via different mechanisms and field shapes — e.g. bypass is `bypass_actors` on a ruleset vs `enforce_admins` on branch protection; branch targeting is a `conditions.ref_name` pattern vs a single `pattern`; and both can even apply to the same branch at once (double enforcement).
+> **Migration caveat (ruleset ⇄ branch_protection).**
+> The two enforce via different mechanisms and field shapes — e.g. bypass is `bypass_actors` on a ruleset vs `enforce_admins` on branch protection; branch targeting is a `conditions.ref_name` pattern vs a single `pattern`; and both can even apply to the same branch at once (double enforcement).
 > If we ever migrate the module from one to the other, **call out the per-field semantic differences and confirm whether any per-repo overrides are needed before switching** — a silent swap is likely to produce unintended drift or a quietly weaker rule.
 > **The migration must also delete the legacy `github_branch_protection`** in the same change — leaving both resources applied double-enforces and defeats the purpose of the move.
 
@@ -85,7 +89,8 @@ The module presents a stable input surface, but the two resources are **not sema
   So "require status checks" has teeth only once contexts are listed; for a repo with CI these are its check names (the `terraform` flag adds the Terraform plan check — see §"standard-repository").
 - Individual rules are overridable per repo where a genuine exception exists, but the intent is that the defaults apply unchanged to almost every repo (customise through the small input set, per §1 "Module inputs & variable naming" — don't fork the module).
 
-**Module built early; applied to the rest later.** The `branch-protection` *module* is built and proven at §7 step 4 — right after repository management and **before** secrets — against the first repo (`authentik.flungo.net`).
+**Module built early; applied to the rest later.**
+The `branch-protection` *module* is built and proven at §7 step 4 — right after repository management and **before** secrets — against the first repo (`authentik.flungo.net`).
 Protecting the remaining repos, `terraform-github` itself included, happens when they are onboarded after CI is proven (§7 step 8).
 `terraform-github` is deliberately **not** the first repo onboarded (see the circularity note in §5).
 
@@ -105,7 +110,8 @@ Capturing this asymmetry is exactly why the "shared secrets" concern is its own 
 
 - **`LYCHEE_GITHUB_TOKEN`** — the starting point.
   The [lychee](https://github.com/lycheeverse/lychee) Markdown link-checker used in CI across these repos needs a GitHub token to avoid rate-limiting; it is the first shared secret every managed repo should carry.
-- **HCP token — optional, gated on the `terraform` intent flag.** A repo that holds Terraform config (its module call sets `terraform = true`) also needs the HCP Terraform token to run `plan`/`apply` in CI.
+- **HCP token — optional, gated on the `terraform` intent flag.**
+  A repo that holds Terraform config (its module call sets `terraform = true`) also needs the HCP Terraform token to run `plan`/`apply` in CI.
   Because an Owners-team HCP token reaches every workspace in the org (it is org-wide, not per-workspace — see §4), this is a *single shared value* attached only where `terraform = true`, not a per-repo secret to manage.
   **Verify at implementation** whether the available HCP token scope is indeed org/team-wide (expected yes) before relying on one shared value.
 
@@ -197,7 +203,8 @@ A deliberately minimal surface, named per the convention above (match the provid
 └── docs/
 ```
 
-**A note on GitHub nomenclature (why `owners/`, and what the leaf is).** GitHub calls both a personal account and an organisation an **account** — a *user account* and an *organisation account*.
+**A note on GitHub nomenclature (why `owners/`, and what the leaf is).**
+GitHub calls both a personal account and an organisation an **account** — a *user account* and an *organisation account*.
 Both **own** repositories: `owner` is the first path segment of every repo (`/repos/{owner}/{repo}` in the REST API), it is the `integrations/github` provider's argument, and a repo's `owner.type` is `User` or `Organization`.
 So **owner** is the precise, provider-aligned word that spans a user and an org — which is why the container is `owners/`, not the softer UI term `accounts/`.
 (GitHub has no "namespace"/"group" concept — those are GitLab's.)
@@ -240,10 +247,13 @@ HCP's CLI-workspace mechanism (`workspaces { tags = [...] }` + `terraform worksp
 So "share one workspace across owner directories" is not actually available the way it would be with, say, an S3 backend keyed by prefix.
 The realistic options are:
 
-- **Option A — workspace per owner directory.** Each `owners/<owner>/` has its own `cloud{}` block → its own HCP workspace → its own state.
-- **Option B — single root module, all owners in one workspace.** Collapse the directory-per-owner layout into one root that declares an aliased provider per owner (`github.personal`, `github.org_foo`) and calls the modules once per owner.
+- **Option A — workspace per owner directory.**
+  Each `owners/<owner>/` has its own `cloud{}` block → its own HCP workspace → its own state.
+- **Option B — single root module, all owners in one workspace.**
+  Collapse the directory-per-owner layout into one root that declares an aliased provider per owner (`github.personal`, `github.org_foo`) and calls the modules once per owner.
   One workspace, one state.
-- **Option C — one config, many workspaces via `tags`/CLI workspaces.** One directory, selected into a per-owner workspace at run time.
+- **Option C — one config, many workspaces via `tags`/CLI workspaces.**
+  One directory, selected into a per-owner workspace at run time.
   Still one state per owner, so it inherits A's isolation but loses the per-owner *directory* the user wants and complicates local ergonomics.
 
 ### Trade-off analysis
@@ -263,7 +273,8 @@ The realistic options are:
 
 Reasons, in priority order:
 
-1. **Credential scoping is the decisive factor.** Managing multiple owners means multiple GitHub tokens (a personal PAT, org admin tokens, or per-owner GitHub App installations).
+1. **Credential scoping is the decisive factor.**
+   Managing multiple owners means multiple GitHub tokens (a personal PAT, org admin tokens, or per-owner GitHub App installations).
    Option A keeps each owner's credential in its own workspace and its own CI run — a mistake or a leak is contained to one owner.
    Option B forces every credential into a single run where any resource can use any token; that is a materially worse security posture for the multi-owner goal.
 2. **Blast radius and apply isolation** matter more here than atomic cross-owner rollout.
@@ -276,7 +287,8 @@ The one real cost — cross-owner rollouts are N applies — is acceptable given
 
 Option C is noted and rejected: it keeps per-owner state (so it doesn't simplify the backend) but gives up the per-owner directory the user wants.
 
-> **Confirmed in review (2026-07-20); ratified as [ADR-002](../decisions/002-workspace-per-owner-topology.md) (2026-07-21).** Option A is accepted.
+> **Confirmed in review (2026-07-20); ratified as [ADR-002](../decisions/002-workspace-per-owner-topology.md) (2026-07-21).**
+> Option A is accepted.
 
 ---
 
@@ -303,7 +315,8 @@ Inheriting `terraform-grafana-cloud`'s setup (ADR-002 there), adapted for multip
   }
   ```
 
-- **Workspaces are auto-created, not a manual chore per owner.** With the `cloud` block, if the named workspace does not exist HCP **creates it on first `terraform init`**.
+- **Workspaces are auto-created, not a manual chore per owner.**
+  With the `cloud` block, if the named workspace does not exist HCP **creates it on first `terraform init`**.
   Execution mode cannot be set in the `cloud` block (it is a workspace setting), and an auto-created workspace **inherits the project's default execution mode**.
   So the one manual step is a *project-level* setting: create the `terraform-github` project once and set its **default execution mode to Local**; every owner workspace then comes into being Local on first init.
   Net answer to "manual each time vs dynamic": **dynamic** — onboarding an owner is adding a directory and running init, not clicking through HCP.
@@ -344,7 +357,8 @@ Credential options, to decide before writing owner directories:
 - **Single classic/fine-grained PAT** with admin on the personal account + each org.
   Simplest bootstrap; matches "under my own credentials".
   Downside: one token is a single point of compromise across all owners, and per-owner PATs would mean one Actions secret to mint and rotate per owner — the overhead the owner flagged.
-- **GitHub App installed per owner — the low-overhead, self-bootstrapping path.** The provider authenticates as an App via `app_auth {}` (App ID + installation ID
+- **GitHub App installed per owner — the low-overhead, self-bootstrapping path.**
+  The provider authenticates as an App via `app_auth {}` (App ID + installation ID
   - private key).
     One App, one **private key** (a single Actions secret), installed on the personal account and each org; the provider mints a **short-lived, per-owner installation token at run time**.
     This is also the answer to "can the repo create the scoped token itself?": GitHub has **no API to mint a user PAT**, but a GitHub App *is* the supported way to issue scoped, auto-expiring per-owner tokens from one key — and `terraform-github` can manage the App's installations and repository access itself once bootstrapped.
@@ -364,11 +378,14 @@ Record the model in an ADR when settled.
 
 Adopt the Grafana repo's `terraform.yml` model — **plan on PR, apply on merge to `main`, `workflow_dispatch` for on-demand** — with two adaptations for the multi-owner layout:
 
-- **Matrix over owner directories.** Each job runs `terraform -chdir=owners/<owner>` for its owner, so plans/applies are per-workspace.
+- **Matrix over owner directories.**
+  Each job runs `terraform -chdir=owners/<owner>` for its owner, so plans/applies are per-workspace.
   A change touching only one owner directory need only run that owner (path filtering is a later optimisation; start by running the full matrix).
-- **Plan comment per owner.** The PR comment upsert keys off the owner so each owner's plan is a distinct, updated comment.
+- **Plan comment per owner.**
+  The PR comment upsert keys off the owner so each owner's plan is a distinct, updated comment.
 
-**Drift remediation — deferred / lighter than Grafana.** The Grafana repo applies daily because it manages *auto-rotating tokens* that must stay authoritative.
+**Drift remediation — deferred / lighter than Grafana.**
+The Grafana repo applies daily because it manages *auto-rotating tokens* that must stay authoritative.
 `terraform-github` manages mostly static configuration with no self-rotating resource, so a daily **auto-apply** is not warranted.
 Recommendation: ship plan/apply CI first; if drift becomes a real problem, add **plan-only drift *detection*** (open an issue on drift, do not auto-apply) across the owner matrix, rather than the Grafana repo's auto-remediation.
 Decide when we get there.
@@ -381,7 +398,8 @@ CI workflow YAML is intentionally **not** written in this documentation PR — i
 
 Each step is its own PR (own plan, own review gate), in order:
 
-> **Progress.** Steps 1–3 are done: structure ratified (ADR-001/002/003); the `owners/flungo/` skeleton and plan/apply CI landed; and `modules/repository` is extracted with the flungo repositories migrated onto it.
+> **Progress.**
+> Steps 1–3 are done: structure ratified (ADR-001/002/003); the `owners/flungo/` skeleton and plan/apply CI landed; and `modules/repository` is extracted with the flungo repositories migrated onto it.
 > Two deviations from the original sequence: **CI (step 7) landed early**, with the skeleton at step 2; and `github-workflows` and `claude-plugins` were added ahead of step 8, so step 3 migrated **all three** existing repositories, not `authentik.flungo.net` alone.
 > Step 4 (`modules/branch-protection`) is done — the module, its `authentik.flungo.net` pilot, and the roll-out to the remaining managed repos (`github-workflows`, `claude-plugins`) have landed.
 > Repos onboarded later (§7 step 8) are protected as they arrive.
@@ -400,7 +418,8 @@ Each step is its own PR (own plan, own review gate), in order:
 > The plan did also surface a real gap in the standard: an attribute the module leaves unset is **not** left alone — the provider resets it to its own default, which was reverting `terraform-grafana-cloud`'s deliberate `PR_TITLE` / `PR_BODY` squash commit settings.
 > Those are now part of the baseline (confirmed 2026-07-29), so the fleet gains them on this apply, along with `allow_update_branch = false` — stated explicitly rather than left to the provider default, since omitting a setting is only ever a silent vote for that default.
 >
-> **Step 8 is complete.** `terraform-github` itself was adopted last, as this section always intended — its apply touches this repo's own branch protection, so the pipeline was proven on every other repo first.
+> **Step 8 is complete.**
+> `terraform-github` itself was adopted last, as this section always intended — its apply touches this repo's own branch protection, so the pipeline was proven on every other repo first.
 > It is the one call carrying `manage_secrets = false`: the composite would otherwise manage the very secrets that gate this repo's CI, and a broken apply that rewrote them would lock the repo out of the credentials needed to fix it (the §5 circularity note).
 > Taking self-management on is a deliberate later step, not an oversight.
 > The whole initial `flungo` set is now under Terraform; the remaining `flungo` repos are left to the discovery pass at step 12.
@@ -423,7 +442,8 @@ Where each repository stands, and what closing the gap needs:
 Until a gap closes the flag stays off, with a comment on the module call naming what adopting the standards needs — so the absence records pending work rather than an oversight.
 `stalwart.flungo.net` is the exception that proves the shape: it keeps the flag because it genuinely follows the standards, and excludes only the context it cannot report.
 
-**Strict checks ride this, not a rollout of their own.** [ADR-011](../decisions/011-strict-required-status-checks.md) encodes `strict_required_status_checks_policy = true` in the branch-protection module, inside a block the module emits only where a context is actually required.
+**Strict checks ride this, not a rollout of their own.**
+[ADR-011](../decisions/011-strict-required-status-checks.md) encodes `strict_required_status_checks_policy = true` in the branch-protection module, inside a block the module emits only where a context is actually required.
 So each repository in the table above gains "branches must be up to date before merging" at the moment its gap closes and it starts requiring a check — there is no separate step, and no way to end up with required checks that are not strict.
 `terraform-github` and `terraform-grafana-cloud` have it now.
 `authentik.flungo.net` and `terraform-cloudflare` get it with the flag; `stalwart.flungo.net` already carries the flag, so it gets it when its `excluded_status_checks` entry comes off.
@@ -445,7 +465,8 @@ The aspiration is broader here — the Markdown workflows are not Terraform-spec
 | `claude-code-sandbox` | Has documentation; runs neither workflow | The same |
 | `terraform-cloudflare` | Empty — no documentation, no workflows | Content first, then the same |
 
-✅ **The realignment is done.** The four repositories already following the standards used the pre-convention caller job names (`lint`, `links`), and had to move to the ones [`github-workflows` ADR-010](https://github.com/flungo/github-workflows/blob/main/docs/decisions/010-caller-job-ids-match-the-workflow-filename.md) settles — job id = the reusable workflow's filename — **before** the flag could require those contexts, or their merges would have blocked behind two checks nothing reports.
+✅ **The realignment is done.**
+The four repositories already following the standards used the pre-convention caller job names (`lint`, `links`), and had to move to the ones [`github-workflows` ADR-010](https://github.com/flungo/github-workflows/blob/main/docs/decisions/010-caller-job-ids-match-the-workflow-filename.md) settles — job id = the reusable workflow's filename — **before** the flag could require those contexts, or their merges would have blocked behind two checks nothing reports.
 It landed as part of each repository's `@v2` migration rather than as a separate pull request each: `github-workflows` cut `v2` for [`github-workflows` ADR-011](https://github.com/flungo/github-workflows/blob/main/docs/decisions/011-reusable-job-ids-are-the-check-name.md) (a reusable job's id is its check name), and every consumer had to edit the same caller jobs to bump the pin anyway.
 Doing both in one pull request per repository also avoided a window where a renamed caller reported a context nothing expected.
 The three still to adopt take the conforming names from the start, so nothing further is owed there.
@@ -463,7 +484,9 @@ Each also gains ADR-011's up-to-date-branch requirement at that point, since the
    - variables and a single imported repository — **`authentik.flungo.net`**, a fairly fresh repo that exercises most of the features discussed (it has Terraform config, so `terraform = true`) — no modules yet.
      First `terraform init` auto-creates the `github-flungo` workspace (§4).
      Prove init/plan/apply end-to-end with the bootstrap **personal PAT**.
-     *(Personal first: it also unlocks self-bootstrapping the GitHub App and the remaining owners' access at step 9.)* **Steps 3–7 are proven against `authentik.flungo.net` alone.** Do not bring in any other repo or owner until the full pipeline (module → protection → secrets → composite → CI) is green for that one repo — see step 8.
+     *(Personal first: it also unlocks self-bootstrapping the GitHub App and the remaining owners' access at step 9.)*
+     **Steps 3–7 are proven against `authentik.flungo.net` alone.**
+     Do not bring in any other repo or owner until the full pipeline (module → protection → secrets → composite → CI) is green for that one repo — see step 8.
 3. **`modules/repository`** — extract the standard repo settings into the module and convert `authentik.flungo.net` to consume it.
    No other repos yet.
 4. **`modules/branch-protection`** — build the module and protect `authentik.flungo.net`'s default branch with the agreed defaults (§1) — right after repository management and **before** secrets.
@@ -471,8 +494,10 @@ Each also gains ADR-011's up-to-date-branch requirement at that point, since the
    (`modules/org-secrets` is not needed until the first org, step 10.)
 6. **`modules/standard-repository` composite** — compose repository + branch protection + secrets; migrate `authentik.flungo.net` to one module call.
    Two requirements settled while piloting `repository-secrets`:
-   - **Source the shared secret values centrally.** The composite pulls the common secret values (`lychee_github_token`, the HCP token) from one owner-level source, so a consumer names the repo and flips flags rather than passing each token per call — this is where the per-consumer boilerplate of calling `repository-secrets` directly goes away.
-   - **Carry a self-secrets opt-out.** `terraform-github`'s own CI-gating tokens stay manually managed for now (see the circularity note in §5); the composite needs a way to opt a repo out of shared-secret management so onboarding `terraform-github` itself (step 8) doesn't try to Terraform-manage the very tokens that gate its own CI.
+   - **Source the shared secret values centrally.**
+     The composite pulls the common secret values (`lychee_github_token`, the HCP token) from one owner-level source, so a consumer names the repo and flips flags rather than passing each token per call — this is where the per-consumer boilerplate of calling `repository-secrets` directly goes away.
+   - **Carry a self-secrets opt-out.**
+     `terraform-github`'s own CI-gating tokens stay manually managed for now (see the circularity note in §5); the composite needs a way to opt a repo out of shared-secret management so onboarding `terraform-github` itself (step 8) doesn't try to Terraform-manage the very tokens that gate its own CI.
      Self-management is a deliberately deferred later step — see [ADR-005](../decisions/005-shared-secrets-module.md).
 7. **CI** — add `terraform.yml` (§6).
    Prove plan-on-PR / apply-on-merge for the single-repo `flungo` workspace.

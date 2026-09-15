@@ -32,10 +32,12 @@ Bring a new **owner account** (the personal account, or an organisation) under m
    }
    ```
 
-2. **Create the owner's token and wire it in.** A fine-grained PAT for `<login>`, **all repositories**, with **Administration: Read and write** + **Metadata: Read-only** (add more as scope grows — see [`github-provider-token-rotation.md`](github-provider-token-rotation.md)).
+2. **Create the owner's token and wire it in.**
+   A fine-grained PAT for `<login>`, **all repositories**, with **Administration: Read and write** + **Metadata: Read-only** (add more as scope grows — see [`github-provider-token-rotation.md`](github-provider-token-rotation.md)).
    Store it as the `<OWNER>_GITHUB_TOKEN` Actions secret and reference it as `TF_VAR_github_token` for this owner in `.github/workflows/terraform.yml`.
 
-3. **Open the PR.** CI's plan job runs `terraform init`, which **auto-creates** the `github-<login>` workspace in the `terraform-github` project (inheriting Local execution), then posts the plan on the PR — no manual `init` or workspace creation.
+3. **Open the PR.**
+   CI's plan job runs `terraform init`, which **auto-creates** the `github-<login>` workspace in the `terraform-github` project (inheriting Local execution), then posts the plan on the PR — no manual `init` or workspace creation.
 
 4. **Adopt the owner's repositories** — follow [`importing-repositories.md`](importing-repositories.md) for each existing repo (import block reconciled against the PR-posted plan → clean import), in this PR or follow-ups.
 
