@@ -34,11 +34,19 @@
 # — "markdownlint", and "Internal links & anchors" with its spaces and ampersand
 # — which had to be copied exactly from a real run and never typed from memory.
 #
-# Markdown implies two checks rather than one, because the standard is two
+# Markdown implies three checks rather than one, because the standard is three
 # workflows. The sweep's sibling job, "markdown-links / external", is
 # deliberately absent — it self-skips on pull_request and reports through an
 # auto-updated issue rather than a check, so requiring it would name a context
 # that never runs for the reason it exists.
+#
+# "markdown-sembr / sembr" joined last: the semantic-line-break check is opt-in
+# by adoption in github-workflows (its ADR-015), so that an outside repo can
+# take the other two without inheriting a prose style — but for a repo Fabrizio
+# owns the prose style is the standard, so the flag requires it like the rest.
+# Requiring it was gated on every markdown = true repo reporting it green on
+# main first, since a context required before a repo reports it sits at
+# "Expected" forever and blocks every merge there.
 module "branch_protection" {
   source = "../branch-protection"
 
@@ -48,7 +56,7 @@ module "branch_protection" {
   required_status_checks = tolist(setsubtract(
     concat(
       var.terraform ? ["terraform / terraform"] : [],
-      var.markdown ? ["markdown-lint / lint", "markdown-links / internal"] : [],
+      var.markdown ? ["markdown-lint / lint", "markdown-links / internal", "markdown-sembr / sembr"] : [],
       var.required_status_checks,
     ),
     var.excluded_status_checks,

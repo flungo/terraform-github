@@ -41,12 +41,25 @@ The composite therefore does both halves together:
 - attaches `LYCHEE_GITHUB_TOKEN`, so the external sweep can reach other private repositories;
 - requires `markdown-lint / lint` and `markdown-links / internal`, the checks the two workflows report on every pull request.
 
+  > **Amended 2026-09-16:** the Markdown standard is now three workflows, and the flag requires `markdown-sembr / sembr` alongside them.
+  > `github-workflows` added `markdown-sembr.yml` — a check for the one machine-decidable MUST rule of [semantic line breaks](https://sembr.org/), two sentences sharing a source line — and kept it opt-in *by adoption* (its [ADR-015](https://github.com/flungo/github-workflows/blob/main/docs/decisions/015-semantic-line-break-check.md)), so that an outside repo can take the other two without inheriting a prose style.
+  > That reasoning is about outside repos: for a repo Fabrizio owns the prose style *is* the standard, so the flag carries it like the rest.
+  > Requiring it was staged rather than switched on — see the amendment under "Two workflows, two checks — but not three".
+
 They arrive together because they are the same fact: the repository runs those workflows.
 
 ### Two workflows, two checks — but not three
 
 The Markdown standard is two workflows, so the flag implies two contexts where `terraform` implies one.
 Nothing about the design assumed one check per flag, and the assembly in `modules/standard-repository/branch-protection.tf` concatenates lists rather than appending strings.
+
+> **Amended 2026-09-16:** three workflows and three contexts now, `markdown-sembr / sembr` having joined.
+> The claim being tested here held: growing the implied set cost one string in the same list, so this section is right about the shape even where its count is out of date.
+> "Not three" below is still about the *fourth* job, `markdown-links / external`, and is unaffected.
+>
+> Adding it was ordered rather than switched on, because the failure mode is unforgiving: a context required before a repo reports it sits at "Expected" forever, and nothing in that repo can merge.
+> So each `markdown = true` repo reflowed its prose, adopted the caller, and was watched reporting green on `main` — `authentik.flungo.net`, `claude-plugins`, `github-workflows`, `mdformat-markdownlint`, `stalwart.flungo.net`, `terraform-github` and `terraform-provider-stalwart`, all seven verified before this change.
+> That is the same ordering the four renames below needed, for the same reason, and it makes the reflow a precondition of the flag: a repo whose prose has not been reflowed is a `markdown = false` case until it is, since its check would be red on arrival rather than merely absent.
 
 The third job is deliberately **not** required.
 `markdown-links.yml` carries an `external` job alongside `internal`, and it self-skips on `pull_request` — the sweep runs on a schedule and on dispatch, reporting breakage through a single auto-updated issue rather than failing a run, precisely so that a third-party outage cannot block a merge.
