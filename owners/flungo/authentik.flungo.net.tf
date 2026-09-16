@@ -9,7 +9,7 @@ module "authentik_flungo_net" {
   description = "Terraform configuration, architecture documentation, and operational records for Fabrizio's Authentik server."
 
   # Holds Terraform config, but does not yet follow Fabrizio's Terraform
-  # standards — its CI is markdown lint/links and version-check only, with no
+  # standards — its CI is the Markdown workflows and version-check only, with no
   # github-workflows Terraform jobs. The flag asserts the standards are
   # followed (ADR-010), so setting it would require a check nothing reports and
   # block every merge. Enable when those jobs are adopted; that is also when
