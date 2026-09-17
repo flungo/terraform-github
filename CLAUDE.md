@@ -129,7 +129,7 @@ Local `plan` is not possible: it needs both the HCP backend token and a GitHub t
 ### Validating Markdown locally
 
 Both commands, where to read the linter version from (a CI run — never a number written down here), how to install `lychee` in this sandbox, and why the external URL sweep cannot be verified locally all come from the **`markdown-standards`** plugin's `validating-locally.md`.
-There is nothing repo-specific to add: this repo runs the fleet's two checks with the fleet's globs.
+There is nothing repo-specific to add: this repo runs the fleet's three checks with the fleet's globs.
 
 ## Branch management
 
