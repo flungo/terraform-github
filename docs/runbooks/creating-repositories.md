@@ -29,7 +29,7 @@ Settle these before writing the module call — most map straight onto a module 
    Set it `false` for an empty repo whose first bulk push establishes `main`.
 7. **Terraform repo?**
    — `terraform = true` marks a repo that holds Terraform config, which attaches the HCP token secret so it can plan/apply in its own CI (the value comes from the owner-level `shared_secrets`).
-8. **Markdown standards** — `markdown` defaults to **`true`**, because every repo should end up following them, but a repo being *created* has not adopted them yet: it has no caller workflows, so the two checks the flag requires would never report and the first pull request would be unmergeable.
+8. **Markdown standards** — `markdown` defaults to **`true`**, because every repo should end up following them, but a repo being *created* has not adopted them yet: it has no caller workflows, so the three checks the flag requires would never report and the first pull request would be unmergeable.
    **Set `markdown = false` on the create**, with a comment saying adoption is pending, and delete it in the same follow-up as `repository_exists` (step 5) — the same shape, and for the same reason.
    The callers land in the repository's first pull request (step 4), the docs scaffolding and CI: [`adopting-markdown-workflows.md`](https://github.com/flungo/github-workflows/blob/main/docs/runbooks/adopting-markdown-workflows.md) for the mechanics, or the `markdown-standards` plugin's `/adopt-markdown-ci` for the automated path.
 9. **Required status checks** — check contexts that must pass before merging, if the repo's CI is already known (they can be added later once the checks run; a context that never runs blocks merges behind a perpetual "Expected" entry).
