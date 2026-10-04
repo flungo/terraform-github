@@ -15,15 +15,15 @@ Terraform manages these GitHub resources for the `flungo` account (in `owners/fl
 
 - **Repositories** — each managed through the standard-repository composite (`modules/standard-repository`), one module call that applies the standard settings via the primitives below.
   Under management:
-  - `authentik.flungo.net` — adopted (imported) from the pre-existing repo
-  - `github-workflows` — created by this config to host the fleet's shared reusable workflows and CI standards
-  - `claude-plugins` — created by this config; the personal Claude Code / claude.ai plugin marketplace
-  - `stalwart.flungo.net` — adopted; Terraform config for the Stalwart mail server
-  - `claude-code-sandbox` — adopted; the personal Claude Code container image
-  - `terraform-grafana-cloud` — adopted; Terraform config for Grafana Cloud
-  - `terraform-provider-stalwart` — adopted; the Terraform provider for Stalwart
-  - `mdformat-markdownlint` — created by this config; an mdformat plugin and markdownlint preset that keep the two tools in agreement
-  - `terraform-cloudflare` — adopted; Terraform config for Cloudflare
+  - `authentik.flungo.net` — adopted
+  - `github-workflows` — created by this config
+  - `claude-plugins` — created by this config
+  - `stalwart.flungo.net` — adopted
+  - `claude-code-sandbox` — adopted
+  - `terraform-grafana-cloud` — adopted
+  - `terraform-provider-stalwart` — adopted
+  - `mdformat-markdownlint` — created by this config
+  - `terraform-cloudflare` — adopted
   - `synology` — created by this config
   - `terraform-github` — adopted; **this repository**, managing itself.
     Its shared secrets stay manually managed (`manage_secrets = false`), since they gate its own CI

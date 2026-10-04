@@ -11,8 +11,8 @@ Manual management is error-prone, leaves no audit trail, drifts silently, and ma
 
 Two sibling repositories already manage other infrastructure this way and have established conventions worth reusing:
 
-- [`terraform-grafana-cloud`](https://github.com/flungo/terraform-grafana-cloud) — Grafana Cloud org config as code, HCP Terraform backend, GitHub Actions CI (plan on PR / apply on merge), ADR + plan + runbook documentation model.
-- [`stalwart.flungo.net`](https://github.com/flungo/stalwart.flungo.net) — Stalwart mail server config as code, same documentation model.
+- [`terraform-grafana-cloud`](https://github.com/flungo/terraform-grafana-cloud) — HCP Terraform backend, GitHub Actions CI (plan on PR / apply on merge), ADR + plan + runbook documentation model.
+- [`stalwart.flungo.net`](https://github.com/flungo/stalwart.flungo.net) — the same documentation model.
 
 Several founding questions had to be settled before any Terraform is written:
 
@@ -27,7 +27,7 @@ Several founding questions had to be settled before any Terraform is written:
 ### 1. A dedicated repository
 
 GitHub resources are managed in their own repository, `terraform-github`, rather than folded into an existing infra repo.
-The GitHub provider, its credentials, its state, and its blast radius are distinct from Grafana Cloud or the mail server; co-locating them would entangle unrelated credentials and apply cycles.
+The GitHub provider, its credentials, its state, and its blast radius are distinct from those of the sibling repos; co-locating them would entangle unrelated credentials and apply cycles.
 A dedicated repo keeps each concern's state, CI, and review gate independent — consistent with the one-platform-per-repo pattern the sibling repos already follow.
 
 ### 2. Terraform

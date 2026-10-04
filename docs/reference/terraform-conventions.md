@@ -6,7 +6,7 @@ Generic HCL authoring conventions are the **`terraform-standards`** plugin's (`f
 This doc covers only what is specific to *this* repo's structure, and defers to the plugin for the rest.
 
 > **Key divergence from the sibling repos.**
-> `terraform-grafana-cloud` and `stalwart.flungo.net` use a **single flat root module** ("root module only — no child modules unless complexity clearly warrants it").
+> The `terraform-standards` plugin's default is a **single flat root module** ("root module only — no child modules unless complexity clearly warrants it").
 > This repo deliberately does **not**: the multi-owner requirement makes shared modules + a directory (and HCP workspace) per owner the right structure from the start.
 > The "one flat root" rule does not apply here.
 

@@ -1,7 +1,6 @@
-# terraform-cloudflare — Terraform config for Cloudflare. Adopted from the
-# pre-existing repository; managed through the standard-repository composite:
-# standard repository settings, default-branch protection, and the shared
-# Actions secrets.
+# terraform-cloudflare — adopted from the pre-existing repository; managed
+# through the standard-repository composite: standard repository settings,
+# default-branch protection, and the shared Actions secrets.
 
 module "terraform_cloudflare" {
   source = "../../modules/standard-repository"
@@ -9,17 +8,12 @@ module "terraform_cloudflare" {
   name        = "terraform-cloudflare"
   description = "Terraform configuration management for Cloudflare"
 
-  # Still empty — no config and no workflows, so it cannot yet follow
-  # Fabrizio's Terraform standards, which is what the flag asserts (ADR-010);
-  # setting it would require a check nothing reports and block every merge.
-  # Enable when the repo gains its config and the github-workflows Terraform
-  # jobs.
+  # Not set: the repository does not report "terraform / terraform" yet, and the
+  # flag requires it (ADR-010). Enable once it does.
   # terraform = true
 
-  # Off: still empty, so it has no Markdown and no workflows to validate it
-  # with — the same reason the terraform flag is off, and it clears the same
-  # way. Delete this line alongside the repo's first documentation; the lychee
-  # token it has been carrying unread is removed by this apply.
+  # Off: the repository does not report the Markdown checks yet, and the flag
+  # requires them (ADR-012). Delete this line once it does.
   markdown = false
 
   shared_secrets = local.shared_secrets

@@ -15,7 +15,7 @@ module "authentik_flungo_net" {
   source = "../../modules/standard-repository"
 
   name        = "authentik.flungo.net"
-  description = "Terraform configuration and documentation for Fabrizio's Authentik server."
+  description = "Terraform configuration for authentik.flungo.net."
 
   terraform = true # follows Fabrizio's Terraform standards → HCP token + required check
   markdown  = true # follows Fabrizio's Markdown standards  → lychee token + required checks

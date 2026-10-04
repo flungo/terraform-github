@@ -1,6 +1,6 @@
-# authentik.flungo.net — Terraform config/docs repo for Fabrizio's Authentik
-# server. Managed through the standard-repository composite: standard repository
-# settings, default-branch protection, and the shared Actions secrets.
+# authentik.flungo.net — adopted from the pre-existing repository; managed
+# through the standard-repository composite: standard repository settings,
+# default-branch protection, and the shared Actions secrets.
 
 module "authentik_flungo_net" {
   source = "../../modules/standard-repository"
@@ -8,14 +8,9 @@ module "authentik_flungo_net" {
   name        = "authentik.flungo.net"
   description = "Terraform configuration, architecture documentation, and operational records for Fabrizio's Authentik server."
 
-  # Holds Terraform config, but does not yet follow Fabrizio's Terraform
-  # standards — its CI is the Markdown workflows and version-check only, with no
-  # github-workflows Terraform jobs. The flag asserts the standards are
-  # followed (ADR-010), so setting it would require a check nothing reports and
-  # block every merge. Enable when those jobs are adopted; that is also when
-  # the HCP token starts being read.
+  # Not set: the repository does not report "terraform / terraform" yet, and the
+  # flag requires it (ADR-010). Enable once it does.
   # terraform = true
-
 
   shared_secrets = local.shared_secrets
 }

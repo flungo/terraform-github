@@ -18,11 +18,11 @@ Only two of five run the shared workflow:
 | `terraform-github` | shared reusable, caller job `terraform` |
 | `terraform-grafana-cloud` | shared reusable, caller job `terraform` |
 | `stalwart.flungo.net` | **bespoke** — not the shared workflow |
-| `authentik.flungo.net` | **none** — markdown lint/links and version-check only |
-| `terraform-cloudflare` | **no workflows at all** — the repository is empty |
+| `authentik.flungo.net` | **none** |
+| `terraform-cloudflare` | **none** |
 
 The flag had been read as "holds Terraform config".
-That is a different property from "follows Fabrizio's Terraform standards", and the fleet proves they diverge: `stalwart.flungo.net` holds config and runs a workflow that is not the shared one; `terraform-cloudflare` holds nothing yet.
+That is a different property from "follows Fabrizio's Terraform standards", and the fleet proves they diverge: `stalwart.flungo.net` carried the flag and runs a workflow that is not the shared one; `terraform-cloudflare` carried it and runs none.
 Only the second property implies both of the things the flag is meant to drive — the repo needs the HCP token *because* the workflow plans and applies, and reports the check *because* that workflow runs.
 
 GitHub offers no way to sidestep the naming problem.
@@ -58,7 +58,7 @@ See below.
 ### Conflicts are resolved by excluding the context, not by opting out of the flag
 
 A repository can legitimately follow the standards — needing the secrets, wanting the settings — and still be unable to report the check they imply.
-`stalwart.flungo.net` is the case: it uses HCP for state, so it wants the token, but its management host is LAN-only and the shared baseline cannot run on a GitHub-hosted runner.
+`stalwart.flungo.net` is the case: it uses HCP for state, so it wants the token, but it cannot report the shared check.
 
 `excluded_status_checks` removes named contexts after the implied and additional ones are combined.
 That is preferred to a per-flag opt-out (`terraform_check = false` or similar) because the conflict is general: any future flag that implies a check can meet a repository that cannot report it, and the exclusion list absorbs each case without growing a matching boolean.

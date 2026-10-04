@@ -20,7 +20,7 @@ Surveying which repositories call the [`flungo/github-workflows`](https://github
 | `terraform-github` | both, `@v1` — adopted in the pull request this one follows | `markdown-lint`, `markdown-links` |
 | `terraform-grafana-cloud` | **neither** | — |
 | `claude-code-sandbox` | **neither** | — |
-| `terraform-cloudflare` | **neither** — the repository is empty | — |
+| `terraform-cloudflare` | **neither** | — |
 
 The token is only ever read by the **external** URL sweep, which needs it to resolve links into other private repositories and to avoid public-GitHub rate limits.
 A repository that runs neither workflow has no reader for it.
@@ -116,8 +116,8 @@ That was backwards.
 `ci.yml` was not deviating from the standard; it was the only caller in the fleet already doing the right thing, and the runbook's examples were what needed fixing.
 Under [`github-workflows` ADR-010](https://github.com/flungo/github-workflows/blob/main/docs/decisions/010-caller-job-ids-match-the-workflow-filename.md) it conforms with no reconciliation at all, and the exclusion route is no longer offered for a naming mismatch — a repository that reports a different context should be renamed, not excused.
 
-`excluded_status_checks` keeps its real case: a repository that follows a standard but genuinely **cannot run** the check, as `stalwart.flungo.net` cannot run the Terraform baseline from a GitHub-hosted runner.
-That is a fact about the infrastructure; a job name is a choice, and choices get aligned.
+`excluded_status_checks` keeps its real case: a repository that follows a standard but genuinely **cannot run** the check, as `stalwart.flungo.net` cannot run the Terraform check.
+That inability is a constraint; a job name is a choice, and choices get aligned.
 
 ### Realigning the four existing adopters is part of this change
 

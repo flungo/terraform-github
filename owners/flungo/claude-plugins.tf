@@ -1,7 +1,6 @@
-# claude-plugins — the personal Claude Code / claude.ai plugin marketplace
-# (public so it can be installed). Managed through the standard-repository
-# composite: standard repository settings, default-branch protection, and the
-# shared Actions secrets.
+# claude-plugins — created by this config; managed through the
+# standard-repository composite: standard repository settings, default-branch
+# protection, and the shared Actions secrets.
 
 module "claude_plugins" {
   source = "../../modules/standard-repository"
@@ -12,7 +11,6 @@ module "claude_plugins" {
 
   # Public so the marketplace can be installed from Claude Code / claude.ai.
   visibility = "public"
-
 
   shared_secrets = local.shared_secrets
 }
