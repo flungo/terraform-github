@@ -64,7 +64,8 @@ Settle these before writing the module call — most map straight onto a module 
 ## Procedure
 
 1. **Add config in a PR.**
-   In a new file `owners/<login>/<repo>.tf` (each repo's config lives in one by-subject file named for it), add a module call with the answers above — and **no `import {}` block**:
+   In a new file `owners/<login>/<repo>.tf` (each repo's config lives in one by-subject file named for it), add a module call with the answers above — and **no `import {}` block**.
+   Comments, the commit message and the PR description carry configuration only, never what the repository is for or will hold — this repo is public ([CLAUDE.md](../../CLAUDE.md) § Other repositories):
 
    ```hcl
    module "<name>" {

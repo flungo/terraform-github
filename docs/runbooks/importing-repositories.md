@@ -13,7 +13,8 @@ Only the repository itself is imported — the branch-protection ruleset (two, w
 ## Procedure
 
 1. **Add config in a PR.**
-   In the repo's own file `owners/<login>/<repo>.tf` (each repo's config lives in one by-subject file named for it — create it if new), add a module call and an `import {}` block targeting its internal resource address:
+   In the repo's own file `owners/<login>/<repo>.tf` (each repo's config lives in one by-subject file named for it — create it if new), add a module call and an `import {}` block targeting its internal resource address.
+   Comments, the commit message and the PR description carry configuration only, never commentary on the repository's contents — this repo is public ([CLAUDE.md](../../CLAUDE.md) § Other repositories):
 
    ```hcl
    import {

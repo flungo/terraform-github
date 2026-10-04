@@ -45,6 +45,26 @@ When a sensitive value is needed in docs or config, use a placeholder (e.g. `<gi
 Provider tokens are supplied via `TF_VAR_github_token` from a per-owner Actions secret; they are declared `sensitive = true` and never hard-coded.
 The secrets CI uses, and their rotation, are catalogued in [`docs/reference/secrets.md`](docs/reference/secrets.md).
 
+## Other repositories — say only what the configuration requires
+
+This repository is **public**; most of the repositories it manages are not.
+Everything written here — config, comments, docs, commit messages, PR descriptions and comments — is readable by anyone, and stays readable in the history after it is edited out.
+
+So this repo carries **no commentary on any managed repository's contents, purpose, or the systems behind it**.
+What it holds about a repository is the configuration that has to be defined — name, description, topics, visibility, and the module inputs — and nothing more:
+
+- **Comments** in `owners/<owner>/<repo>.tf` explain a *configuration* choice only in configuration terms (e.g. "transient: removed once the creating apply has run").
+  Never what the repository holds or will hold, what it is for, the hosts, devices, networks or services behind it, its CI's internals, or its state of progress.
+- **Docs** list a managed repository by name and how it came under management (created / adopted) — no summary of what it is.
+- **Commit messages and PR descriptions** say what changed in *this* repo's config and why, in the same terms — never a rationale drawn from the other repository's contents, or what you learned about it.
+- **Where a deviation genuinely needs a reason**, state the configuration fact ("does not report the check yet") rather than the cause inside the other repository.
+- **The default is to say less.**
+  If you are unsure whether a detail is configuration or commentary, leave it out, or ask.
+
+> **🤖 Agent** — Apply this to *every* managed repository, public ones included: this repo is not where their contents are documented, and a public repo's details today can belong to a private one tomorrow.
+> Context the user gives you in conversation (what a repository is for, hosts, devices, plans) informs your choices; it is not material to write here.
+> Before pushing, and before posting any PR text, re-read the diff and the message for anything that describes another repository rather than configures it.
+
 ## Repo layout
 
 ```text
