@@ -32,6 +32,14 @@ Topics are set through the `topics` input on the standard repository module (see
 | `mdformat` | The repository is, or extends, the [mdformat](https://github.com/hukkin/mdformat) formatter — a plugin, a preset, or tooling built on it. Pair with `plugin` for a plugin. |
 | `markdownlint` | The repository is, or targets, [markdownlint](https://github.com/DavidAnson/markdownlint) — a rule set, a preset, a custom rule, or tooling built to agree with it. Use this form, not `markdown-lint`: the tool's own name is the one the ecosystem tags by, several times over. |
 
+### Self-hosting
+
+| Topic | Signals — and when to apply it |
+| --- | --- |
+| `homelab` | The repository configures or documents self-hosted infrastructure, rather than providing tooling for others. |
+| `nas` | The repository concerns network-attached storage — configuring, documenting, or extending a NAS. |
+| `synology` | The repository targets Synology NAS hardware or its DSM operating system. Use this form, not `synology-nas`: it is the more widely used tag (951 repositories against 314). |
+
 ### Claude
 
 | Topic | Signals — and when to apply it |
