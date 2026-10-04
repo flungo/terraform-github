@@ -1,12 +1,10 @@
-# github-workflows — reusable GitHub Actions workflows and shared CI standards
-# (public so the private consumer repos can call it). Managed through the
+# github-workflows — created by this config; managed through the
 # standard-repository composite: standard repository settings, default-branch
 # and release-branch protection, and the shared Actions secrets.
 #
-# The `terraform` topic is deliberate even though this repo holds no .tf of its
-# own: it provides CI *for* Terraform repos, and being findable by people
-# looking for that beats conforming to topics.md's "configuration codebase"
-# definition. Not a mis-tag to tidy away.
+# The `terraform` topic is deliberate, not a mis-tag to tidy away: the
+# repository provides CI for Terraform repos, and being findable for that
+# outweighs topics.md's "configuration codebase" definition.
 
 module "github_workflows" {
   source = "../../modules/standard-repository"
@@ -19,11 +17,8 @@ module "github_workflows" {
   # extra Actions-sharing config.
   visibility = "public"
 
-  # The moving-major release branches (v1, later v2, …): consumers pin @vN and
-  # the repo's release.yml fast-forwards the current major to main on every
-  # merge (its ADR-003). Only that workflow's App identity may push them
-  # directly; reverts and backports land as PRs (base v*). See the repo's
-  # releasing.md § Branch protection, github-workflows#6, and #13 here.
+  # Release branches (v1, v2, …): only the release App may push or create them
+  # directly; everything else lands as a pull request (ADR-007).
   # The pattern is fnmatch, not regex, so it also reaches names like v2-test.
   # That is deliberate: creation is restricted to the same App, so nobody can
   # make those branches anyway, and a broad glob cannot silently miss a real

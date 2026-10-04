@@ -1,9 +1,6 @@
-# mdformat-markdownlint — an mdformat plugin and a markdownlint preset that keep
-# the two tools in agreement, so a formatted file lints clean from one config
-# (public, so the package can be published and installed). Created by this
-# config; managed through the standard-repository composite: standard
-# repository settings, default-branch protection, and the shared Actions
-# secrets.
+# mdformat-markdownlint — created by this config; managed through the
+# standard-repository composite: standard repository settings, default-branch
+# protection, and the shared Actions secrets.
 
 module "mdformat_markdownlint" {
   source = "../../modules/standard-repository"

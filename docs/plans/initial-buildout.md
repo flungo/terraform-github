@@ -435,9 +435,9 @@ Where each repository stands, and what closing the gap needs:
 | --- | --- | --- |
 | `terraform-github` | Follows the standards | — |
 | `terraform-grafana-cloud` | Follows the standards | — |
-| `stalwart.flungo.net` | Follows them, but cannot report the check — its check is excluded via `excluded_status_checks` | A self-hosted runner, and probably support for one in `github-workflows`. Tracked in **that repository's own docs** (`docs/plans/terraform-ci.md` § Phase 3), not here |
-| `authentik.flungo.net` | Holds Terraform config; CI is markdown lint/links and version-check only | Adopting the `github-workflows` Terraform jobs |
-| `terraform-cloudflare` | Empty — no config, no workflows | Its Terraform config, then those jobs |
+| `stalwart.flungo.net` | Follows them, but cannot report the check — its check is excluded via `excluded_status_checks` | Tracked in **that repository's own docs**, not here |
+| `authentik.flungo.net` | Does not report the check | Adopting the `github-workflows` Terraform jobs |
+| `terraform-cloudflare` | Does not report the check | Adopting those jobs |
 
 Until a gap closes the flag stays off, with a comment on the module call naming what adopting the standards needs — so the absence records pending work rather than an oversight.
 `stalwart.flungo.net` is the exception that proves the shape: it keeps the flag because it genuinely follows the standards, and excludes only the context it cannot report.
@@ -461,9 +461,9 @@ The aspiration is broader here — the Markdown workflows are not Terraform-spec
 | `terraform-provider-stalwart` | Follows the standards | — |
 | `claude-plugins` | Follows the standards | — |
 | `github-workflows` | Follows the standards — it cannot pin itself `@v1`, so it dogfoods both from `./` in a combined `ci.yml`, under conforming job names | — |
-| `terraform-grafana-cloud` | Has documentation; runs neither workflow | Adopting the two callers, a `.markdownlint-cli2.jsonc`, and a `.lycheeignore` |
-| `claude-code-sandbox` | Has documentation; runs neither workflow | The same |
-| `terraform-cloudflare` | Empty — no documentation, no workflows | Content first, then the same |
+| `terraform-grafana-cloud` | Runs neither workflow | Adopting the two callers, a `.markdownlint-cli2.jsonc`, and a `.lycheeignore` |
+| `claude-code-sandbox` | Runs neither workflow | The same |
+| `terraform-cloudflare` | Runs neither workflow | The same |
 
 ✅ **The realignment is done.**
 The four repositories already following the standards used the pre-convention caller job names (`lint`, `links`), and had to move to the ones [`github-workflows` ADR-010](https://github.com/flungo/github-workflows/blob/main/docs/decisions/010-caller-job-ids-match-the-workflow-filename.md) settles — job id = the reusable workflow's filename — **before** the flag could require those contexts, or their merges would have blocked behind two checks nothing reports.
@@ -481,7 +481,7 @@ Each also gains ADR-011's up-to-date-branch requirement at that point, since the
 1. **Ratify structure** — merge this repo's docs (this PR).
    Confirm the workspace recommendation (§3) and credential model (§5); write **ADR-002** (workspace topology) and, if the credential model is settled, an ADR for it.
 2. **HCP + personal-account skeleton** — create the HCP `terraform-github` project (default execution mode **Local**); add `owners/flungo/` with backend + provider
-   - variables and a single imported repository — **`authentik.flungo.net`**, a fairly fresh repo that exercises most of the features discussed (it has Terraform config, so `terraform = true`) — no modules yet.
+   - variables and a single imported repository — **`authentik.flungo.net`** — no modules yet.
      First `terraform init` auto-creates the `github-flungo` workspace (§4).
      Prove init/plan/apply end-to-end with the bootstrap **personal PAT**.
      *(Personal first: it also unlocks self-bootstrapping the GitHub App and the remaining owners' access at step 9.)*
