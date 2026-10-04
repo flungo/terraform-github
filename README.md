@@ -24,6 +24,7 @@ Terraform manages these GitHub resources for the `flungo` account (in `owners/fl
   - `terraform-provider-stalwart` — adopted; the Terraform provider for Stalwart
   - `mdformat-markdownlint` — created by this config; an mdformat plugin and markdownlint preset that keep the two tools in agreement
   - `terraform-cloudflare` — adopted; Terraform config for Cloudflare
+  - `synology` — created by this config
   - `terraform-github` — adopted; **this repository**, managing itself.
     Its shared secrets stay manually managed (`manage_secrets = false`), since they gate its own CI
 - **Repository settings** — the standard settings, merge strategy, and feature toggles (`modules/repository`).
