@@ -7,7 +7,7 @@ Secrets written to *other* repos (below) carry no such circularity and are Terra
 
 | Secret | Purpose | Rotation |
 | --- | --- | --- |
-| `TF_TOKEN_APP_TERRAFORM_IO` | HCP Terraform Owners-team token for the state backend — org-wide, shared across all owner workspaces. Also propagated to `terraform = true` managed repos (below). | Manual (rotate in HCP) |
+| `TF_TOKEN_APP_TERRAFORM_IO` | HCP Terraform Owners-team token for the state backend — org-wide, shared across all owner workspaces. Also propagated to `terraform = true` managed repos (below). | [`../runbooks/hcp-terraform-token-rotation.md`](../runbooks/hcp-terraform-token-rotation.md) |
 | `FLUNGO_GITHUB_TOKEN` | `github` provider token for the `flungo` owner (fine-grained PAT, bootstrap) → `TF_VAR_github_token` | [`../runbooks/github-provider-token-rotation.md`](../runbooks/github-provider-token-rotation.md) |
 | `LYCHEE_GITHUB_TOKEN` | The lychee Markdown link-checker's GitHub token — read by the external URL sweep, to reach other private repos and avoid rate limits. Composed into the reusable workflow's `tf_secret_vars` and propagated to `markdown = true` managed repos (below). Also read by this repo's own sweep. | Manual |
 
