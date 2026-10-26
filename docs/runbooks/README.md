@@ -12,3 +12,4 @@ Contrast with [`../plans/`](../plans/) (one-time procedures, tracked to completi
 | [`creating-repositories.md`](creating-repositories.md) | Create a new repository with Terraform (no import block); includes the questions to settle before writing the resource |
 | [`migrating-classic-protection-to-ruleset.md`](migrating-classic-protection-to-ruleset.md) | Migrate a repo off classic branch protection onto the ruleset: compare the classic rule against the ruleset (CI surfaces its settings), then remove it |
 | [`github-provider-token-rotation.md`](github-provider-token-rotation.md) | Rotate the `github` provider's fine-grained PAT (`terraform-github-flungo` → `FLUNGO_GITHUB_TOKEN`) before expiry |
+| [`hcp-terraform-token-rotation.md`](hcp-terraform-token-rotation.md) | Rotate the HCP Terraform Owners-team token (`TF_TOKEN_APP_TERRAFORM_IO`) here, then apply to copy it into the managed `terraform = true` repositories |
