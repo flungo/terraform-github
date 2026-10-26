@@ -15,6 +15,7 @@ Until the App is in place, rotate the PAT on or before expiry.
 | Permissions | Repository → **Administration: Read and write**, **Secrets: Read and write**, **Metadata: Read-only** |
 | Actions secret | `FLUNGO_GITHUB_TOKEN` (repo secret) → env `TF_VAR_github_token` |
 | Expiry | 90 days |
+| Expiry notices | GitHub emails 7 days and 1 day before expiry, and again when it expires |
 
 > **Permissions grow with scope.**
 > The current set covers everything managed today: **Administration** for repository settings and rulesets (`github_repository`, `github_repository_ruleset` — branch protection included), **Secrets** for the shared Actions secrets written to managed repos (`github_actions_secret`), and **Metadata**, which is always required.
@@ -39,3 +40,4 @@ Until the App is in place, rotate the PAT on or before expiry.
 | Date | Expires | Note |
 | --- | --- | --- |
 | 2026-07-21 | 2026-10-19 | Initial issue (bootstrap) |
+| 2026-10-25 | 2027-01-23 | Regenerated after expiry (2026-10-19) |
